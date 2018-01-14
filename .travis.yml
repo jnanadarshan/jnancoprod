@@ -10,6 +10,21 @@ install:
   - gem install jekyll
   - gem install s3_website
 script: bundle exec jekyll build
+# Remove the .html extension from all blog posts for sexy URLs
+for filename in $DEPLOY_DIR/_site/*.html; do
+    if [ $filename != "$DEPLOY_DIR/blog/index.html" ];
+    then
+        original="$filename"
+
+        # Get the filename without the path/extension
+        filename=$(basename "$filename")
+        extension="${filename##*.}"
+        filename="${filename%.*}"
+
+        # Move it
+        mv $original $DEPLOY_DIR/blog/$filename
+    fi
+done
 after_success: s3_website push
 
 #script: bundle exec rake site:deploy --quiet #--trace
