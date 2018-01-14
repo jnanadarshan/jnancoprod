@@ -47,3 +47,10 @@ Prime or FF binds frequent online shoppers to one platform and in turn bring mor
 
 ### Solution : Flipkart First with Netflix
 While VPN remains a big hindrance for Netflix to implement custom pricing in different countries, tying up with Flipkart which has a database of verified addresses will largely solve the issue. If Netflix offers a custom pricing for Indian customers, Flipkart can help verify the locality of users which will address the problem of cross-country signup and revenue leakage. Amazon is too big to fight for both Netflix and Flipkart individually, in India. They need to form an alliance to fight Amazon on each front. With Amazon Prime music right at the corner may be Flipkart can look forward to Saavn or Gaana to prevent Amazon from becoming the de facto e-commerce player in India. The alliances will be hard to form and revenue will decrease in short term but this will help Flipkart and Netflix keep Amazon contained. At least for now.
+
+***
+Liked this post? You can subscribe to my monthly newsletter [here](http://go.jdnayak.com/2hDwHVw). The newsletter contains my new posts and some interesting reads from across the web. I never send more than one newsletter in a month.
+
+Author — Jnanadarshan Nayak
+
+LinkedIn — Jnanadarshan Nayak
