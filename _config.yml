@@ -1,33 +1,33 @@
 # Jekyll configuration
 markdown: kramdown
 highlighter: rouge
-paginate: 100 # it will paginate after this number
+paginate: 10 # it will paginate after this number
 language: 'en-uk'
 
 # edit baseurl to simply '/' if using as your personal page (instead of a project page)
-baseurl: /jasper2/
+baseurl: '/'
 
 # Website info
-title: Ghost
-description: The professional publishing platform
+title: Jnanadarshan Nayak | Blog
+description: Consultant, Marketer, Technology Enthusiast. Social and Digital.
 cover: assets/images/blog-cover.jpg
 logo: assets/images/blog-icon.png
 logo_dark: assets/images/favicon.png
 favicon: assets/images/favicon.png
-production_url: https://myJekyll.github.io/jasper2/
-source_url: https://github.com/myJekyll/jasper2/
+production_url: https://jnan.co
+source_url: https://github.com/jnanadarshan/jasper2/
 
 # Social info
 navigation: True # show the navbar links
 subscribers: True # you need to connect an external service for this to work,
 # if 'True' the submit button is disabled for now, but you can change that
 # by editing `_includes/subscribe-form.html`
-twitter: tryghost # replace by your username
-facebook: ghost # replace by your username
+twitter: jnanadarshan # replace by your username
+facebook: jnanadarshan # replace by your username
 
 # Disqus
 disqus: False
-disqus_shortname: myjekyll # replace with your disqus username
+disqus_shortname: jnanadarshan # replace with your disqus username
 
 # Google Analytics
 google_analytics: UA-69281367-1 # replace with your GA tracking identifier
@@ -67,13 +67,13 @@ feed:
 # or "master" otherwise
 safe: False
 lsi: False
-username: myJekyll
+username: jnanadarshan
 repo: jasper2
 branch: master
 relative_source: ../jasper2/
-destination: ../jasper2-pages/
-production_url:  https://myJekyll.github.io/jasper2/
-source_url:  https://github.com/myJekyll/jasper2/
+destination: _site
+production_url:  https://jnan.co
+source_url:  https://github.com/jnanadarshan/jasper2/
 
 exclude:
   - README.md

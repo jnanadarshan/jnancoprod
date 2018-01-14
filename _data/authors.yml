@@ -1,13 +1,13 @@
-ghost:
-  username: ghost
-  name: Ghost
-  url_full: http://myJekyll.github.io/jasper2/
-  url: myJekyll.github.io/jasper2
-  bio: The professional publishing platform
+jnan:
+  username: jnan
+  name: Jnanadarshan Nayak
+  url_full: https://jdnayak.com/
+  url: www.jdnayak.com
+  bio: Yet to be decded.
   picture: assets/images/ghost.png
-  facebook: ghost
-  twitter: tryghost
-  cover: False
+  facebook: jnanadarshan
+  twitter: jnanadarshan
+  cover: assets/images/hannah-cover.jpg
 hannah:
   username: hannah
   name: Hannah Wolfe

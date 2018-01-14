@@ -1,16 +1,16 @@
-speeches:
-  name: speeches
-  description: Some of the greatest words ever spoken.
+blog-tech:
+  name: blog-tech
+  description: Technology that powers this blog. Affordable, trusted and open source.
   cover: assets/images/speeches.jpg
-fiction:
-  name: fiction
-  description: False
-  cover: False
-fables:
-  name: fables
-  description: A series of short stories that make you think.
+technology:
+  name: technology
+  description: Latest Technology I like to talk abut.
+  cover: assets/images/speeches.jpg
+india-politics:
+  name: india-poltics
+  description: Commentacy on latest political developments in India.
   cover: assets/images/fables.jpg
-getting-started:
-  name: getting-started
+life:
+  name: life
   description: False
   cover: False
