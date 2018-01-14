@@ -1,7 +1,7 @@
 ---
 layout: post
 current: post
-cover:  assets/images/flipkart-netflix.png
+cover:  assets/images/c-netflix-st.jpg
 navigation: True
 title: Flipkart & Netflix. A match made in heaven.
 date: 2017-10-18 10:00:00
