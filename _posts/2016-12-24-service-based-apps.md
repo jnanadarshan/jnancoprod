@@ -39,7 +39,8 @@ Until then apps will be there and continue to eat precious device memory and hom
 
 
 ***
-Liked this post? You can subscribe to my monthly newsletter [here](http://go.jdnayak.com/2hDwHVw). The newsletter contains my new posts and some interesting reads from across the web. I never send more than one newsletter in a month.
+
+#### Liked this post? You can subscribe to my monthly newsletter [here](http://go.jdnayak.com/2hDwHVw). The newsletter contains my new posts and some interesting reads from across the web. I never send more than one newsletter in a month.
 
 Author — Jnanadarshan Nayak
 
