@@ -10,7 +10,8 @@ class: post-template
 subclass: 'post technology'
 author: jnan
 ---
-Jnanadarshan Nayak, 24 December, 2016
+<script src="//platform.linkedin.com/in.js" type="text/javascript"></script>
+<script type="IN/MemberProfile" data-id="https://www.linkedin.com/in/jnanadarshan" data-format="hover" data-related="false" data-text="Jnanadarshan Nayak"></script>
 
 First we heard of Bots on Messenger [Facebook] platform, but then Microsoft showed the first AI powered bots for Skype in Build Conference 2016 and ever since the Bots word is doing rounds. While many have predicted Bots have the power to kill Apps and I also feel some Apps will be killed by Bots, but to be specific there are a category of Apps that are under threat from Bots not all. In my opinion the hype that bots will take over is overblown. If you think through then it becomes clear that the Apps that can be replaced are service apps like Skyscanner, Yelp, MySmartPrice [Price comparison], Uber, MakeMyTrip, Banking (still few years away) etc. Bots are unlikely to replace Office Apps, Games, Entertainment Apps like YouTube and Netflix etc or the Social Apps.
 
@@ -43,5 +44,3 @@ Until then apps will be there and continue to eat precious device memory and hom
 #### Liked this post? You can subscribe to my monthly newsletter [here](http://go.jdnayak.com/2hDwHVw). The newsletter contains my new posts and some interesting reads from across the web. I never send more than one newsletter in a month.
 
 Author — Jnanadarshan Nayak
-
-LinkedIn — Jnanadarshan Nayak
