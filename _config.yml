@@ -26,11 +26,11 @@ twitter: jnanadarshan # replace by your username
 facebook: jnanadarshan # replace by your username
 
 # Disqus
-disqus: False
+disqus: true
 disqus_shortname: jnanadarshan # replace with your disqus username
 
 # Google Analytics
-google_analytics: UA-69281367-1 # replace with your GA tracking identifier
+google_analytics: UA-91757997-1 # replace with your GA tracking identifier
 
 # Permalinks
 permalink: /:title.html

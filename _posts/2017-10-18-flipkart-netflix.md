@@ -11,7 +11,7 @@ subclass: 'post technology'
 author: jnan
 ---
 ### Amazon, The common enemy.
-Everyone from Apple, Google, Microsoft, Walmart, Netflix and some of the biggest names in their industry are scared of Amazon.com Inc. From retail to cloud computing and video streaming Amazon is killing it everywhere. A CEO who doesn’t care about profitability and criticism with seemingly unlimited funds should scare everyone. Flipkart, the Indian company that brought the flavor of e-retail and till to date the largest Indian online retailer is facing fierce competition from Amazon.in. Flipkart might not agree but the truth is it’s losing the market to Amazon.
+Everyone from Apple, Google, Microsoft, Walmart, Netflix and some of the biggest names in their industry are scared of Amazon.com Inc. From retail to cloud computing and video streaming Amazon is killing it everywhere. A CEO who doesn’t care about profitability and criticism with seemingly unlimited funds should scare everyone. Flipkart, the Indian company that brought the flavour of e-retail and till to date the largest Indian online retailer is facing fierce competition from Amazon.in. Flipkart might not agree but the truth is it’s losing the market to Amazon.
 
 In the US Amazon has far more dominance than India. They’ve managed to scare off a lot of industry leaders. Netflix is one of them. Though according to a recent story Netflix has more viewing hours than Amazon Video, YouTube and Hulu combined, it can’t ignore Amazon. Netflix is still dominating the US because it was very early in the market and has more content and exclusive shows like House of Cards, Orange is the new black and Narcos. But, it's changing fast. Amazon has also created shows like The Grand Tour which went on to become the most pirated show in history. Though the US is still the biggest market at some point in time the growth will slow down and both the players will look to emerging markets for growth. In markets like India, early movers will have an advantage and Amazon is winning the early days.
 
@@ -54,3 +54,5 @@ Liked this post? You can subscribe to my monthly newsletter [here](http://go.jdn
 Author — Jnanadarshan Nayak
 
 LinkedIn — Jnanadarshan Nayak
+
+<script type="text/javascript" src="//downloads.mailchimp.com/js/signup-forms/popup/embed.js" data-dojo-config="usePlainJson: true, isDebug: false"></script><script type="text/javascript">require(["mojo/signup-forms/Loader"], function(L) { L.start({"baseUrl":"mc.us14.list-manage.com","uuid":"8991ef78ed397f79182ba03b3","lid":"09d8d0a5de"}) })</script>
