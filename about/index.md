@@ -8,7 +8,8 @@ class: page-template
 subclass: 'post page'
 ---
 
-Ghost is professional publishing platform designed for modern journalism. This is a demo site of a basic Ghost install to give you a general sense of what a new Ghost site looks like when set up for the first time.
+My name is Jnanadarshan Nayak (Pronounced as Gyana-darshan ) and I work as a Pre-sales and Marketing professional at TATA Consultancy Services. I have completed my MBA from Xavier Institute of Management (XIMB)
+in Marketing and Operations. 
 
 > If you'd like to set up a site like this for yourself, head over to [Ghost.org](https://ghost.org/) and start a free 14 day trial to give Ghost a try!
 
