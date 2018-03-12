@@ -14,3 +14,7 @@ life:
   name: life
   description: False
   cover: False
+reads:
+  name: reads
+  description: The best of the best articles.
+  cover: assets/images/fables.jpg
