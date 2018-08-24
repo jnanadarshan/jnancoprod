@@ -30,7 +30,6 @@ Now let’s compare internet streaming options available in India with Netflix�
 
 <img src="assets/images/p-india-streaming-prices.png" width="80%">
 
-
 The above visualization shows the pricing issue of Netflix in India. Undoubtedly Netflix has a huge international catalog but other local players have access to exclusive Indian shows and movies that Netflix doesn’t have. Let’s discuss the two major competitors on Netflix in India.
 
 ### Hotstar

@@ -11,7 +11,9 @@ subclass: 'post technology'
 author: jnan
 ---
 ### ‘Flagship Killer’
-I bought my first OnePlus smartphone (The OnePlus One...hereafter ‘The One’) in December 2014, much before it became the de facto mid-tier premium smartphone in India. I used it for about 26 months and then upgraded to OnePlus 3T in February 2017. The first one was  20,000/- while 3T was around  27,000/- after discounts and cashbacks. OnePlus started with a no-nonsense moto ‘Flagship Killer’. Though not quite compare to the then flagships like Galaxy S5, LG and HTC in terms of display and camera, everything else played out nicely for The One. Snapdragon 801 Chipset with 3GB RAM was enough for usage of that era. OnePlus since has steadily bumped up the price with surprisingly with iterative improvements over the years. The latest installment OnePlus 6 still lags miles in terms of display and camera quality. But the price gap when compared with Samsung or LG or even Apple iPhone has since been drastically narrowed. Below is a chart of comparison between OnePlus devices and Samsung S series devices launched in same year.
+I bought my first OnePlus smartphone (The OnePlus One...hereafter ‘The One’) in December 2014, much before it became the de facto mid-tier premium smartphone in India. I used it for about 26 months and then upgraded to OnePlus 3T in February 2017. The first one was ₹ 20,000/- while 3T was around ₹ 27,000/- after discounts and cashbacks. OnePlus started with a no-nonsense moto ‘Flagship Killer’. Though not quite compare to the then flagships like Galaxy S5, LG and HTC in terms of display and camera, everything else played out nicely for The One. Snapdragon 801 Chipset with 3GB RAM was enough for usage of that era. OnePlus since has steadily bumped up the price with surprisingly with iterative improvements over the years. The latest installment OnePlus 6 still lags miles in terms of display and camera quality. But the price gap when compared with Samsung or LG or even Apple iPhone has since been drastically narrowed. Below is a chart of comparison between OnePlus devices and Samsung S series devices launched in same year.
+
+<img src="assets/images/p-samsung-oneplus-aug18.png" width="80%">
 
 You can see somewhere with massive popularity in India and launch of 5/5T OnePlus lost its motto ‘The Flagship Killer’. I don’t buy a OnePlus device for anything that’s out of the box. I buy OnePlus for flagship Snapdragon processor combined with higher RAM with everything else being decent. As a user I’m looking at the basic product functionality or in marketing terms the ‘core product’, not a potential product with suite of additional features and services. For the “experience” of a potential product I will go with a flagship Samsung or iPhone with best-in-class camera, display, water resistant capabilities and long term software and service support.
 ……
@@ -26,7 +28,7 @@ Yesterday Xiaomi launched POCO F1 with identical specs to OnePlus 6 and a jaw dr
 
 ### Way forward for OnePlus
 OnePlus has done one thing very good since its inception. They have never dropped prices of devices after launch like Samsung and LG or never discounted earlier models rather like Apple. This is something that’s going to haunt them now. It’s a catch 22 situation for them. OnePlus 6 might have sold over a million units since its launch in India. They can’t drop the price now to close the gap with POCO F1 because it will irk buyers of ‘The 6’. They also can’t keep ‘The 6’ priced at ₹ 35,000/- for the base version while POCO F1 eats all their market share. They can’t also undercut the anticipated OnePlus 6T since it’ll create an uproar from ‘The 6’ customers It’ll be really interesting to see how OnePlus reacts to Xiaomi.
-
+___
 About me - My name is Jnanadarshan (Pronounced Gyana-Darshan) Nayak and I’m working at TATA Consultancy Services as a Business Analyst. I have Majored in MBA-Marketing from Xavier Institute of Management, Bhubaneswar in 2017.
 
 ***
