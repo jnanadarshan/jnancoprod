@@ -31,8 +31,8 @@ Yesterday Xiaomi launched POCO F1 with identical specs to OnePlus 6 and a jaw-dr
 
 ### Way forward for OnePlus
 OnePlus has done one thing very good since its inception. They have never dropped prices of devices after launches like Samsung and LG or never discounted earlier models rather like Apple. This is something that’s going to haunt them now. It’s a catch 22 situation for them. OnePlus 6 might have sold over a million units since its launch in India. They can’t drop the price now to close the gap with POCO F1 because it will irk buyers of ‘The 6’. They also can’t keep ‘The 6’ priced at ₹ 35,000/- for the base version while POCO F1 eats all their market share. They can’t also undercut the anticipated OnePlus 6T since it’ll create an uproar from ‘The 6’ customers It’ll be really interesting to see how OnePlus reacts to Xiaomi.
-***
 
+***
 About me - My name is Jnanadarshan (Pronounced Gyana-Darshan) Nayak and I’m working at TATA Consultancy Services as a Business Analyst. I have Majored in MBA-Marketing from Xavier Institute of Management, Bhubaneswar in 2017.
 
 ***
