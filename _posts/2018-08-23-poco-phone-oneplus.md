@@ -3,7 +3,7 @@ layout: post
 current: post
 cover:  assets/images/c-never-settle.jpg
 navigation: True
-title: How Xaimi ambushed OnePlus with POCO PHONE F1
+title: How Xiaomi ambushed OnePlus with POCO PHONE F1
 date: 2018-08-23 22:00:00
 tags: technology
 class: post-template
