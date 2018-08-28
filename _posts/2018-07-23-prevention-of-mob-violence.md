@@ -5,9 +5,9 @@ cover:  assets/images/c-pomov.jpg
 navigation: True
 title: It’s time for Prevention of Mob Violence Act in India
 date: 2018-07-23 21:00:00
-tags: india
+tags: india-politics
 class: post-template
-subclass: 'post india'
+subclass: 'post india-politics'
 author: jnan
 ---
 
