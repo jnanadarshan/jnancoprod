@@ -14,7 +14,7 @@ author: jnan
 
 *Economic development is necessary but not at the cost of peace and social justice.* I’ve always supported the vision and the economic agenda of PM Modi but his party falls short when it comes to speaking against mobs who incite violence in the name of cows, country, reservation, and pride. The lynching of a Muslim man for carrying beef, violence in Haryana after Ram Raheem’s sentence, violence by Karni Sena against movie Padmavat and recent violence during Maratha reservation demand in Maharashtra is unacceptable to the larger public. Yet statement by certain members of the BJP is affecting the parties image and in my opinion PM should not refrain from condemning BJP members who make stupid statements.
 
->##*There is no grievance that is a fit object of redress by mob law*
+>## *There is no grievance that is a fit object of redress by mob law*
 *Abraham Lincoln*
 
 When we talk about a new India that is developed it doesn’t mean only economic development. We need both moral and economic development to call ourselves a great country. A country where there is no place for religious politics, casteism, sexism, reservation based on caste or any kind of mob violence. We must remember we are a republic, not a democracy alone. In a democracy, the majority rules according to their will, in a republic the majority rules according to a set of laws which are morally right and socially justified. It’s time we need a strong anti-mob-violence act in India to protect people and public/private property from unruly mobs.
