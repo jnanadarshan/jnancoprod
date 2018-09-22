@@ -6,7 +6,7 @@ language: 'en-uk'
 
 # edit baseurl to simply '/' if using as your personal page (instead of a project page)
 baseurl: /
-url: https://jnan.co/ # the base hostname & protocol for your site
+url: https://jnan.co # the base hostname & protocol for your site
 
 # Website info
 title: Jnanadarshan Nayak | Blog
