@@ -3,4 +3,8 @@ s3_secret: <%= ENV['S3_SECRET_KEY'] %>
 s3_endpoint: ap-south-1
 s3_bucket: jnan.co
 skip_cleanup: true
+ignore_on_server:
+        -cflog
+        -amp
+
 #Content_type: text/html
