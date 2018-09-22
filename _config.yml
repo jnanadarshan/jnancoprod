@@ -85,8 +85,8 @@ exclude:
   - vendor
   - .travis.yml
   - s3_website.yml
-  - [cflog]
-  - [amp]
+  - cflog
+  - amp
 keep_files:
-  - [cflog]
-  - [amp]
+  - cflog
+  - amp
