@@ -6,5 +6,5 @@ skip_cleanup: true
 ignore_on_server:
         -cflog
         -amp
-cloudfront_distribution_id: E1VLA25EQG3EMV
+#cloudfront_distribution_id: E1VLA25EQG3EMV
 #Content_type: text/html
