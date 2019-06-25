@@ -33,6 +33,9 @@ If you connect headphones via wire there has to be a port. Unlike charging and d
 
 So we might see a completely wireless iPhone in near future that truly is innovative and first of its kind. Judging by Jony Ive’s AirPods video and his announcement that Apple is working on wireless future for quite some time, the future might be as soon as 10 th gen iPhone 7s/8/X.
 
+***
+About me - My name is Jnanadarshan (Pronounced Gyana-Darshan) Nayak and I’m working at TATA Consultancy Services as a Strategy Consultant. I have Majored in MBA-Marketing from Xavier Institute of Management, Bhubaneswar in 2017.
+
 ___
 Liked this post? You can subscribe to my monthly newsletter [here](http://go.jdnayak.com/2hDwHVw). The newsletter contains my new posts and some interesting reads from across the web. I never send more than one newsletter in a month.
 
