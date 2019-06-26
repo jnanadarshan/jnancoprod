@@ -3,7 +3,8 @@ layout: post
 current: post
 cover:  assets/images/c-service-apps.jpeg
 navigation: True
-title: Service based Apps will disappear[replaced].
+title: Service based Apps will disappear[replaced]
+description: With Google Assistant, Siri and Alexa getting smarter every day, will we need separate apps to hail an Uber or just ask Google Assistant?
 date: 2016-12-24 10:00:00
 tags: technology
 class: post-template

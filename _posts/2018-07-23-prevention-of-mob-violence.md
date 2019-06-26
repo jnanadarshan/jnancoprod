@@ -4,6 +4,7 @@ current: post
 cover:  assets/images/c-pomov.jpg
 navigation: True
 title: It’s time for Prevention of Mob Violence Act in India
+description: We want development, but not at the cost of social disturbance. Read to know what we can do to avoid such violence
 date: 2018-07-23 21:00:00
 tags: india-politics
 class: post-template

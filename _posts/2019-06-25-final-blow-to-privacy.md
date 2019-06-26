@@ -4,6 +4,7 @@ current: post
 cover:  assets/images/c-oppo-privacy.jpg
 navigation: True
 title: This New Tech Will be the Final Blow to Privacy
+description: There is a new tech lurking around the corner that will take concerns about privacy to the next level
 date: 2019-06-25 08:26:00
 tags: technology
 class: post-template

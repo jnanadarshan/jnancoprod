@@ -3,7 +3,8 @@ layout: post
 current: post
 cover:  assets/images/c-netflix-st.jpg
 navigation: True
-title: Flipkart & Netflix. A match made in heaven.
+title: Flipkart & Netflix. A match made in heaven
+description: Amazon is hurting Flipkart and Netflix in their own games. How can a collaboration put Amazon in the backfoot?
 date: 2017-10-18 10:00:00
 tags: technology
 class: post-template

@@ -6,6 +6,23 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
+    <!--facebook OpenGraph
+  <meta property="og:url" content="{{site.production_url}}{{page.url}}" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="{{ page.title }} | {{site.name}}" />
+  <meta property="og:image" content="{{ site.production_url }}/{{ page.cover }}" />
+  <meta property="fb:app_id" content="453670432031808" />
+  <meta property="locale" content="en_IN" />
+  <meta property="locale:alternate" content="en_US" />
+  {% if page.description %}
+  <meta property="og:description" content="{{ page.description }}">
+  {% endif %}
+  <!--facebook OpenGraph Ends Here-->
+  <!--Twitter Card>
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@jnanadarshan" />
+<!--Twitter Card Ends Here-->
+
     <!-- Base Meta -->
     {% include dynamic_title.html %}
     <title>{% if title %}{{ title }}{% elsif page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}</title>
@@ -46,7 +63,7 @@
         <!-- The footer at the very bottom of the screen -->
         <footer class="site-footer outer">
             <div class="site-footer-content inner">
-                <section class="copyright"><a href="{{ site.url }}{{ site.baseurl }}">&copy; Jnanadarshan Nayak</a>  {{  site.time | date: '%Y' }}</section>
+                <section class="copyright"><a href="{{ site.production_url }}{{ site.baseurl }}">&copy; Jnanadarshan Nayak</a>  {{  site.time | date: '%Y' }}</section>
                 <section class="poweredby">Proudly hosted on <a href="https://aws.amazon.com/">AWS</a> & built with
                     <a href="https://github.com/">GitHub</a> , CI by
                     <a href="https://travis-ci.org">Travis CI</a></section>

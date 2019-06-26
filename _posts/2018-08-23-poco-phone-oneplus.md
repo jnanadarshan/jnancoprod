@@ -4,6 +4,7 @@ current: post
 cover:  assets/images/c-never-settle.jpg
 navigation: True
 title: How Xiaomi ambushed OnePlus with POCO PHONE F1
+description: How Xiaomi ambushed OnePlus with Poco F-One and gained substantial market share in no time
 date: 2018-08-23 22:00:00
 tags: technology
 class: post-template
