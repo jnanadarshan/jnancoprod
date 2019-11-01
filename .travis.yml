@@ -1,11 +1,12 @@
 sudo: false
-language: ruby
+language:
+  - ruby
+  - java
 cache: bundler
 rvm:
 - 2.7.0
 jdk:
   - oraclejdk8
-
 install:
   # Install Jekyll and dependencies
   - bundle install
