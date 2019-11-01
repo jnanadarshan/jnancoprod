@@ -4,6 +4,7 @@ current: post
 cover:  assets/images/c-iphone-portx.jpg
 navigation: True
 title: Portless & Wireless iPhone?
+description: Apple has been preparing long for this, removing one thing at a time
 date: 2017-10-18 10:00:00
 tags: technology
 class: post-template
