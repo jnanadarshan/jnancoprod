@@ -5,8 +5,7 @@ language:
 cache: bundler
 rvm:
 - 2.7.0
-jdk:
-  - oraclejdk8
+jdk: openjdk8
 install:
   # Install Jekyll and dependencies
   - bundle install
