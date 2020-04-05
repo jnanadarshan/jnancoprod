@@ -86,6 +86,7 @@ exclude:
   - vendor
   - .travis.yml
   - s3_website.yml
+  - .jekyll-cache
 #  - cflog
 #  - amp
 #keep_files:
