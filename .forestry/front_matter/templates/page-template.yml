@@ -1,0 +1,25 @@
+---
+label: Page Template
+hide_body: false
+fields:
+- type: text
+  name: layout
+  label: layout
+- type: text
+  name: current
+  label: current
+- type: text
+  name: title
+  label: title
+- type: boolean
+  name: navigation
+  label: navigation
+- type: file
+  name: logo
+  label: logo
+- type: text
+  name: class
+  label: class
+- type: text
+  name: subclass
+  label: subclass
