@@ -8,4 +8,4 @@ class: page-template
 subclass: 'post page'
 ---
 
-*This page has been restricted*
+*This page is only accessible within Sanctity Domain <servername.sanctity.jnan.co>*

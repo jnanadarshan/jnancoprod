@@ -3,9 +3,9 @@ layout: post
 current: post
 cover:  assets/images/p-reading-list.png
 navigation: True
-title: Best Reads of October 2019
+title: Winding Down Social Media for a &#35; bettertomorrow
 date: 2019-10-30 10:00:00
-tags: reads
+tags: thoughts
 class: post-template
 subclass: 'post tag-reads'
 author: jnan
