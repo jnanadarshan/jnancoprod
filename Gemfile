@@ -1,6 +1,7 @@
 source "https://rubygems.org"
-gem "jekyll", "~> 3.8.5"
+gem "jekyll", "~> 3.9"
 gem "github-pages", "~> 204"
 gem "webrick"
 gem "rake", "~> 13.0.1"
 gem "liquid-c"
+gem "kramdown-parser-gfm", "~> 1.1"
