@@ -1,6 +1,6 @@
 source "https://rubygems.org"
-gem "jekyll", "~> 3.9"
-gem "github-pages", "~> 204"
+gem "jekyll", "~> 3.10"
+gem "github-pages", "~> 232"
 gem "webrick"
 gem "rake", "~> 13.0.1"
 gem "liquid-c"
