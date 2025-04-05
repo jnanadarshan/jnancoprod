@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESPHome Display Designer</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --md-primary-color: #3f51b5; /* Indigo */
+            --md-primary-dark: #303f9f;
+            --md-accent-color: #ff4081; /* Pink */
+            --md-background-color: #f5f5f5; /* Grey 100 */
+            --md-surface-color: #ffffff;
+            --md-text-primary-on-background: rgba(0, 0, 0, 0.87);
+            --md-text-secondary-on-background: rgba(0, 0, 0, 0.6);
+            --md-text-hint-on-background: rgba(0, 0, 0, 0.38);
+            --md-text-primary-on-surface: rgba(0, 0, 0, 0.87);
+            --md-border-color: rgba(0, 0, 0, 0.12);
+            --md-canvas-background: #000000;
+            --md-selected-item-bg: #e8eaf6; /* Indigo 50 */
+            --md-error-color: #f44336; /* Red */
+            --md-success-color: #4caf50; /* Green */
+
+            --left-panel-width: 400px; /* Width for Setup */
+            --right-panel-width: 450px; /* Width for Properties/Code */
+            --canvas-scale-factor: 1.5;
+        }
+
+        /* --- Overall Layout (3 Columns) --- */
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            line-height: 1.6; margin: 0; padding: 0;
+            background-color: var(--md-background-color);
+            color: var(--md-text-primary-on-background);
+            display: flex; /* Use flex for main columns */
+            min-height: 100vh; font-size: 14px;
+        }
+
+        .left-panel { /* Setup */
+            width: var(--left-panel-width); padding: 20px;
+            background-color: var(--md-surface-color); border-right: 1px solid var(--md-border-color);
+            display: flex; flex-direction: column; gap: 16px; overflow-y: auto;
+            flex-shrink: 0; box-shadow: 1px 0 3px rgba(0,0,0,0.05);
+        }
+
+        .center-panel { /* Preview */
+            flex: 1; /* Grow to fill space */ padding: 24px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; /* Center preview */
+            overflow-y: auto;
+        }
+
+        .right-panel { /* Properties + Code */
+            width: var(--right-panel-width); padding: 20px;
+            background-color: var(--md-surface-color); border-left: 1px solid var(--md-border-color);
+            display: flex; flex-direction: column; gap: 16px; overflow-y: auto;
+            flex-shrink: 0; box-shadow: -1px 0 3px rgba(0,0,0,0.05);
+        }
+        /* --- End Layout --- */
+
+
+        /* General Styles (mostly unchanged) */
+         h1, h2, h3 { margin-top: 0; margin-bottom: 16px; color: var(--md-text-primary-on-surface); font-weight: 500; }
+         h1 { font-size: 1.8em; color: var(--md-primary-color); margin-bottom: 20px;}
+         h2 { font-size: 1.4em; border-bottom: 1px solid var(--md-border-color); padding-bottom: 8px; width: 100%; }
+         h3 { font-size: 1.1em; font-weight: 500; margin-bottom: 12px;}
+
+        /* Details/Summary Styling (unchanged) */
+        details { border: 1px solid var(--md-border-color); border-radius: 8px; background-color: var(--md-surface-color); width: 100%; }
+        summary { padding: 10px 16px; font-weight: 500; cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid transparent; transition: background-color 0.1s ease; }
+        summary:hover { background-color: #f9f9f9; }
+        details[open] > summary { border-bottom: 1px solid var(--md-border-color); background-color: #f5f5f5; }
+        summary::before { content: '\e5cc'; font-family: 'Material Symbols Outlined'; font-weight: normal; font-size: 1.5em; display: inline-block; transition: transform 0.2s ease-in-out; margin-right: 4px; }
+        details[open] > summary::before { transform: rotate(90deg); }
+        summary::-webkit-details-marker { display: none; }
+        .details-content { padding: 16px; }
+
+
+        /* Input/Label/Button Styles (mostly unchanged) */
+        label { display: block; margin-top: 12px; margin-bottom: 4px; font-weight: 500; font-size: 0.85em; color: var(--md-text-secondary-on-background); }
+        input[type="text"], input[type="number"], select, textarea { width: 100%; padding: 10px 12px; margin-bottom: 8px; border: 1px solid var(--md-border-color); border-radius: 4px; box-sizing: border-box; font-size: 1em; background-color: #fff; color: var(--md-text-primary-on-surface); transition: border-color 0.2s ease; }
+        input:focus, select:focus, textarea:focus { border-color: var(--md-primary-color); outline: none; box-shadow: 0 0 0 1px var(--md-primary-color); }
+        textarea#configFonts, textarea#configColors { min-height: 60px; font-family: monospace; font-size: 0.9em; resize: vertical; }
+        button { background-color: var(--md-primary-color); color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.90em; font-weight: 500; text-transform: uppercase; margin-right: 8px; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; transition: background-color 0.2s ease, box-shadow 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
+        button:hover { background-color: var(--md-primary-dark); box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23); }
+        button.danger { background-color: var(--md-error-color); }
+        button.danger:hover { background-color: #d32f2f; }
+        button.success { background-color: var(--md-success-color); } /* Added success style for copy */
+        button.success:hover { background-color: #388e3c; }
+        button .material-symbols-outlined { font-size: 1.2em; }
+
+        /* --- ADDED: Coordinate Slider Styles --- */
+        .coord-control { display: flex; align-items: center; gap: 10px; margin-bottom: 8px;}
+        .coord-control label { margin: 0; width: 15px; /* Fixed width for X/Y label */ text-align: right;}
+        .coord-control input[type="number"] { width: 65px; margin: 0; text-align: right;}
+        .coord-control input[type="range"] { flex: 1; margin: 0; height: 5px; accent-color: var(--md-primary-color); }
+        /* --- End Slider Styles --- */
+
+        /* --- ADDED: Color Picker Styles --- */
+        .color-control { display: flex; align-items: center; gap: 10px; }
+        .color-control select { flex: 1; margin-bottom: 0; }
+        .color-control input[type="color"] {
+             width: 40px; height: 38px; /* Match input height */ padding: 4px; border: 1px solid var(--md-border-color); border-radius: 4px; cursor: pointer; margin-bottom: 0; background-color: #fff;
+        }
+        /* --- End Color Styles --- */
+
+        /* Elements list styling (unchanged) */
+        #elementList { list-style: none; padding: 0; margin: 0; max-height: 250px; overflow-y: auto; }
+        #elementList li { padding: 10px 12px; border-bottom: 1px solid var(--md-border-color); cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background-color 0.1s ease; }
+        #elementList li:last-child { border-bottom: none; }
+        #elementList li:hover { background-color: #f0f0f0; }
+        #elementList li.selected { background-color: var(--md-selected-item-bg); font-weight: 500; }
+        .element-label { display: flex; align-items: center; gap: 8px; }
+        .element-label .material-symbols-outlined { font-size: 1.3em; color: #555; }
+        .element-controls button { background: none; border: none; color: var(--md-text-secondary-on-background); cursor: pointer; padding: 4px; font-size: 1.4em; box-shadow: none; margin: 0; line-height: 1; }
+        .element-controls button:hover { color: var(--md-error-color); background: none; box-shadow: none; }
+
+        /* Editor styles */
+        #editor-section { width: 100%; /* Take full width of right panel */}
+        #editor-content { display: none; }
+
+         /* --- ADDED: Icon Search Dropdown Styles --- */
+         #iconSearchContainer { position: relative; margin-bottom: 8px; }
+         #iconSuggestions {
+            position: absolute; background-color: white; border: 1px solid var(--md-border-color); border-top: none;
+            border-radius: 0 0 4px 4px; max-height: 180px; overflow-y: auto; z-index: 10; width: 100%; /* Full width */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: none; /* Hidden by default */
+        }
+        #iconSuggestions div { padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        #iconSuggestions div:hover { background-color: #eee; }
+        #iconSuggestions .material-symbols-outlined { font-size: 1.2em; width: 24px; text-align: center; }
+        /* --- End Icon Search Styles --- */
+
+         /* --- ADDED: Fill Checkbox Style --- */
+        .checkbox-control { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+        .checkbox-control input[type="checkbox"] { margin: 0; width: auto; }
+        .checkbox-control label { margin: 0; font-weight: normal; font-size: 1em; color: var(--md-text-primary-on-surface); }
+        /* --- End Fill Checkbox Style --- */
+
+        /* Preview & Code Styles */
+        #previewContainer { text-align: center; width: 100%; /* Full width within center panel */ }
+        #screenPreview { border: 2px solid #666; background-color: var(--md-canvas-background); margin: 10px auto; position: relative; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        canvas#previewCanvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+        details#codeSection { width: 100%; /* Full width within right panel */ margin-top: 0; /* Remove top margin */ }
+        #generateCodeBtnContainer { padding: 0 16px 16px 16px; margin-top: -8px; }
+        #generatedCodeOutput { width: calc(100% - 32px); height: 350px; white-space: pre; font-family: monospace; font-size: 13px; background-color: #282c34; color: #abb2bf; border: none; border-top: 1px solid var(--md-border-color); border-radius: 0 0 8px 8px; padding: 16px; margin: 0; box-sizing: border-box; resize: vertical; }
+        #copyCodeBtn { background-color: #6c757d; /* Secondary color */} /* Style copy button */
+        #copyCodeBtn:hover { background-color: #5a6268; }
+
+        /* Flex layout helpers */
+        .flex-row { display: flex; gap: 16px; align-items: flex-end; }
+        .flex-grow { flex: 1; }
+
+    </style>
+</head>
+<body>
+
+    <div class="left-panel">
+        <h1><span class="material-symbols-outlined">display_settings</span> Screen Setup</h1>
+
+        <details open> <summary><span class="material-symbols-outlined">tune</span> Configuration</summary>
+             <div class="details-content">
+                 <div class="flex-row">
+                   <div class="flex-grow">
+                       <label for="configResolution">Resolution:</label>
+                       <select id="configResolution">
+                            <option value="128x160">128 x 160</option> <option value="135x240">135 x 240</option>
+                            <option value="160x128">160 x 128</option> <option value="240x135">240 x 135</option>
+                            <option value="240x240">240 x 240</option> <option value="240x320">240 x 320</option>
+                            <option value="320x240">320 x 240</option> <option value="480x320">480 x 320</option>
+                        </select>
+                   </div>
+                </div>
+                <label for="configFonts">Font IDs (comma-separated):</label>
+                <textarea id="configFonts">id(roboto_12), id(roboto_bold_16), id(material_symbols_24)</textarea>
+                <label for="configColors">Color IDs (comma-separated):</label>
+                <textarea id="configColors">id(primary_color), id(accent_color), white, black</textarea>
+             </div>
+        </details>
+
+        <details open> <summary><span class="material-symbols-outlined">widgets</span> Elements</summary>
+             <div class="details-content">
+                 <div>
+                    <button id="addTextBtn"><span class="material-symbols-outlined">title</span>Text</button>
+                    <button id="addIconBtn"><span class="material-symbols-outlined">mood</span>Icon</button>
+                    <button id="addBarBtn"><span class="material-symbols-outlined">horizontal_rule</span>Bar</button>
+                    <button id="addRectBtn"><span class="material-symbols-outlined">check_box_outline_blank</span>Rect</button>
+                 </div>
+                 <ul id="elementList"></ul>
+            </div>
+        </details>
+    </div> <div class="center-panel">
+        <div id="previewContainer">
+             <h2><span class="material-symbols-outlined">visibility</span> Preview</h2>
+             <div id="screenPreview"> <canvas id="previewCanvas"></canvas> </div>
+             <p style="font-size: 0.85em; color: var(--md-text-secondary-on-background); margin-top: 10px;">Note: Fonts and exact rendering are approximations.</p>
+         </div>
+    </div> <div class="right-panel">
+        <details id="editorDetails"> <summary><span class="material-symbols-outlined">edit</span> Properties</summary>
+             <div class="details-content">
+                 <div id="editor-placeholder">Select an element from the list on the left.</div>
+                 <div id="editor-content">
+                    <input type="hidden" id="editId">
+
+                    <div class="coord-control">
+                        <label for="editX">X:</label>
+                        <input type="number" id="editX" value="0" step="1">
+                        <input type="range" id="editXSlider" min="0" max="128" step="1" title="X Coordinate"> </div>
+                    <div class="coord-control">
+                        <label for="editY">Y:</label>
+                        <input type="number" id="editY" value="0" step="1">
+                        <input type="range" id="editYSlider" min="0" max="160" step="1" title="Y Coordinate"> </div>
+
+                    <div id="colorSelectContainer">
+                        <label for="editColorId">Color:</label>
+                        <div class="color-control">
+                            <select id="editColorId"></select>
+                            <input type="color" id="editColorPicker" title="Choose Custom Color">
+                        </div>
+                    </div>
+
+                    <div id="fontSelectContainer">
+                         <label for="editFontId">Font ID:</label>
+                         <select id="editFontId"></select>
+                    </div>
+
+                    <div id="textSpecific">
+                        <label for="editContent">Format String:</label> <input type="text" id="editContent" placeholder='"Temp: %.1f C"'>
+                        <label for="editArgs">Argument(s):</label> <input type="text" id="editArgs" placeholder="id(sensor).state">
+                        <label for="editAlign">Alignment:</label> <select id="editAlign"> <option value="LEFT">Left</option> <option value="CENTER">Center</option> <option value="RIGHT">Right</option> </select>
+                    </div>
+
+                     <div id="iconSpecific">
+                         <label for="editIconLigature">Icon Ligature (<a href="https://fonts.google.com/icons" target="_blank" rel="noopener">Find Names</a>):</label>
+                          <div id="iconSearchContainer">
+                             <input type="text" id="editIconLigature" placeholder="e.g., home, settings...">
+                             <div id="iconSuggestions"></div>
+                         </div>
+                     </div>
+
+                    <div id="barSpecific">
+                          <div class="flex-row">
+                            <div class="flex-grow"> <label for="editWidth">Width:</label> <input type="number" id="editWidth" value="128"> </div>
+                            <div class="flex-grow"> <label for="editHeight">Height:</label> <input type="number" id="editHeight" value="1"> </div>
+                          </div>
+                    </div>
+
+                    <div id="rectSpecific">
+                        <div class="flex-row">
+                            <div class="flex-grow"> <label for="editRectWidth">Width:</label> <input type="number" id="editRectWidth" value="50"> </div>
+                            <div class="flex-grow"> <label for="editRectHeight">Height:</label> <input type="number" id="editRectHeight" value="30"> </div>
+                        </div>
+                         <div> <label for="editRectThickness">Line Thickness (Preview Only):</label> <input type="number" id="editRectThickness" value="1" min="1"> </div>
+                         <div class="checkbox-control">
+                            <input type="checkbox" id="editRectFill">
+                            <label for="editRectFill">Fill Rectangle</label>
+                        </div>
+                    </div>
+
+                 </div></div> </details>
+
+        <details id="codeSection">
+            <summary><span class="material-symbols-outlined">code</span> Generated Lambda Code</summary>
+            <div id="generateCodeBtnContainer">
+                <button id="generateCodeBtn"><span class="material-symbols-outlined">generating_tokens</span>Generate</button>
+                <button id="copyCodeBtn" title="Copy Code"><span class="material-symbols-outlined">content_copy</span> Copy</button>
+            </div>
+            <textarea id="generatedCodeOutput" readonly placeholder="Generated ESPHome lambda code will appear here..."></textarea>
+         </details>
+
+    </div> <script>
+        // --- Embedded Google Icons Ligature-to-Codepoint Data (Sample - unchanged) ---
+        const googleIconsLigatureToCodepoint = { /* ... Keep same map ... */
+             "search": "e8b6", "home": "e88a", "settings": "e8b8", "done": "e876", "info": "e88e", "delete": "e872", "star": "e838",
+             "schedule": "e8b5", "thermostat": "f076", "lightbulb": "e0f0", "visibility": "e8f4", "wifi": "e63e", "signal_cellular_alt": "e0cd",
+             "warning": "e002", "error": "e000", "task_alt": "e2e6", "radio_button_unchecked": "e836", "check_box_outline_blank": "e835",
+             "cloud": "e2c8", "sunny": "eb3d", "water_drop": "e798", "air": "e1d8", "power_settings_new": "e8ac", "arrow_back": "e5c4",
+             "arrow_forward": "e5c8", "arrow_upward": "e5d8", "arrow_downward": "e5db", "menu": "e5d2", "add": "e145", "remove": "e15b",
+             "close": "e5cd", "edit": "e3c9", "thermostat_auto": "f073", "ac_unit": "eb3b", "bolt": "e1f7", "humidity_percentage": "f05b",
+             "light_mode": "e518", "dark_mode": "e51c", "location_on": "e0c8", "percent": "e413", "restart_alt": "f04d", "upload": "f09b",
+             "download": "f090", "link": "e157" };
+
+        // --- Global State & Elements ---
+        let elements = []; // {id, type, x, y, fontId, colorId, content, args, align, iconLigature, width, height, thickness, fill} // Added fill
+        let selectedElementId = null;
+        let nextId = 0;
+
+        // Left Panel elements
+        const configResolutionSelect = document.getElementById('configResolution');
+        const configFontsInput = document.getElementById('configFonts');
+        const configColorsInput = document.getElementById('configColors');
+        const addTextBtn = document.getElementById('addTextBtn');
+        const addIconBtn = document.getElementById('addIconBtn');
+        const addBarBtn = document.getElementById('addBarBtn');
+        const addRectBtn = document.getElementById('addRectBtn');
+        const elementList = document.getElementById('elementList');
+
+        // Right Panel elements
+        const editorDetails = document.getElementById('editorDetails');
+        const editorPlaceholder = document.getElementById('editor-placeholder');
+        const editorContent = document.getElementById('editor-content');
+        const editIdInput = document.getElementById('editId');
+        // Coords
+        const editXInput = document.getElementById('editX');
+        const editYInput = document.getElementById('editY');
+        const editXSlider = document.getElementById('editXSlider'); // Added
+        const editYSlider = document.getElementById('editYSlider'); // Added
+        // Color
+        const colorSelectContainer = document.getElementById('colorSelectContainer');
+        const editColorIdSelect = document.getElementById('editColorId');
+        const editColorPicker = document.getElementById('editColorPicker'); // Added
+        // Font
+        const fontSelectContainer = document.getElementById('fontSelectContainer');
+        const editFontIdSelect = document.getElementById('editFontId');
+        // Text
+        const textSpecificDiv = document.getElementById('textSpecific');
+        const editContentInput = document.getElementById('editContent');
+        const editArgsInput = document.getElementById('editArgs');
+        const editAlignSelect = document.getElementById('editAlign');
+        // Icon
+        const iconSpecificDiv = document.getElementById('iconSpecific');
+        const editIconLigatureInput = document.getElementById('editIconLigature');
+        const iconSearchContainer = document.getElementById('iconSearchContainer'); // Added
+        const iconSuggestionsDiv = document.getElementById('iconSuggestions'); // Added
+        // Bar
+        const barSpecificDiv = document.getElementById('barSpecific');
+        const editWidthInput = document.getElementById('editWidth');
+        const editHeightInput = document.getElementById('editHeight');
+        // Rectangle
+        const rectSpecificDiv = document.getElementById('rectSpecific');
+        const editRectWidthInput = document.getElementById('editRectWidth');
+        const editRectHeightInput = document.getElementById('editRectHeight');
+        const editRectThicknessInput = document.getElementById('editRectThickness');
+        const editRectFillCheckbox = document.getElementById('editRectFill'); // Added
+        // Preview (Center Panel)
+        const screenPreviewDiv = document.getElementById('screenPreview');
+        const previewCanvas = document.getElementById('previewCanvas');
+        const previewCtx = previewCanvas.getContext('2d');
+        // Code (Right Panel)
+        const generateCodeBtn = document.getElementById('generateCodeBtn');
+        const copyCodeBtn = document.getElementById('copyCodeBtn'); // Added
+        const generatedCodeOutput = document.getElementById('generatedCodeOutput');
+        const codeSectionDetails = document.getElementById('codeSection');
+
+
+        // --- Helper Functions ---
+        function getAvailableFonts() { return configFontsInput.value.split(',').map(s => s.trim()).filter(s => s); }
+        function getAvailableColors() { return configColorsInput.value.split(',').map(s => s.trim()).filter(s => s); }
+        function populateSelect(selectElement, options) {
+           selectElement.innerHTML = '';
+           const defaultOption = document.createElement('option'); defaultOption.value = ""; defaultOption.textContent = "-- Select ID --"; selectElement.appendChild(defaultOption);
+           options.forEach(optionValue => { const option = document.createElement('option'); option.value = optionValue; option.textContent = optionValue; selectElement.appendChild(option); });
+        }
+        function mapFontPreview(fontId) { /* Unchanged */
+             if (!fontId) return '10px sans-serif'; const sizeMatch = fontId.match(/_(\d+)/); const size = sizeMatch ? parseInt(sizeMatch[1], 10) : 12;
+             const family = (fontId.includes('material') || fontId.includes('symbol') || fontId.includes('icon')) ? "'Material Symbols Outlined', 'Roboto', sans-serif" : "'Roboto', sans-serif";
+             const weight = (fontId.includes('bold') || fontId.includes('black')) ? 'bold' : 'normal'; return `${weight} ${size}px ${family}`; }
+        function mapColorPreview(colorId) { // Modified to handle Color(r,g,b)
+            if (!colorId) return '#FFFFFF';
+            const lowerColor = colorId.toLowerCase();
+            // Check for Color(r,g,b) format first
+            const colorMatch = colorId.match(/Color\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i);
+            if (colorMatch) {
+                return `rgb(${colorMatch[1]}, ${colorMatch[2]}, ${colorMatch[3]})`;
+            }
+            // Standard names and keywords
+            if (lowerColor === 'white') return '#FFFFFF'; if (lowerColor === 'black') return '#000000';
+            if (lowerColor === 'red' || lowerColor.includes('red')) return '#FF0000'; if (lowerColor === 'green' || lowerColor.includes('green')) return '#00FF00';
+            if (lowerColor === 'blue' || lowerColor.includes('blue')) return '#0000FF'; if (lowerColor.includes('primary')) return getComputedStyle(document.documentElement).getPropertyValue('--md-primary-color').trim() || '#3f51b5';
+            if (lowerColor.includes('accent')) return getComputedStyle(document.documentElement).getPropertyValue('--md-accent-color').trim() || '#ff4081';
+            return '#CCCCCC'; // Default grey
+        }
+        function getIconCodepoint(ligature) { return googleIconsLigatureToCodepoint[ligature?.toLowerCase()] || null; }
+        // Added: Helper to convert hex to Color(r,g,b) string
+        function hexToRgbColorString(hex) {
+            hex = hex.replace('#', '');
+            const bigint = parseInt(hex, 16);
+            const r = (bigint >> 16) & 255;
+            const g = (bigint >> 8) & 255;
+            const b = bigint & 255;
+            return `Color(${r}, ${g}, ${b})`;
+        }
+        // Added: Helper to convert Color(r,g,b) string to hex
+        function rgbColorStringToHex(colorString) {
+             const match = colorString.match(/Color\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i);
+             if (match) {
+                 const r = parseInt(match[1]);
+                 const g = parseInt(match[2]);
+                 const b = parseInt(match[3]);
+                 return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+             }
+             return null; // Return null if format is wrong
+        }
+
+
+        // --- Screen Size Logic ---
+        function updateScreenSize() {
+           const resolution = configResolutionSelect.value; const [baseWidth, baseHeight] = resolution.split('x').map(Number);
+           const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--canvas-scale-factor') || 1.5);
+           previewCanvas.width = baseWidth; previewCanvas.height = baseHeight;
+           screenPreviewDiv.style.width = `${baseWidth * scale}px`; screenPreviewDiv.style.height = `${baseHeight * scale}px`;
+           document.documentElement.style.setProperty('--canvas-base-width', `${baseWidth}px`); document.documentElement.style.setProperty('--canvas-base-height', `${baseHeight}px`);
+           // Update slider max values
+           editXSlider.max = baseWidth;
+           editYSlider.max = baseHeight;
+           drawPreview();
+        }
+
+        // --- ADDED: Icon Search Logic ---
+        function populateIconSuggestions(searchTerm) {
+            iconSuggestionsDiv.innerHTML = '';
+            iconSuggestionsDiv.style.display = 'none';
+            if (!searchTerm || searchTerm.length < 1) return; // Search even on 1 char
+
+            const lowerSearchTerm = searchTerm.toLowerCase();
+            const filteredLigatures = Object.keys(googleIconsLigatureToCodepoint)
+                .filter(ligature => ligature.includes(lowerSearchTerm))
+                .sort() // Sort alphabetically
+                .slice(0, 15); // Limit results
+
+            if (filteredLigatures.length > 0) {
+                filteredLigatures.forEach(ligature => {
+                    const suggestion = document.createElement('div');
+                    suggestion.innerHTML = `<span class="material-symbols-outlined">${ligature}</span> ${ligature}`; // Show icon + name
+                    suggestion.onclick = () => selectIcon(ligature);
+                    iconSuggestionsDiv.appendChild(suggestion);
+                });
+                iconSuggestionsDiv.style.display = 'block';
+            }
+        }
+
+        function selectIcon(ligature) {
+            if (selectedElementId !== null) {
+                 const elIndex = elements.findIndex(e => e.id === selectedElementId);
+                 if (elIndex !== -1 && elements[elIndex].type === 'icon') {
+                     elements[elIndex].iconLigature = ligature; // Store the ligature
+                     editIconLigatureInput.value = ligature; // Update display name in input
+                     iconSuggestionsDiv.style.display = 'none'; // Hide suggestions
+                     iconSuggestionsDiv.innerHTML = '';
+                     updateElementFromEditor(); // Trigger redraw and list update
+                 }
+            } else {
+                 console.error("Could not select icon or no element selected:", ligature);
+                 iconSuggestionsDiv.style.display = 'none';
+            }
+        }
+        // --- End Icon Search ---
+
+
+        // --- Core Logic ---
+        function drawPreview() { /* Modified for rectangle fill */
+             previewCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--md-canvas-background').trim();
+             previewCtx.fillRect(0, 0, previewCanvas.width, previewCanvas.height); previewCtx.imageSmoothingEnabled = false;
+             elements.forEach(el => {
+                 const x = parseInt(el.x || 0); const y = parseInt(el.y || 0);
+                 if (el.type === 'text' || el.type === 'icon') {
+                     previewCtx.font = mapFontPreview(el.fontId); previewCtx.fillStyle = mapColorPreview(el.colorId);
+                     const fontSizeMatch = previewCtx.font.match(/(\d+)px/); const fontSize = fontSizeMatch ? parseInt(fontSizeMatch[1]) : 12;
+                     const drawY = y + Math.round(fontSize * 0.8);
+                     if (el.type === 'text') {
+                         const align = el.align || 'LEFT'; previewCtx.textAlign = align.toLowerCase(); let displayText = el.content || '';
+                         if (el.args) displayText = displayText.replace(/%[.\d]*[fdis]/, `[${el.args.split('.')[0].replace('id(','').replace(')','')}]`);
+                         previewCtx.fillText(displayText, x, drawY);
+                     } else { previewCtx.textAlign = 'start'; previewCtx.fillText(el.iconLigature || '', x, drawY); }
+                     previewCtx.textAlign = 'start';
+                 } else if (el.type === 'bar') {
+                     previewCtx.fillStyle = mapColorPreview(el.colorId); const w = parseInt(el.width || 10); const h = parseInt(el.height || 1); previewCtx.fillRect(x, y, w, h);
+                 } else if (el.type === 'rectangle') {
+                     const w = parseInt(el.width || 10); const h = parseInt(el.height || 10);
+                     if (el.fill) { // Check fill state
+                        previewCtx.fillStyle = mapColorPreview(el.colorId);
+                        previewCtx.fillRect(x, y, w, h);
+                     } else {
+                        previewCtx.strokeStyle = mapColorPreview(el.colorId);
+                        previewCtx.lineWidth = parseInt(el.thickness || 1);
+                        previewCtx.strokeRect(x, y, w, h);
+                     }
+                 }
+             });
+        }
+
+        function renderElementList() { /* Unchanged */
+              elementList.innerHTML = '';
+             elements.forEach(el => {
+                 const li = document.createElement('li'); li.dataset.id = el.id; const labelDiv = document.createElement('div'); labelDiv.classList.add('element-label');
+                 let iconType = 'edit_note'; let labelText = 'Unknown';
+                 if (el.type === 'text') { iconType = 'title'; labelText = el.content ? `"${el.content.substring(0, 20)}${el.content.length>20 ? '...' : ''}"` : 'Text'; }
+                 else if (el.type === 'icon') { iconType = el.iconLigature || 'mood'; labelText = el.iconLigature || 'Icon'; }
+                 else if (el.type === 'bar') { iconType = 'horizontal_rule'; labelText = `Bar (${el.width ?? '?'}x${el.height ?? '?'})`; }
+                 else if (el.type === 'rectangle') { iconType = el.fill ? 'check_box' : 'check_box_outline_blank'; labelText = `Rect (${el.width ?? '?'}x${el.height ?? '?'})`; } // Updated rect icon based on fill
+                 labelDiv.innerHTML = `<span class="material-symbols-outlined" title="${el.type}">${iconType}</span> <span>${labelText}</span>`; li.appendChild(labelDiv);
+                 if (el.id === selectedElementId) { li.classList.add('selected'); }
+                 const controls = document.createElement('span'); controls.classList.add('element-controls'); const delBtn = document.createElement('button'); delBtn.innerHTML = `<span class="material-symbols-outlined">delete</span>`;
+                 delBtn.classList.add('danger'); delBtn.title = "Remove Element"; delBtn.onclick = (e) => { e.stopPropagation(); removeElement(el.id); }; controls.appendChild(delBtn); li.appendChild(controls);
+                 li.onclick = () => { selectElement(el.id); }; elementList.appendChild(li);
+             });
+             drawPreview(); }
+
+        function updateEditorForm() { // Modified for sliders, color picker, fill checkbox
+             const el = elements.find(e => e.id === selectedElementId);
+             if (!el) { editorPlaceholder.style.display = 'block'; editorContent.style.display = 'none'; editorDetails.open = false; return; }
+             editorPlaceholder.style.display = 'none'; editorContent.style.display = 'block'; editorDetails.open = true;
+
+             editIdInput.value = el.id;
+             // Coords - Update both number and slider
+             editXInput.value = el.x ?? 0; editXSlider.value = el.x ?? 0;
+             editYInput.value = el.y ?? 0; editYSlider.value = el.y ?? 0;
+
+             // Color - Handle picker vs select
+             const colorIsRgbString = el.colorId?.match(/^Color\(/i);
+             if (colorIsRgbString) {
+                 editColorPicker.value = rgbColorStringToHex(el.colorId) || '#000000';
+                 editColorIdSelect.value = ""; // Deselect ID
+             } else {
+                 editColorIdSelect.value = el.colorId || "";
+                 editColorPicker.value = '#000000'; // Reset picker
+             }
+
+             const isText = el.type === 'text'; const isIcon = el.type === 'icon'; const isBar = el.type === 'bar'; const isRect = el.type === 'rectangle';
+             textSpecificDiv.style.display = isText ? 'block' : 'none'; iconSpecificDiv.style.display = isIcon ? 'block' : 'none'; barSpecificDiv.style.display = isBar ? 'block' : 'none'; rectSpecificDiv.style.display = isRect ? 'block' : 'none';
+             fontSelectContainer.style.display = (isText || isIcon) ? 'block' : 'none'; colorSelectContainer.style.display = 'block';
+
+             if (isText) { editFontIdSelect.value = el.fontId || ''; editContentInput.value = el.content || ''; editArgsInput.value = el.args || ''; editAlignSelect.value = el.align || 'LEFT'; }
+             else if (isIcon) { editFontIdSelect.value = el.fontId || ''; editIconLigatureInput.value = el.iconLigature || ''; iconSuggestionsDiv.style.display='none'; } // Ensure suggestions hidden
+             else if (isBar) { const defaultWidth = previewCanvas.width || 128; editWidthInput.value = el.width ?? defaultWidth; editHeightInput.value = el.height ?? 1; }
+             else if (isRect) {
+                 const defaultWidth = 50; const defaultHeight = 30;
+                 editRectWidthInput.value = el.width ?? defaultWidth; editRectHeightInput.value = el.height ?? defaultHeight;
+                 editRectThicknessInput.value = el.thickness ?? 1; editRectFillCheckbox.checked = el.fill ?? false; // Update fill checkbox
+             }
+        }
+
+        function updateElementFromEditor() { // Modified for sliders, color picker, fill checkbox
+             if (selectedElementId === null) return; const elIndex = elements.findIndex(e => e.id === selectedElementId); if (elIndex === -1) return; const el = elements[elIndex];
+
+             // Read common properties (Coords read within listeners now, color handled by its listeners)
+             // el.x = parseInt(editXInput.value || 0); // No longer needed here
+             // el.y = parseInt(editYInput.value || 0); // No longer needed here
+             // el.colorId = editColorIdSelect.value; // Handled by listeners
+
+             if (el.type === 'text') { el.fontId = editFontIdSelect.value; el.content = editContentInput.value; el.args = editArgsInput.value; el.align = editAlignSelect.value; }
+             else if (el.type === 'icon') { el.fontId = editFontIdSelect.value; el.iconLigature = editIconLigatureInput.value.trim().toLowerCase(); }
+             else if (el.type === 'bar') { el.width = parseInt(editWidthInput.value || 10); el.height = parseInt(editHeightInput.value || 1); }
+             else if (el.type === 'rectangle') {
+                 el.width = parseInt(editRectWidthInput.value || 10); el.height = parseInt(editRectHeightInput.value || 10);
+                 el.thickness = parseInt(editRectThicknessInput.value || 1); el.fill = editRectFillCheckbox.checked; // Read fill state
+             }
+             renderElementList(); drawPreview();
+        }
+
+        function addElement(type) { /* Modified for rect fill */
+            const defaultFont = getAvailableFonts()[0] || 'id(default_font)'; const defaultColor = getAvailableColors().find(c => c.toLowerCase() === 'white') || getAvailableColors()[0] || 'white';
+            const defaultY = (elements.length * 20) + 10; const defaultX = 10;
+            const newElement = { id: nextId++, type: type, x: defaultX, y: defaultY, colorId: defaultColor, };
+            if (type === 'text') { newElement.fontId = defaultFont; newElement.content = "Text"; newElement.args = ""; newElement.align = "LEFT"; }
+            else if (type === 'icon') { newElement.fontId = getAvailableFonts().find(f => f.includes('symbol') || f.includes('icon')) || defaultFont; newElement.iconLigature = "home"; }
+            else if (type === 'bar') { newElement.width = previewCanvas.width ? Math.round(previewCanvas.width * 0.8) : 100; newElement.height = 1; }
+            else if (type === 'rectangle') { newElement.width = 50; newElement.height = 30; newElement.thickness = 1; newElement.fill = false; } // Add fill: false
+            elements.push(newElement); selectElement(newElement.id); renderElementList();
+         }
+
+         function removeElement(id) { /* Unchanged */
+             elements = elements.filter(el => el.id !== id); if (selectedElementId === id) { selectedElementId = null; updateEditorForm(); } renderElementList(); }
+         function selectElement(id) { /* Unchanged */
+             selectedElementId = id; renderElementList(); updateEditorForm(); }
+
+        function generateLambdaCode() { /* Modified for rect fill */
+             let code = "lambda: |-\n";
+             elements.forEach(el => {
+                 const x = el.x ?? 0; const y = el.y ?? 0; const color = el.colorId || 'white';
+                 if (el.type === 'text') {
+                     const font = el.fontId || 'id(default_font)'; const formatStr = JSON.stringify(el.content || ""); const args = (el.args || "").trim(); const align = el.align || 'LEFT';
+                     code += `  it.printf(${x}, ${y}, ${font}, ${color}, `; if (align !== 'LEFT') code += `TextAlign::${align}, `; code += `${formatStr}`;
+                     if (args) { if (args.includes('.state') && !args.endsWith('.c_str()')) code += `, ${args}.c_str()`; else code += `, ${args}`; } code += ");\n";
+                 } else if (el.type === 'icon') {
+                     const font = el.fontId || 'id(default_icon_font)'; const codepointHex = getIconCodepoint(el.iconLigature);
+                     if (codepointHex) {
+                         try { const codePointInt = parseInt(codepointHex, 16); const character = String.fromCodePoint(codePointInt); const cppStringLiteral = JSON.stringify(character);
+                             code += `  it.printf(${x}, ${y}, ${font}, ${color}, ${cppStringLiteral}); // Ligature: ${el.iconLigature}\n`;
+                         } catch (e) { code += `  // Error: Could not generate code for icon ligature: ${el.iconLigature}\n`; }
+                     } else { code += `  // Warning: Unknown icon ligature: ${el.iconLigature}\n`; }
+                 } else if (el.type === 'bar') {
+                     const w = el.width ?? 10; const h = el.height ?? 1; code += `  it.filled_rectangle(${x}, ${y}, ${w}, ${h}, ${color});\n`;
+                 } else if (el.type === 'rectangle') {
+                     const w = el.width ?? 10; const h = el.height ?? 10;
+                     if (el.fill) { // Check fill state
+                         code += `  it.filled_rectangle(${x}, ${y}, ${w}, ${h}, ${color});\n`;
+                     } else {
+                         code += `  it.rectangle(${x}, ${y}, ${w}, ${h}, ${color});\n`; // Thickness ignored
+                     }
+                 }
+             });
+             generatedCodeOutput.value = code; codeSectionDetails.open = true;
+        }
+
+
+        // --- Initialization and Event Listeners ---
+        function initializeConfig() { const fonts = getAvailableFonts(); const colors = getAvailableColors(); populateSelect(editFontIdSelect, fonts); populateSelect(editColorIdSelect, colors); }
+        configResolutionSelect.addEventListener('change', updateScreenSize);
+        configFontsInput.addEventListener('change', initializeConfig);
+        configColorsInput.addEventListener('change', initializeConfig);
+        addTextBtn.addEventListener('click', () => addElement('text'));
+        addIconBtn.addEventListener('click', () => addElement('icon'));
+        addBarBtn.addEventListener('click', () => addElement('bar'));
+        addRectBtn.addEventListener('click', () => addElement('rectangle'));
+
+        // --- ADDED: Coordinate Slider/Input Listeners ---
+        function syncCoordControls(sourceInput, targetSlider, isX) {
+             const value = parseInt(sourceInput.value || 0);
+             if (targetSlider.value != value) { // Update slider only if different
+                 targetSlider.value = value;
+             }
+             // Update element model
+             if (selectedElementId !== null) {
+                 const elIndex = elements.findIndex(e => e.id === selectedElementId);
+                 if (elIndex !== -1) {
+                     elements[elIndex][isX ? 'x' : 'y'] = value;
+                     updateElementFromEditor(); // Use this to trigger redraw/re-render list
+                 }
+             }
+        }
+         function syncCoordControlsFromSlider(sourceSlider, targetInput, isX) {
+             const value = parseInt(sourceSlider.value || 0);
+             if (targetInput.value != value) { // Update number input only if different
+                 targetInput.value = value;
+             }
+              // Update element model
+             if (selectedElementId !== null) {
+                 const elIndex = elements.findIndex(e => e.id === selectedElementId);
+                 if (elIndex !== -1) {
+                     elements[elIndex][isX ? 'x' : 'y'] = value;
+                     updateElementFromEditor(); // Use this to trigger redraw/re-render list
+                 }
+             }
+         }
+        editXInput.addEventListener('input', () => syncCoordControls(editXInput, editXSlider, true));
+        editXSlider.addEventListener('input', () => syncCoordControlsFromSlider(editXSlider, editXInput, true));
+        editYInput.addEventListener('input', () => syncCoordControls(editYInput, editYSlider, false));
+        editYSlider.addEventListener('input', () => syncCoordControlsFromSlider(editYSlider, editYInput, false));
+        // --- End Coord Listeners ---
+
+        // --- ADDED: Color Picker/Select Listeners ---
+        editColorPicker.addEventListener('input', () => {
+             if (selectedElementId !== null) {
+                 const elIndex = elements.findIndex(e => e.id === selectedElementId);
+                 if (elIndex !== -1) {
+                     elements[elIndex].colorId = hexToRgbColorString(editColorPicker.value); // Store as Color(...)
+                     editColorIdSelect.value = ""; // Deselect ID
+                     updateElementFromEditor();
+                 }
+             }
+        });
+        editColorIdSelect.addEventListener('change', () => {
+             if (selectedElementId !== null) {
+                 const elIndex = elements.findIndex(e => e.id === selectedElementId);
+                 if (elIndex !== -1) {
+                     elements[elIndex].colorId = editColorIdSelect.value; // Store ID/Name
+                     editColorPicker.value = '#000000'; // Reset picker
+                     updateElementFromEditor();
+                 }
+             }
+        });
+        // --- End Color Listeners ---
+
+        // --- ADDED: Icon Search Listeners ---
+        editIconLigatureInput.addEventListener('input', () => { populateIconSuggestions(editIconLigatureInput.value); });
+        editIconLigatureInput.addEventListener('focus', () => { populateIconSuggestions(editIconLigatureInput.value); });
+        document.addEventListener('click', (event) => { if (!iconSearchContainer.contains(event.target)) { iconSuggestionsDiv.style.display = 'none'; } });
+        // --- End Icon Search ---
+
+        // General editor listener for other fields (like text input, checkboxes, etc.)
+        editorContent.addEventListener('input', (event) => {
+             // Avoid re-triggering for controls handled by specific listeners above
+             if (event.target !== editXInput && event.target !== editXSlider &&
+                 event.target !== editYInput && event.target !== editYSlider &&
+                 event.target !== editColorPicker && event.target !== editIconLigatureInput) {
+                 updateElementFromEditor();
+             }
+        });
+        editorContent.addEventListener('change', (event) => {
+             if (event.target.tagName === 'SELECT' && event.target !== editColorIdSelect) { // Handle selects except color ID
+                 updateElementFromEditor();
+             }
+             if (event.target === editRectFillCheckbox) { // Handle fill checkbox specifically on change
+                 updateElementFromEditor();
+             }
+        });
+
+        generateCodeBtn.addEventListener('click', generateLambdaCode);
+
+        // --- ADDED: Copy Button Listener ---
+        copyCodeBtn.addEventListener('click', () => {
+             if (!navigator.clipboard) {
+                 alert("Clipboard API not available in your browser.");
+                 return;
+             }
+             navigator.clipboard.writeText(generatedCodeOutput.value).then(() => {
+                 // Success feedback
+                 const originalText = copyCodeBtn.innerHTML;
+                 copyCodeBtn.innerHTML = `<span class="material-symbols-outlined">done</span> Copied!`;
+                 copyCodeBtn.classList.add('success');
+                 setTimeout(() => {
+                     copyCodeBtn.innerHTML = originalText;
+                     copyCodeBtn.classList.remove('success');
+                 }, 1500);
+             }).catch(err => {
+                 console.error('Failed to copy text: ', err);
+                 alert("Failed to copy code to clipboard.");
+             });
+        });
+        // --- End Copy Button ---
+
+
+        // --- Initial Setup ---
+        initializeConfig();
+        updateScreenSize();
+        renderElementList();
+
+    </script>
+
+</body>
+</html>
