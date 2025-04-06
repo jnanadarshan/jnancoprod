@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESPHome LD2410 Config Generator</title>
+    <style>
+        /* Material Design Inspired Colors */
+        :root {
+            --primary-color: #2196F3; /* Blue */
+            --primary-dark-color: #1976D2; /* Darker Blue */
+            --background-color: #f5f5f5; /* Light Grey */
+            --card-background-color: #ffffff; /* White */
+            --text-color: #212121; /* Almost Black */
+            --secondary-text-color: #757575; /* Grey */
+            --border-color: #e0e0e0; /* Light Grey Border */
+            --input-background-color: #fafafa; /* Very Light Grey */
+            --success-color: #4CAF50; /* Green */
+        }
+
+        body {
+            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            background-color: var(--card-background-color);
+            padding: 25px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+            font-weight: 500;
+         }
+         h2 {
+             color: var(--text-color);
+             margin: 0;
+             font-size: 1.2em;
+             font-weight: 500;
+             display: inline-block;
+         }
+
+        fieldset {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 20px;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        legend {
+            font-weight: 500;
+            padding: 12px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid var(--border-color);
+            box-sizing: border-box;
+            color: var(--primary-dark-color);
+        }
+
+        legend:hover {
+            background-color: #f1f1f1;
+        }
+
+        .fieldset-content {
+            padding: 15px 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+            border-top: none;
+            background-color: var(--card-background-color);
+        }
+
+        .fieldset-content.expanded {
+            max-height: 1000px;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+        }
+
+
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--secondary-text-color);
+            font-size: 0.95em;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: calc(100% - 22px);
+            padding: 12px 10px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1em;
+            background-color: var(--input-background-color);
+        }
+         input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+        }
+
+        button#generateButton { /* Specific style for Generate button */
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            transition: background-color 0.2s ease;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        button#generateButton:hover {
+            background-color: var(--primary-dark-color);
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px; /* Space above output section */
+            margin-bottom: 10px; /* Space below header */
+        }
+
+        button#copyButton { /* Style for Copy button */
+            background-color: var(--secondary-text-color);
+            color: white;
+            padding: 6px 12px; /* Smaller padding */
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px; /* Smaller font */
+            transition: background-color 0.2s ease;
+            font-weight: 500;
+        }
+
+        button#copyButton:hover {
+            background-color: #616161; /* Darker grey */
+        }
+
+        button#copyButton.copied { /* Style when copied */
+             background-color: var(--success-color);
+        }
+
+
+        pre {
+            background-color: #282c34;
+            border: 1px solid #ddd;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 60vh;
+            overflow-y: auto;
+            margin-top: 0; /* Removed margin-top as it's handled by output-header */
+        }
+
+        code {
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .note {
+            font-size: 0.9em;
+            color: var(--secondary-text-color);
+            margin-top: -5px;
+            margin-bottom: 15px;
+        }
+
+        .arrow {
+             display: inline-block;
+             width: 0;
+             height: 0;
+             border-left: 6px solid transparent;
+             border-right: 6px solid transparent;
+             border-top: 6px solid var(--secondary-text-color);
+             margin-left: 10px;
+             transition: transform 0.3s ease;
+        }
+
+        legend.expanded .arrow {
+            transform: rotate(-180deg);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ESPHome LD2410 Configuration Generator</h1>
+        <p>Fill in the details below to customize the ESPHome YAML configuration. Click section headers to expand/collapse.</p>
+
+        <fieldset class="collapsible">
+            <legend>
+                <h2>Substitutions</h2>
+                <span class="arrow"></span>
+            </legend>
+            <div class="fieldset-content">
+                <label for="subName">Name (Hostname / Entity Prefix):</label>
+                <input type="text" id="subName" value="mmwave-ff-hallpass">
+
+                <label for="subDeviceName">Device Name (Internal ID):</label>
+                <input type="text" id="subDeviceName" value="mmwave_ff_hallpass">
+
+                <label for="subFriendlyName">Friendly Name (Shown in UI):</label>
+                <input type="text" id="subFriendlyName" value="MMWAVE HALLPASS">
+            </div>
+        </fieldset>
+
+        <fieldset class="collapsible">
+            <legend>
+                <h2>API Settings</h2>
+                 <span class="arrow"></span>
+           </legend>
+            <div class="fieldset-content">
+                <label for="apiKey">Encryption Key (Optional):</label>
+                <input type="text" id="apiKey" placeholder="Leave blank for no encryption">
+                <p class="note">If provided, enables Home Assistant API encryption.</p>
+            </div>
+        </fieldset>
+
+        <fieldset class="collapsible">
+            <legend>
+                <h2>Wi-Fi Credentials</h2>
+                 <span class="arrow"></span>
+            </legend>
+            <div class="fieldset-content">
+                <label for="wifiSSIDSecret">Wi-Fi SSID Secret Name:</label>
+                <input type="text" id="wifiSSIDSecret" value="wifi_ssid">
+                <p class="note">Enter the name of the secret defined in your <code>secrets.yaml</code> for the Wi-Fi SSID.</p>
+
+                <label for="wifiPasswordSecret">Wi-Fi Password Secret Name:</label>
+                <input type="text" id="wifiPasswordSecret" value="wifi_password">
+                 <p class="note">Enter the name of the secret defined in your <code>secrets.yaml</code> for the Wi-Fi Password.</p>
+            </div>
+       </fieldset>
+
+       <fieldset class="collapsible">
+            <legend>
+                <h2>Wi-Fi Static IP Configuration</h2>
+                 <span class="arrow"></span>
+           </legend>
+            <div class="fieldset-content">
+                <label for="staticIp">Static IP Address:</label>
+                <input type="text" id="staticIp" value="10.10.1.61">
+
+                <label for="gateway">Gateway:</label>
+                <input type="text" id="gateway" value="10.10.1.1">
+
+                <label for="subnet">Subnet:</label>
+                <input type="text" id="subnet" value="255.255.0.0">
+
+                <label for="dns1">DNS Server 1:</label>
+                <input type="text" id="dns1" value="10.10.1.1">
+
+                <label for="dns2">DNS Server 2 (Optional):</label>
+                <input type="text" id="dns2" placeholder="e.g., 1.1.1.1 (Leave blank if none)">
+            </div>
+        </fieldset>
+
+        <button id="generateButton">Generate YAML</button>
+
+        <div class="output-header">
+             <h2>Generated YAML Code:</h2>
+             <button id="copyButton">Copy Code</button>
+        </div>
+        <pre><code id="outputYaml">Click "Generate YAML" to see the output here.</code></pre>
+    </div>
+
+    <script>
+        // --- Collapsible Section Logic ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const legends = document.querySelectorAll('.collapsible legend');
+            legends.forEach((legend, index) => {
+                const content = legend.nextElementSibling;
+                if (content && content.classList.contains('fieldset-content')) {
+                    if (index === 0) {
+                        content.classList.add('expanded');
+                        legend.classList.add('expanded');
+                        setTimeout(() => {
+                             content.style.maxHeight = content.scrollHeight + "px";
+                             content.style.padding = "15px 20px";
+                        }, 50);
+                    } else {
+                        content.style.maxHeight = '0';
+                        content.style.padding = '0 20px';
+                    }
+
+                    legend.addEventListener('click', function() {
+                        const isExpanded = content.classList.toggle('expanded');
+                        legend.classList.toggle('expanded');
+                        if (isExpanded) {
+                             content.style.padding = "15px 20px";
+                            content.style.maxHeight = content.scrollHeight + "px";
+                        } else {
+                             content.style.padding = '0 20px';
+                            content.style.maxHeight = '0';
+                        }
+                    });
+                }
+            });
+        });
+
+
+        // --- YAML Generation Logic (Unchanged) ---
+        const generateButton = document.getElementById('generateButton');
+        const outputYamlElement = document.getElementById('outputYaml');
+
+        generateButton.addEventListener('click', function() {
+            // Read Input Values
+            const subName = document.getElementById('subName').value.trim();
+            const subDeviceName = document.getElementById('subDeviceName').value.trim();
+            const subFriendlyName = document.getElementById('subFriendlyName').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const wifiSSIDSecret = document.getElementById('wifiSSIDSecret').value.trim() || 'wifi_ssid';
+            const wifiPasswordSecret = document.getElementById('wifiPasswordSecret').value.trim() || 'wifi_password';
+            const staticIp = document.getElementById('staticIp').value.trim();
+            const gateway = document.getElementById('gateway').value.trim();
+            const subnet = document.getElementById('subnet').value.trim();
+            const dns1 = document.getElementById('dns1').value.trim();
+            const dns2 = document.getElementById('dns2').value.trim();
+
+            // Build Conditional API Block
+            let apiBlock = `# Enable Home Assistant API
+api:`;
+            if (apiKey) {
+                apiBlock += `
+  encryption:
+    key: "${apiKey}"`;
+            }
+
+            // Build Wi-Fi Block
+            let wifiBlock = `wifi:
+  # Set up a wifi access point
+  ssid: !secret ${wifiSSIDSecret}
+  password: !secret ${wifiPasswordSecret}
+  manual_ip:
+    static_ip: ${staticIp}
+    gateway: ${gateway}
+    subnet: ${subnet}
+    dns1: ${dns1}`;
+            if (dns2) {
+                wifiBlock += `
+    dns2: ${dns2}`;
+            }
+            wifiBlock += `
+  ap: {} # Fallback AP`;
+
+            // Assemble YAML Template (same as before)
+            const yamlOutput = `substitutions:
+  name: ${subName}
+  device_name: ${subDeviceName}
+  friendly_name: ${subFriendlyName}
+
+esphome:
+  name: \\${subName} # Use substitution name directly
+  friendly_name: \\${subFriendlyName} # Use substitution name directly
+  min_version: 2024.6.0 # Or your desired minimum version
+  name_add_mac_suffix: false
+  platformio_options:
+    board_build.flash_mode: dio
+  project:
+    name: esphome.web
+    version: dev # Or your desired version
+
+esp32:
+  board: esp32-s3-devkitc-1 # Ensure this matches your board
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+${apiBlock}
+
+# Allow Over-The-Air updates
+ota:
+- platform: esphome
+
+# Allow provisioning Wi-Fi via serial
+improv_serial:
+
+${wifiBlock}
+
+# In combination with the \`ap\` this allows the user
+# to provision wifi credentials to the device via WiFi AP.
+captive_portal:
+
+dashboard_import:
+  package_import_url: github://esphome/firmware/esphome-web/esp32s3.yaml@main
+  import_full_config: true
+
+# Sets up Bluetooth LE (Only on ESP32) to allow the user
+# to provision wifi credentials to the device.
+esp32_improv:
+  authorizer: none
+
+# To have a "next url" for improv serial
+web_server:
+  version: 3
+
+################################################################################
+# UART (Connect to LD2410)
+################################################################################
+uart:
+  id: \${device_name}_presence
+  tx_pin: GPIO43 # Verify pins for your ESP32-S3 board
+  rx_pin: GPIO44 # Verify pins for your ESP32-S3 board
+  baud_rate: 256000 # Must match LD2410 setting
+  parity: NONE
+  stop_bits: 1
+
+################################################################################
+# LD2410 Sensor
+################################################################################
+ld2410:
+  uart_id: \${device_name}_presence
+  id: \${device_name}_presence_sensor
+
+################################################################################
+# Text Sensors
+################################################################################
+text_sensor:
+
+  - platform: template
+    name: "\${friendly_name} Uptime" # Use Friendly Name substitution
+    id: \${device_name}_uptime_human
+    icon: mdi:clock-start
+    entity_category: diagnostic
+  #-------------------------------------------------------------------------------
+  # LD2410 Text sensors
+  #-------------------------------------------------------------------------------
+  - platform: ld2410
+    version:
+      name: "\${friendly_name} Firmware Version"
+      entity_category: diagnostic
+    mac_address:
+      name: "\${friendly_name} MAC Address"
+      entity_category: diagnostic
+#-------------------------------------------------------------------------------
+# ESP32 internal sensors
+#-------------------------------------------------------------------------------
+  - platform: wifi_info
+    ip_address:
+      name: "\${friendly_name} IP Address"
+      id: \${device_name}_ip_address
+      entity_category: diagnostic
+    ssid:
+      name: "\${friendly_name} Connected SSID"
+      id: \${device_name}_connected_ssid
+      entity_category: diagnostic
+    mac_address:
+      name: "\${friendly_name} MAC Wifi Address"
+      id: \${device_name}_mac_address
+      entity_category: diagnostic
+  #-------------------------------------------------------------------------------
+  # ESPHome Version
+  #-------------------------------------------------------------------------------
+  - platform: version
+    name: "\${friendly_name} ESPHome Version"
+    hide_timestamp: true
+    entity_category: diagnostic
+
+################################################################################
+# Binary Sensors
+################################################################################
+binary_sensor:
+  # Room ESP Status
+  - platform: status
+    name: "\${friendly_name} Status"
+    id: \${device_name}_device_status
+    device_class: connectivity
+    entity_category: diagnostic
+  - platform: gpio
+    pin: GPIO3 # Optional: Connect to LD2410 OUT pin if needed
+    name: "\${friendly_name} GPIO Presence"
+    device_class: presence
+    # Consider adding internal: true if LD2410 presence is primary
+
+  # LD2410
+  - platform: ld2410
+    has_target:
+      name: "\${friendly_name} Presence"
+      device_class: presence
+    has_moving_target:
+      name: "\${friendly_name} Moving Target"
+      device_class: motion
+    has_still_target:
+      name: "\${friendly_name} Still Target"
+      device_class: presence
+
+################################################################################
+# Sensors
+################################################################################
+sensor:
+ # Optional Temperature/Humidity sensor (example)
+ # - platform: aht10
+ #   i2c_id: bus_a # Define i2c section if using
+ #   temperature:
+ #     name: "\${friendly_name} Temperature"
+ #   humidity:
+ #     name: "\${friendly_name} Humidity"
+ #   update_interval: 120s
+  #-------------------------------------------------------------------------------
+  # ESP Generic Sensors
+  #-------------------------------------------------------------------------------
+
+  # WiFi
+  - platform: wifi_signal
+    name: "\${friendly_name} WiFi Signal"
+    id: \${device_name}_wifi_signal_sensor
+    update_interval: 120s
+    entity_category: diagnostic
+
+  # Uptime
+  - platform: uptime
+    name: "\${friendly_name} Uptime Raw"
+    id: \${device_name}_uptime_sensor
+    update_interval: 120s
+    entity_category: diagnostic
+    internal: true # Hide raw sensor, only show formatted text sensor
+    on_raw_value:
+      then:
+        - text_sensor.template.publish:
+            id: \${device_name}_uptime_human
+            state: !lambda |-
+              int seconds = round(id(\${device_name}_uptime_sensor).raw_state);
+              int days = seconds / (24 * 3600);
+              seconds = seconds % (24 * 3600);
+              int hours = seconds / 3600;
+              seconds = seconds % 3600;
+              int minutes = seconds /  60;
+              seconds = seconds % 60;
+              return (
+                (days ? to_string(days) + "d " : "") +
+                (hours ? to_string(hours) + "h " : "") +
+                (minutes ? to_string(minutes) + "m " : "") +
+                (to_string(seconds) + "s")
+              ).c_str();
+
+  #-------------------------------------------------------------------------------
+  # LD2410D Millimeter Wave Sensor
+  #-------------------------------------------------------------------------------
+  - platform: ld2410
+    light:
+      name: "\${friendly_name} Light Level"
+      entity_category: diagnostic # Often just diagnostic
+    moving_distance:
+      name: "\${friendly_name} Moving Distance"
+    still_distance:
+      name: "\${friendly_name} Still Distance"
+    moving_energy:
+      name: "\${friendly_name} Moving Energy"
+      entity_category: diagnostic
+    still_energy:
+      name: "\${friendly_name} Still Energy"
+      entity_category: diagnostic
+    detection_distance:
+      name: "\${friendly_name} Detection Distance"
+      entity_category: diagnostic
+    # Gate sensors are primarily for tuning/diagnostics
+    g0:
+      move_energy:
+        name: "\${friendly_name} G0 Moving Energy"
+        entity_category: diagnostic
+      still_energy:
+        name: "\${friendly_name} G0 Still Energy"
+        entity_category: diagnostic
+    g1:
+      move_energy:
+        name: "\${friendly_name} G1 Moving Energy"
+        entity_category: diagnostic
+      still_energy:
+        name: "\${friendly_name} G1 Still Energy"
+        entity_category: diagnostic
+    g2:
+      move_energy:
+        name: "\${friendly_name} G2 Moving Energy"
+        entity_category: diagnostic
+      still_energy:
+        name: "\${friendly_name} G2 Still Energy"
+        entity_category: diagnostic
+    g3:
+      move_energy:
+        name: "\${friendly_name} G3 Moving Energy"
+        entity_category: diagnostic
+      still_energy:
+        name: "\${friendly_name} G3 Still Energy"
+        entity_category: diagnostic
+    g4:
+      move_energy:
+        name: "\${friendly_name} G4 Moving Energy"
+        entity_category: diagnostic
+      still_energy:
+        name: "\${friendly_name} G4 Still Energy"
+        entity_category: diagnostic
+    g5:
+      move_energy:
+        name: "\${friendly_name} G5 Moving Energy"
+        entity_category: diagnostic
+      still_energy:
+        name: "\${friendly_name} G5 Still Energy"
+        entity_category: diagnostic
+    g6:
+      move_energy:
+        name: "\${friendly_name} G6 Moving Energy"
+        entity_category: diagnostic
+      still_energy:
+        name: "\${friendly_name} G6 Still Energy"
+        entity_category: diagnostic
+    g7:
+      move_energy:
+        name: "\${friendly_name} G7 Moving Energy"
+        entity_category: diagnostic
+      still_energy:
+        name: "\${friendly_name} G7 Still Energy"
+        entity_category: diagnostic
+    g8:
+      move_energy:
+        name: "\${friendly_name} G8 Moving Energy"
+        entity_category: diagnostic
+      still_energy:
+        name: "\${friendly_name} G8 Still Energy"
+        entity_category: diagnostic
+
+################################################################################
+# Switch (Configuration/Control)
+################################################################################
+switch:
+  - platform: restart
+    name: "\${friendly_name} Restart Device"
+    id: \${device_name}_restart
+    entity_category: config
+    icon: mdi:restart
+
+  - platform: safe_mode
+    name: "\${friendly_name} Boot into Safe Mode"
+    id: \${device_name}_safe_mode
+    entity_category: config
+    icon: mdi:lock-alert-outline
+
+  - platform: ld2410
+    engineering_mode:
+      name: "\${friendly_name} Engineering Mode"
+      entity_category: config
+      icon: mdi:cog-transfer-outline
+    bluetooth:
+      name: "\${friendly_name} Control Bluetooth"
+      restore_mode: RESTORE_DEFAULT_OFF # Switch the BT off on boot
+      entity_category: config
+      icon: mdi:bluetooth-settings
+
+################################################################################
+# Button (Actions)
+################################################################################
+button:
+  - platform: ld2410
+    factory_reset:
+      name: "\${friendly_name} Factory Reset Sensor"
+      entity_category: config
+      icon: mdi:delete-restore
+    restart:
+      name: "\${friendly_name} Restart Sensor"
+      entity_category: config
+      icon: mdi:restart-alert
+    query_params:
+      name: "\${friendly_name} Query Sensor Params"
+      entity_category: diagnostic
+      icon: mdi:help-rhombus-outline
+
+################################################################################
+# Select (Sensor Settings)
+################################################################################
+select:
+  - platform: ld2410
+    distance_resolution:
+      name: "\${friendly_name} Distance Resolution"
+      entity_category: config
+      icon: mdi:map-marker-distance
+    baud_rate:
+      name: "\${friendly_name} Sensor Baud Rate"
+      entity_category: config
+      icon: mdi:serial-port
+    light_function:
+      name: "\${friendly_name} Light Function"
+      entity_category: config
+      icon: mdi:lightbulb-on-outline
+    out_pin_level:
+      name: "\${friendly_name} OUT Pin Level"
+      entity_category: config
+      icon: mdi:swap-vertical-bold
+`;
+
+            // Display Output
+            outputYamlElement.textContent = yamlOutput;
+        });
+
+        // --- Copy Button Logic ---
+        const copyButton = document.getElementById('copyButton');
+
+        copyButton.addEventListener('click', function() {
+            const codeToCopy = outputYamlElement.textContent;
+            // Check if code block has content other than the placeholder
+            if (codeToCopy && codeToCopy !== 'Click "Generate YAML" to see the output here.') {
+                navigator.clipboard.writeText(codeToCopy).then(() => {
+                    // Success feedback
+                    copyButton.textContent = 'Copied!';
+                    copyButton.classList.add('copied'); // Add class for styling
+                    copyButton.disabled = true; // Optional: disable button briefly
+
+                    // Reset button after a delay
+                    setTimeout(() => {
+                        copyButton.textContent = 'Copy Code';
+                        copyButton.classList.remove('copied'); // Remove class
+                        copyButton.disabled = false; // Re-enable button
+                    }, 2000); // 2 seconds
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                    // Optional: Show error feedback to user
+                    copyButton.textContent = 'Error Copying';
+                     setTimeout(() => {
+                        copyButton.textContent = 'Copy Code';
+                    }, 2000);
+                });
+            } else {
+                // Handle case where there's nothing to copy yet
+                copyButton.textContent = 'Nothing to Copy';
+                 setTimeout(() => {
+                    copyButton.textContent = 'Copy Code';
+                }, 1500);
+            }
+        });
+
+    </script>
+</body>
+</html>
