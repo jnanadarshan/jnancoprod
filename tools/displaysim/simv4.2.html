@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESPHome Display Designer (v4.3 UI Update)</title> 
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- https://material.io/resources/icons/?style=baseline -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons"rel="stylesheet">
+    
+    <!-- https://material.io/resources/icons/?style=outline -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Outlined"rel="stylesheet">
+    
+    <!-- https://material.io/resources/icons/?style=round -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Round"rel="stylesheet">
+    
+    <!-- https://material.io/resources/icons/?style=sharp -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Sharp"rel="stylesheet">
+
+    <!-- https://material.io/resources/icons/?style=twotone -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Two+Tone"rel="stylesheet">
+
+    <style>
+        :root {
+            --md-primary-color: #3f51b5; 
+            --md-primary-dark: #303f9f; 
+            --md-accent-color: #ff4081;
+            --md-background-color: #f8f9fa; 
+            --md-surface-color: #ffffff;
+            --md-text-primary-on-background: rgba(0, 0, 0, 0.87); 
+            --md-text-secondary-on-background: rgba(0, 0, 0, 0.6);
+            --md-text-hint-on-background: rgba(0, 0, 0, 0.38); 
+            --md-text-primary-on-surface: rgba(0, 0, 0, 0.87);
+            --md-border-color: rgba(0, 0, 0, 0.08); 
+            --md-canvas-background: #000000; 
+            --md-selected-item-bg: #e8eaf6;
+            --md-error-color: #f44336; 
+            --md-success-color: #4caf50;
+            --md-shadow-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
+            --md-shadow-2: 0 3px 6px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.12);
+            --md-shadow-3: 0 10px 20px rgba(0,0,0,0.15), 0 3px 6px rgba(0,0,0,0.10);
+            --md-radius-sm: 6px;
+            --md-radius-md: 8px;
+            --md-radius-lg: 12px;
+            --left-panel-width: 380px;
+            --center-panel-width: 420px;
+            --canvas-scale-factor: 1.5;
+            --top-nav-height: 64px;
+        }
+
+        html { height: 100%; }
+        body {
+            font-family: 'Roboto', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 0;
+            background-color: var(--md-background-color); 
+            color: var(--md-text-primary-on-background);
+            display: grid;
+            grid-template-rows: var(--top-nav-height) 1fr;
+            grid-template-columns: var(--left-panel-width) var(--center-panel-width) 1fr;
+            height: 100vh;
+            font-size: 14px;
+            overflow: hidden;
+        }
+
+        .top-nav {
+            grid-row: 1;
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            background-color: var(--md-surface-color);
+            border-bottom: 1px solid var(--md-border-color);
+            box-shadow: var(--md-shadow-1);
+            z-index: 10;
+        }
+        
+        .top-nav .title {
+            font-size: 1.4em;
+            font-weight: 500;
+            color: var(--md-primary-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .top-nav .nav-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .top-nav .nav-icons .material-symbols-outlined {
+            font-size: 1.6em;
+            color: var(--md-text-secondary-on-background);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .top-nav .nav-icons .material-symbols-outlined:hover {
+            color: var(--md-text-primary-on-background);
+            transform: scale(1.1);
+        }
+
+        .panel {
+            padding: 24px;
+            overflow-y: auto;
+            height: calc(100vh - var(--top-nav-height));
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .left-panel {
+            grid-row: 2; 
+            grid-column: 1;
+            background-color: #f8f9fc;
+            border-right: 1px solid var(--md-border-color);
+        }
+
+        .center-panel {
+            grid-row: 2; 
+            grid-column: 2;
+            background-color: var(--md-surface-color);
+            border-right: 1px solid var(--md-border-color);
+        }
+
+        .right-panel {
+            grid-row: 2; 
+            grid-column: 3;
+            align-items: center;
+            background-color: var(--md-background-color);
+            padding: 32px;
+        }
+
+        h1, h2, h3 { 
+            margin-top: 0; 
+            margin-bottom: 20px; 
+            color: var(--md-text-primary-on-surface); 
+            font-weight: 500; 
+        }
+        
+        h2 { 
+            font-size: 1.3em; 
+            border-bottom: 1px solid var(--md-border-color); 
+            padding-bottom: 12px; 
+            width: 100%; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+        }
+        
+        h3 { 
+            font-size: 1.1em; 
+            font-weight: 500; 
+            margin-bottom: 16px;
+        }
+
+        details {
+            border: 1px solid var(--md-border-color);
+            border-radius: var(--md-radius-md);
+            background-color: var(--md-surface-color);
+            width: 100%;
+            margin-bottom: 16px;
+            box-shadow: var(--md-shadow-1);
+            transition: box-shadow 0.2s ease;
+        }
+
+        details:hover {
+            box-shadow: var(--md-shadow-2);
+        }
+
+        details[open] {
+            box-shadow: var(--md-shadow-2);
+        }
+
+        summary { 
+            padding: 14px 20px; 
+            font-weight: 500; 
+            cursor: pointer; 
+            list-style: none; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            border-bottom: 1px solid transparent; 
+            transition: all 0.2s ease;
+        }
+
+        summary:hover { 
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        details[open] > summary { 
+            border-bottom: 1px solid var(--md-border-color); 
+            background-color: var(--md-surface-color);
+        }
+
+        .details-content { 
+            padding: 20px; 
+            border-top: 1px solid var(--md-border-color);
+        }
+
+        label { 
+            display: block; 
+            margin-top: 16px; 
+            margin-bottom: 6px; 
+            font-weight: 500; 
+            font-size: 0.9em; 
+            color: var(--md-text-secondary-on-background);
+        }
+
+        input[type="text"], 
+        input[type="number"], 
+        select, 
+        textarea { 
+            width: 100%; 
+            padding: 12px 16px; 
+            margin-bottom: 12px; 
+            border: 1px solid var(--md-border-color); 
+            border-radius: var(--md-radius-sm); 
+            box-sizing: border-box; 
+            font-size: 1em; 
+            background-color: #fff; 
+            color: var(--md-text-primary-on-surface); 
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        input:focus, 
+        select:focus, 
+        textarea:focus { 
+            border-color: var(--md-primary-color); 
+            outline: none; 
+            box-shadow: 0 0 0 3px rgba(63,81,181,0.1);
+        }
+
+        button { 
+            background-color: var(--md-primary-color); 
+            color: white; 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: var(--md-radius-sm); 
+            cursor: pointer; 
+            font-size: 0.9em; 
+            font-weight: 500; 
+            text-transform: uppercase; 
+            margin-right: 8px; 
+            margin-top: 8px; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            transition: all 0.2s ease;
+            box-shadow: var(--md-shadow-1);
+        }
+
+        button:hover { 
+            background-color: var(--md-primary-dark); 
+            box-shadow: var(--md-shadow-2);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: var(--md-shadow-1);
+        }
+
+        #elementList { 
+            list-style: none; 
+            padding: 0; 
+            margin: 0; 
+            max-height: 250px; 
+            overflow-y: auto; 
+            margin-top: 16px;
+            border: 1px solid var(--md-border-color);
+            border-radius: var(--md-radius-md);
+            font-size: 0.9em;
+        }
+
+        #elementList li { 
+            padding: 8px 12px; 
+            border-bottom: 1px solid var(--md-border-color); 
+            cursor: pointer; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            transition: all 0.2s ease;
+            min-height: 32px;
+            user-select: none;
+        }
+
+        #elementList li .drag-handle {
+            cursor: move;
+            color: var(--md-text-hint-on-background);
+            margin-right: 4px;
+            opacity: 0.5;
+            transition: opacity 0.2s ease;
+        }
+
+        #elementList li:hover .drag-handle {
+            opacity: 1;
+        }
+
+        #elementList li.dragging {
+            opacity: 0.5;
+            background-color: var(--md-selected-item-bg);
+        }
+
+        #elementList li.drag-over {
+            border-top: 2px solid var(--md-primary-color);
+        }
+
+        #elementList li:hover { 
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        #elementList li.selected { 
+            background-color: var(--md-selected-item-bg);
+            font-weight: 500;
+        }
+
+        #elementList li.selected .element-label .material-symbols-outlined {
+            color: var(--md-primary-color);
+        }
+
+        #elementList li:last-child {
+            border-bottom: none;
+        }
+
+        .element-label { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            line-height: 1;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .element-label span:last-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .element-label .material-symbols-outlined { 
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--md-text-secondary-on-background);
+        }
+
+        .element-controls { 
+            display: flex;
+            align-items: center;
+        }
+
+        .element-controls button { 
+            background: none; 
+            border: none; 
+            color: var(--md-text-secondary-on-background); 
+            cursor: pointer; 
+            padding: 4px; 
+            margin: 0;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--md-radius-sm);
+            transition: all 0.2s ease;
+        }
+
+        .element-controls button .material-symbols-outlined {
+            font-size: 18px;
+        }
+
+        .element-controls button:hover { 
+            color: var(--md-error-color);
+            background-color: rgba(244, 67, 54, 0.08);
+        }
+
+        #previewContainer {
+            text-align: left;
+            width: 100%;
+            max-width: 700px;
+            background-color: var(--md-surface-color);
+            border-radius: var(--md-radius-lg);
+            padding: 24px;
+            border: 1px solid var(--md-border-color);
+            box-sizing: border-box;
+            box-shadow: var(--md-shadow-2);
+        }
+
+        #screenPreview { 
+            border: 2px solid #444; 
+            background-color: var(--md-canvas-background); 
+            margin: 16px 0;
+            position: relative; 
+            box-shadow: var(--md-shadow-1);
+            border-radius: 4px;
+        }
+
+        #generatedCodeOutput, 
+        #generatedFontCodeOutput { 
+            width: calc(100% - 32px); 
+            height: 300px; 
+            white-space: pre; 
+            font-family: monospace; 
+            font-size: 13px; 
+            background-color: #282c34; 
+            color: #abb2bf; 
+            border: none; 
+            border-radius: 0 0 var(--md-radius-md) var(--md-radius-md);
+            padding: 20px; 
+            margin: 0; 
+            box-sizing: border-box; 
+            resize: vertical;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .coord-control { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            margin-bottom: 12px;
+        }
+
+        .coord-control input[type="range"] { 
+            flex: 1; 
+            margin: 0; 
+            height: 4px; 
+            accent-color: var(--md-primary-color); 
+            cursor: pointer;
+        }
+
+        #iconSearchContainer { 
+            position: relative; 
+            margin-bottom: 8px;
+            max-width: 300px;
+        }
+
+        #iconSearchContainer input[type="text"] {
+            padding-right: 32px;
+        }
+
+        #iconSuggestions { 
+            position: absolute; 
+            background-color: white; 
+            border: 1px solid var(--md-border-color); 
+            border-radius: var(--md-radius-sm);
+            max-height: 180px; 
+            overflow-y: auto; 
+            z-index: 10; 
+            width: 100%;
+            max-width: 300px;
+            box-shadow: var(--md-shadow-2);
+            margin-top: 4px;
+        }
+
+        #iconSuggestions div { 
+            padding: 6px 12px; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            font-size: 0.9em;
+            transition: background-color 0.15s ease;
+            min-height: 32px;
+        }
+
+        #iconSuggestions .material-symbols-outlined {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--md-text-secondary-on-background);
+        }
+
+        #iconSuggestions div:hover { 
+            background-color: rgba(0, 0, 0, 0.04);
+        }
+
+        #iconSuggestions div.selected,
+        #iconSuggestions div:active {
+            background-color: var(--md-selected-item-bg);
+        }
+
+        #iconSuggestions::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #iconSuggestions::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #iconSuggestions::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        #iconSuggestions::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        .checkbox-control { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            margin-top: 12px;
+            padding: 4px 0;
+        }
+
+        .checkbox-control input[type="checkbox"] { 
+            margin: 0; 
+            width: 18px;
+            height: 18px;
+            accent-color: var(--md-primary-color);
+        }
+
+        .add-elements-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .add-elements-container button {
+            flex: 1;
+            min-width: calc(50% - 4px);
+            padding: 8px 12px;
+            font-size: 0.85em;
+            background-color: white;
+            color: var(--md-text-primary-on-background);
+            border: 1px solid var(--md-border-color);
+            box-shadow: var(--md-shadow-1);
+            margin: 0;
+        }
+
+        .add-elements-container button:hover {
+            background-color: var(--md-primary-color);
+            color: white;
+            border-color: var(--md-primary-color);
+        }
+
+        .add-elements-container button .material-symbols-outlined {
+            font-size: 16px;
+        }
+
+        .add-elements-container button:active {
+            transform: translateY(1px);
+            box-shadow: none;
+        }
+
+        .code-actions-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .code-actions-container button {
+            padding: 6px 12px;
+            font-size: 0.85em;
+            background-color: white;
+            color: var(--md-text-primary-on-background);
+            border: 1px solid var(--md-border-color);
+            box-shadow: var(--md-shadow-1);
+            margin: 0;
+        }
+
+        .code-actions-container button:hover {
+            background-color: var(--md-primary-color);
+            color: white;
+            border-color: var(--md-primary-color);
+        }
+
+        .code-actions-container button .material-symbols-outlined {
+            font-size: 16px;
+        }
+
+        .code-actions-container button:active {
+            transform: translateY(1px);
+            box-shadow: none;
+        }
+
+        #generateCodeBtn, #generateFontCodeBtn {
+            background-color: var(--md-primary-color);
+            color: white;
+        }
+
+        #copyCodeBtn, #copyFontCodeBtn {
+            background-color: white;
+            color: var(--md-text-secondary-on-background);
+        }
+
+        #copyCodeBtn:hover, #copyFontCodeBtn:hover {
+            background-color: var(--md-text-secondary-on-background);
+            color: white;
+        }
+
+        #copyCodeBtn.success, #copyFontCodeBtn.success {
+            background-color: var(--md-success-color);
+            color: white;
+            border-color: var(--md-success-color);
+        }
+
+        .code-output {
+            border: 1px solid var(--md-border-color);
+            border-radius: var(--md-radius-sm);
+            background-color: #282c34;
+            padding: 16px;
+            margin-top: 12px;
+            position: relative;
+        }
+
+        .code-output textarea {
+            width: 100%;
+            min-height: 200px;
+            border: none;
+            background: transparent;
+            color: #abb2bf;
+            font-family: monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            resize: vertical;
+            padding: 0;
+            margin: 0;
+        }
+
+        .code-output textarea:focus {
+            outline: none;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="top-nav">
+        <div class="title">
+            <span class="material-symbols-outlined">developer_board</span> ESPHome Display Designer
+        </div>
+        <div class="nav-icons">
+             <span class="material-symbols-outlined" title="Search (Placeholder)">search</span>
+             <span class="material-symbols-outlined" title="Notifications (Placeholder)">notifications</span>
+             <span class="material-symbols-outlined" title="Account (Placeholder)">account_circle</span>
+        </div>
+    </header>
+
+    <div class="left-panel panel"> <details open> <summary><span class="material-symbols-outlined">tune</span> Configuration</summary>
+             <div class="details-content">
+                 <div class="flex-row"> <div class="flex-grow"> <label for="configResolution">Resolution:</label> <select id="configResolution"> <option value="128x64">128 x 64</option> <option value="128x160" selected>128 x 160</option> <option value="135x240">135 x 240</option> <option value="160x128">160 x 128</option> <option value="240x135">240 x 135</option> <option value="240x240">240 x 240</option> <option value="240x320">240 x 320</option> <option value="320x240">320 x 240</option> <option value="480x320">480 x 320</option> </select> </div> </div>
+                 <label for="configCustomFonts">Available Font IDs (comma-separated):</label> <textarea id="configCustomFonts" placeholder="id(roboto_12), id(material_symbols_24)">id(roboto_12), id(roboto_bold_16), id(material_symbols_18), id(material_symbols_24)</textarea>
+                 <label for="configColors">Available Color IDs (comma-separated):</label> <textarea id="configColors">id(primary_color), id(accent_color), white, black, red, green, blue</textarea>
+             </div>
+        </details>
+        <details open> 
+            <summary><span class="material-symbols-outlined">widgets</span> Elements</summary>
+            <div class="details-content">
+                <div class="add-elements-container"> 
+                    <button id="addTextBtn"><span class="material-symbols-outlined">title</span>Text</button> 
+                    <button id="addIconBtn"><span class="material-symbols-outlined">mood</span>Icon</button> 
+                    <button id="addBarBtn"><span class="material-symbols-outlined">horizontal_rule</span>Bar</button> 
+                    <button id="addRectBtn"><span class="material-symbols-outlined">check_box_outline_blank</span>Rect</button> 
+                </div>
+                <ul id="elementList"></ul>
+            </div>
+        </details>
+    </div> <div class="center-panel panel"> <details id="editorDetails" open> <summary><span class="material-symbols-outlined">edit</span> Properties</summary>
+             <div class="details-content">
+                 <div id="editor-placeholder">Select an element from the list on the left.</div>
+                 <div id="editor-content">
+                    <input type="hidden" id="editId">
+                    <label>Position:</label>
+                    <div class="coord-control"> <label for="editX">X</label> <input type="number" id="editX" value="0" step="1"> <input type="range" id="editXSlider" min="0" max="128" step="1" title="X Coordinate"> <span class="slider-value" id="editXValue">0</span><span class="material-symbols-outlined coord-indicator">swap_horiz</span> </div>
+                    <div class="coord-control"> <label for="editY">Y</label> <input type="number" id="editY" value="0" step="1"> <input type="range" id="editYSlider" min="0" max="160" step="1" title="Y Coordinate"> <span class="slider-value" id="editYValue">0</span><span class="material-symbols-outlined coord-indicator">swap_vert</span> </div>
+                    <div id="colorSelectContainer"> <label for="editColorId">Color:</label> <div class="color-control"> <select id="editColorId"></select> <input type="color" id="editColorPicker" value="#FFFFFF" title="Choose Custom Color"> </div> </div>
+                    <div id="fontSelectContainer"> <label for="editFontId">Font ID:</label> <select id="editFontId"></select> </div>
+                    <div id="textSpecific"> <label for="editContent">Format String:</label> <input type="text" id="editContent" placeholder='"Temp: %.1f C"'> <label for="editArgs">Argument(s):</label> <input type="text" id="editArgs" placeholder="id(sensor).state"> <label for="editAlign">Alignment:</label> <select id="editAlign"> <option value="LEFT">Left</option> <option value="CENTER">Center</option> <option value="RIGHT">Right</option> </select> </div>
+                    <div id="iconSpecific"> <label for="editIconLigature">Icon Ligature (<a href="https://fonts.google.com/icons?selected=Material+Symbols+Outlined" target="_blank" rel="noopener">Find Names</a>):</label> <div id="iconSearchContainer"> <input type="text" id="editIconLigature" placeholder="e.g., home, settings..."> <div id="iconSuggestions"></div> </div> </div>
+                    <div id="barSpecific"> <div class="flex-row"> <div class="flex-grow"> <label for="editWidth">Width:</label> <input type="number" id="editWidth" value="128"> </div> <div class="flex-grow"> <label for="editHeight">Height:</label> <input type="number" id="editHeight" value="1"> </div> </div> </div>
+                    <div id="rectSpecific"> <div class="flex-row"> <div class="flex-grow"> <label for="editRectWidth">Width:</label> <input type="number" id="editRectWidth" value="50"> </div> <div class="flex-grow"> <label for="editRectHeight">Height:</label> <input type="number" id="editRectHeight" value="30"> </div> </div> <div> <label for="editRectThickness">Line Thickness (Preview Only):</label> <input type="number" id="editRectThickness" value="1" min="1"> </div> <div> <label for="editRectRadius">Corner Radius (Preview Only): <span id="editRectRadiusValue">0</span>px</label> <input type="range" id="editRectRadius" min="0" max="15" step="1" value="0" style="width: 100%; accent-color: var(--md-primary-color); height: 4px;"> </div> <div class="checkbox-control"> <input type="checkbox" id="editRectFill"> <label for="editRectFill">Fill Rectangle</label> </div> </div>
+                 </div>
+             </div>
+        </details>
+    </div> <div class="right-panel panel"> <div id="previewContainer">
+             <div class="section-header">
+                 <h2><span class="material-symbols-outlined">visibility</span>Preview</h2>
+             </div>
+             <div id="screenPreview"> <canvas id="previewCanvas"></canvas> </div>
+             <p style="font-size: 0.85em; color: var(--md-text-secondary-on-background); margin-top: 10px;">Note: Fonts & corners are approximations.</p>
+         </div>
+        <details id="codeSection"> 
+            <summary><span class="material-symbols-outlined">code</span> Generated Lambda Code</summary> 
+            <div class="details-content">
+                <div class="code-actions-container">
+                    <button id="generateCodeBtn"><span class="material-symbols-outlined">generating_tokens</span>Generate</button>
+                    <button id="copyCodeBtn" title="Copy Code"><span class="material-symbols-outlined">content_copy</span>Copy</button>
+                </div>
+                <div class="code-output">
+                    <textarea id="generatedCodeOutput" readonly placeholder="Generated ESPHome lambda code will appear here..."></textarea>
+                </div>
+            </div>
+        </details>
+        <details id="fontCodeSection"> 
+            <summary><span class="material-symbols-outlined">font_download</span> Generate Font Code</summary> 
+            <div class="details-content"> 
+                <p class="code-note">Generates a template based on used Font IDs. <strong>Verify file paths and types!</strong></p> 
+                <div class="code-actions-container">
+                    <button id="generateFontCodeBtn"><span class="material-symbols-outlined">generating_tokens</span>Generate</button>
+                    <button id="copyFontCodeBtn" title="Copy Font Code"><span class="material-symbols-outlined">content_copy</span>Copy</button>
+                </div>
+                <div class="code-output">
+                    <textarea id="generatedFontCodeOutput" readonly placeholder="Generated ESPHome font YAML will appear here..."></textarea>
+                </div>
+            </div>
+        </details>
+    </div> <script>
+        // --- Expanded Google Icons Ligature-to-Codepoint Data ---
+        const googleIconsLigatureToCodepoint = { /* ... Keep same expanded map ... */
+             "search": "e8b6", "home": "e88a", "menu": "e5d2", "close": "e5cd", "settings": "e8b8", "expand_more": "e5cf", "done": "e876", "check_circle": "e86c", "favorite": "e87d", "add": "e145", "delete": "e872", "arrow_back": "e5c4", "arrow_forward": "e5c8", "arrow_downward": "e5db", "arrow_upward": "e5d8", "more_vert": "e5d4", "account_circle": "e853", "info": "e88e", "visibility": "e8f4", "visibility_off": "e8f5", "refresh": "e5d5", "edit": "e3c9", "check": "e5ca", "logout": "e9ba", "help": "e887", "thumb_up": "e8dc", "schedule": "e8b5", "language": "e894", "fingerprint": "e90d", "face": "e87c", "lock": "e897", "warning": "e002", "share": "e80d", "download": "f090", "cloud": "e2c8", "attachment": "e226", "block": "e14b", "error": "e000", "place": "e55f", "place_filled": "e0c8", "location_on": "e0c8", "phone": "e0cd", "email": "e0be", "star": "e838", "thermostat": "f076", "lightbulb": "e0f0", "wifi": "e63e", "signal_cellular_alt": "e0cd", "task_alt": "e2e6", "radio_button_unchecked": "e836", "check_box_outline_blank": "e835", "check_box": "e834", "sunny": "eb3d", "water_drop": "e798", "air": "e1d8", "power_settings_new": "e8ac", "remove": "e15b", "thermostat_auto": "f073", "ac_unit": "eb3b", "bolt": "e1f7", "humidity_percentage": "f05b", "light_mode": "e518", "dark_mode": "e51c", "percent": "e413", "restart_alt": "f04d", "upload": "f09b", "link": "e157", "volume_up": "e050", "volume_off": "e04f", "mic": "e029", "videocam": "e04b", "photo_camera": "e412", "notifications": "e7f4", "calendar_month": "ebcc", "today": "e8df", "alarm": "e855", "watch_later": "e924", "update": "e923", "sync": "e627", "login": "ea77", "sensors": "e51e", "speed": "e9e4", "network_wifi": "ebea", "bluetooth": "e1a1", "battery_full": "e1a4", "battery_charging_full": "e1a3", "sd_card": "e623", "usb": "e1e0", "database": "f04f", "memory": "e322", "cpu": "ea71", "developer_board": "e30b", "dns": "e875", "router": "e328", "key": "e73c", "cloud_upload": "e2c3", "cloud_download": "e2c0", "folder": "e2c7", "description": "e873", "code": "e86f", "terminal": "ebc8", "power": "e63c", "factory": "ebef", "house": "e84f", "apartment": "ea40", "light": "f02b", "window": "f11c", "door_sliding": "f11e", "garage": "f011", "airwave": "e1d8", "air_purifier_gen": "f06b", "wind_power": "f049", "solar_power": "f04a", "water_heater": "f03d", "heat_pump": "f018", "nest_thermostat": "e314", "sprinkler": "f0b3", "valve": "f09e", "gas_meter": "f014", "oil_barrel": "f0c8", "mode_fan": "f0c6", "hvac": "f01e", "humidity_high": "e1e9", "humidity_low": "e1ea", "dew_point": "f056", "air_quality": "f060", "co2": "e7ef", "eco": "ea75", "grass": "f104", "energy_savings_leaf": "ea76", "motion_sensor": "f0d2", "door_open": "f117", "vibration": "e62d", "flood": "f14b", "local_fire_department": "f06d", "smoke_free": "eb4a", "smoking_rooms": "eb4b", "brightness_high": "e1ac", "brightness_medium": "e1ad", "brightness_low": "e1ae", "settings_brightness": "e8c4", "wb_sunny": "e430", "bedtime": "ef44", "security": "e32a", "shield": "e9e", "verified_user": "e8e8", "privacy_tip": "f0dc", "policy": "ea17", "lock_open": "e898", "vpn_key": "e0da", "bug_report": "e868",
+        };
+
+        // --- Global State & Elements ---
+        let elements = [];
+        let selectedElementId = null;
+        let nextId = 0;
+
+        // Get ALL element references
+        const configResolutionSelect = document.getElementById('configResolution');
+        // Removed configCommonFontsSelect reference
+        const configCustomFontsTextarea = document.getElementById('configCustomFonts');
+        const configColorsInput = document.getElementById('configColors');
+        const addTextBtn = document.getElementById('addTextBtn'); const addIconBtn = document.getElementById('addIconBtn'); const addBarBtn = document.getElementById('addBarBtn'); const addRectBtn = document.getElementById('addRectBtn');
+        const elementList = document.getElementById('elementList');
+        const editorDetails = document.getElementById('editorDetails'); const editorPlaceholder = document.getElementById('editor-placeholder'); const editorContent = document.getElementById('editor-content');
+        const editIdInput = document.getElementById('editId'); const editXInput = document.getElementById('editX'); const editYInput = document.getElementById('editY'); const editXSlider = document.getElementById('editXSlider'); const editYSlider = document.getElementById('editYSlider'); const editXValueSpan = document.getElementById('editXValue'); const editYValueSpan = document.getElementById('editYValue');
+        const colorSelectContainer = document.getElementById('colorSelectContainer'); const editColorIdSelect = document.getElementById('editColorId'); const editColorPicker = document.getElementById('editColorPicker');
+        const fontSelectContainer = document.getElementById('fontSelectContainer');
+        const editFontIdSelect = document.getElementById('editFontId'); // Single font select
+        const textSpecificDiv = document.getElementById('textSpecific'); const editContentInput = document.getElementById('editContent'); const editArgsInput = document.getElementById('editArgs'); const editAlignSelect = document.getElementById('editAlign');
+        const iconSpecificDiv = document.getElementById('iconSpecific'); const editIconLigatureInput = document.getElementById('editIconLigature'); const iconSearchContainer = document.getElementById('iconSearchContainer'); const iconSuggestionsDiv = document.getElementById('iconSuggestions');
+        const barSpecificDiv = document.getElementById('barSpecific'); const editWidthInput = document.getElementById('editWidth'); const editHeightInput = document.getElementById('editHeight');
+        const rectSpecificDiv = document.getElementById('rectSpecific'); const editRectWidthInput = document.getElementById('editRectWidth'); const editRectHeightInput = document.getElementById('editRectHeight'); const editRectThicknessInput = document.getElementById('editRectThickness'); const editRectFillCheckbox = document.getElementById('editRectFill'); const editRectRadiusSlider = document.getElementById('editRectRadius'); const editRectRadiusValueSpan = document.getElementById('editRectRadiusValue');
+        const screenPreviewDiv = document.getElementById('screenPreview'); const previewCanvas = document.getElementById('previewCanvas'); const previewCtx = previewCanvas.getContext('2d');
+        const generateCodeBtn = document.getElementById('generateCodeBtn'); const copyCodeBtn = document.getElementById('copyCodeBtn'); const generatedCodeOutput = document.getElementById('generatedCodeOutput'); const codeSectionDetails = document.getElementById('codeSection');
+        const generateFontCodeBtn = document.getElementById('generateFontCodeBtn'); const generatedFontCodeOutput = document.getElementById('generatedFontCodeOutput'); const fontCodeSectionDetails = document.getElementById('fontCodeSection');
+
+
+        // --- Helper Functions ---
+        function getAvailableFonts() { return configCustomFontsTextarea.value.split(',').map(s => s.trim()).filter(s => s); }
+        function getAvailableColors() { return configColorsInput.value.split(',').map(s => s.trim()).filter(s => s); }
+        function populateSelect(selectElement, options, defaultText = "-- Select --") { selectElement.innerHTML = ''; const defaultOption = document.createElement('option'); defaultOption.value = ""; defaultOption.textContent = defaultText; selectElement.appendChild(defaultOption); options.forEach(optionValue => { const option = document.createElement('option'); option.value = optionValue; option.textContent = optionValue; selectElement.appendChild(option); }); }
+        function mapFontPreview(fontId) { if (!fontId) return '10px sans-serif'; let sizeMatch = fontId.match(/_(\d+)$/); if (!sizeMatch) sizeMatch = fontId.match(/(\d+)\)$/); if (!sizeMatch) sizeMatch = fontId.match(/_(\d+)_/); let baseSize = 12; if (sizeMatch && sizeMatch[1]) { baseSize = parseInt(sizeMatch[1], 10); } const finalSize = Math.max(5, baseSize); const family = (fontId.includes('material') || fontId.includes('symbol') || fontId.includes('icon')) ? "'Material Symbols Outlined', 'Roboto', sans-serif" : "'Roboto', sans-serif"; const weight = (fontId.includes('bold') || fontId.includes('black')) ? 'bold' : 'normal'; return `${weight} ${finalSize}px ${family}`; }
+        function mapColorPreview(colorId) { if (!colorId) return '#FFFFFF'; const lowerColor = colorId.toLowerCase(); const colorMatch = colorId.match(/Color\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i); if (colorMatch) { return `rgb(${colorMatch[1]}, ${colorMatch[2]}, ${colorMatch[3]})`; } if (lowerColor === 'white') return '#FFFFFF'; if (lowerColor === 'black') return '#000000'; if (lowerColor === 'red' || lowerColor.includes('red')) return '#FF0000'; if (lowerColor === 'green' || lowerColor.includes('green')) return '#00FF00'; if (lowerColor === 'blue' || lowerColor.includes('blue')) return '#0000FF'; if (lowerColor.includes('primary')) return getComputedStyle(document.documentElement).getPropertyValue('--md-primary-color').trim() || '#3f51b5'; if (lowerColor.includes('accent')) return getComputedStyle(document.documentElement).getPropertyValue('--md-accent-color').trim() || '#ff4081'; return '#CCCCCC'; }
+        function getIconCodepoint(ligature) {
+            if (!ligature) return null;
+            const normalizedLigature = ligature.toLowerCase().replace(/_/g, '');
+            return window.materialIcons?.get(normalizedLigature) || googleIconsLigatureToCodepoint[normalizedLigature];
+        }
+        function hexToRgbColorString(hex) { hex = hex.replace('#', ''); const bigint = parseInt(hex, 16); const r = (bigint >> 16) & 255; const g = (bigint >> 8) & 255; const b = bigint & 255; return `Color(${r}, ${g}, ${b})`; }
+        function rgbColorStringToHex(colorString) { const match = colorString.match(/Color\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i); if (match) { const r = parseInt(match[1]); const g = parseInt(match[2]); const b = parseInt(match[3]); return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`; } return null; }
+
+        // --- Screen Size Logic ---
+        function updateScreenSize() { const resolution = configResolutionSelect.value; const [baseWidth, baseHeight] = resolution.split('x').map(Number); const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--canvas-scale-factor') || 1.5); previewCanvas.width = baseWidth; previewCanvas.height = baseHeight; screenPreviewDiv.style.width = `${baseWidth * scale}px`; screenPreviewDiv.style.height = `${baseHeight * scale}px`; document.documentElement.style.setProperty('--canvas-base-width', `${baseWidth}px`); document.documentElement.style.setProperty('--canvas-base-height', `${baseHeight}px`); editXSlider.max = baseWidth; editYSlider.max = baseHeight; editRectRadiusSlider.max = Math.floor(Math.min(baseWidth, baseHeight) / 2); drawPreview(); }
+
+        // --- Icon Search Logic ---
+        function populateIconSuggestions(searchTerm) {
+            iconSuggestionsDiv.innerHTML = '';
+            iconSuggestionsDiv.style.display = 'none';
+            if (!searchTerm || searchTerm.length < 1) return;
+
+            // Fetch icons from Material Symbols API if not already cached
+            if (!window.materialIcons) {
+                fetch('https://raw.githubusercontent.com/google/material-design-icons/master/font/MaterialSymbols/MaterialSymbols-Regular.codepoints')
+                    .then(response => response.text())
+                    .then(data => {
+                        // Parse and store icons
+                        window.materialIcons = new Map();
+                        data.split('\n').forEach(line => {
+                            const [name, codepoint] = line.split(' ');
+                            if (name) {
+                                window.materialIcons.set(name.replace(/_/g, ''), codepoint);
+                            }
+                        });
+                        // After loading, show suggestions
+                        showIconSuggestions(searchTerm);
+                    })
+                    .catch(error => {
+                        console.error('Error loading icons:', error);
+                        // Fallback to built-in icons if fetch fails
+                        window.materialIcons = new Map(Object.entries(googleIconsLigatureToCodepoint));
+                        showIconSuggestions(searchTerm);
+                    });
+            } else {
+                showIconSuggestions(searchTerm);
+            }
+        }
+
+        function showIconSuggestions(searchTerm) {
+            const lowerSearchTerm = searchTerm.toLowerCase().replace(/_/g, '');
+            const matches = [];
+            
+            // Search through material icons
+            window.materialIcons.forEach((codepoint, name) => {
+                if (name.includes(lowerSearchTerm)) {
+                    matches.push({ name, codepoint });
+                }
+            });
+
+            // Sort matches by relevance (exact match first, then startsWith, then includes)
+            matches.sort((a, b) => {
+                const aName = a.name.toLowerCase();
+                const bName = b.name.toLowerCase();
+                if (aName === lowerSearchTerm) return -1;
+                if (bName === lowerSearchTerm) return 1;
+                if (aName.startsWith(lowerSearchTerm) && !bName.startsWith(lowerSearchTerm)) return -1;
+                if (!aName.startsWith(lowerSearchTerm) && bName.startsWith(lowerSearchTerm)) return 1;
+                return aName.localeCompare(bName);
+            });
+
+            // Show top 15 matches
+            const limitedMatches = matches.slice(0, 15);
+            if (limitedMatches.length > 0) {
+                limitedMatches.forEach(({ name }) => {
+                    const suggestion = document.createElement('div');
+                    suggestion.innerHTML = `<span class="material-symbols-outlined">${name}</span> ${name}`;
+                    suggestion.onclick = () => selectIcon(name);
+                    iconSuggestionsDiv.appendChild(suggestion);
+                });
+                iconSuggestionsDiv.style.display = 'block';
+            }
+        }
+
+        function selectIcon(ligature) {
+            if (selectedElementId !== null) {
+                const elIndex = elements.findIndex(e => e.id === selectedElementId);
+                if (elIndex !== -1 && elements[elIndex].type === 'icon') {
+                    elements[elIndex].iconLigature = ligature;
+                    editIconLigatureInput.value = ligature;
+                    iconSuggestionsDiv.style.display = 'none';
+                    iconSuggestionsDiv.innerHTML = '';
+                    updateElementFromEditor();
+                }
+            } else {
+                console.error("Could not select icon:", ligature);
+                iconSuggestionsDiv.style.display = 'none';
+            }
+        }
+
+        // --- Core Logic ---
+        function drawPreview() { /* Unchanged */
+             previewCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--md-canvas-background').trim(); previewCtx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+             elements.forEach(el => { const x = parseInt(el.x || 0); const y = parseInt(el.y || 0); if (el.type === 'text' || el.type === 'icon') { previewCtx.font = mapFontPreview(el.fontId); previewCtx.fillStyle = mapColorPreview(el.colorId); const fontSizeMatch = previewCtx.font.match(/(\d+)px/); const fontSize = fontSizeMatch ? parseInt(fontSizeMatch[1]) : 12; const drawY = y + Math.round(fontSize * 0.8); if (el.type === 'text') { const align = el.align || 'LEFT'; previewCtx.textAlign = align.toLowerCase(); let displayText = el.content || ''; if (el.args) displayText = displayText.replace(/%[.\d]*[fdis]/, `[${el.args.split('.')[0].replace('id(','').replace(')','')}]`); previewCtx.fillText(displayText, x, drawY); } else { previewCtx.textAlign = 'start'; previewCtx.fillText(el.iconLigature || '', x, drawY); } previewCtx.textAlign = 'start'; } else if (el.type === 'bar') { previewCtx.fillStyle = mapColorPreview(el.colorId); const w = parseInt(el.width || 10); const h = parseInt(el.height || 1); previewCtx.fillRect(x, y, w, h); } else if (el.type === 'rectangle') { const w = parseInt(el.width || 10); const h = parseInt(el.height || 10); const radius = parseInt(el.cornerRadius || 0); previewCtx.beginPath(); if (radius > 0 && previewCtx.roundRect) { previewCtx.roundRect(x, y, w, h, radius); } else { previewCtx.rect(x, y, w, h); } previewCtx.closePath(); if (el.fill) { previewCtx.fillStyle = mapColorPreview(el.colorId); previewCtx.fill(); } else { previewCtx.strokeStyle = mapColorPreview(el.colorId); previewCtx.lineWidth = parseInt(el.thickness || 1); previewCtx.stroke(); } } }); }
+        function renderElementList() {
+            elementList.innerHTML = ''; 
+            elements.forEach((el, index) => { 
+                const li = document.createElement('li'); 
+                li.dataset.id = el.id;
+                li.draggable = true;
+
+                // Add drag event listeners
+                li.addEventListener('dragstart', handleDragStart);
+                li.addEventListener('dragend', handleDragEnd);
+                li.addEventListener('dragover', handleDragOver);
+                li.addEventListener('drop', handleDrop);
+                li.addEventListener('dragenter', handleDragEnter);
+                li.addEventListener('dragleave', handleDragLeave);
+
+                const labelDiv = document.createElement('div'); 
+                labelDiv.classList.add('element-label');
+
+                // Add drag handle
+                const dragHandle = document.createElement('span');
+                dragHandle.classList.add('material-symbols-outlined', 'drag-handle');
+                dragHandle.textContent = 'drag_indicator';
+                labelDiv.appendChild(dragHandle);
+
+                let iconType = 'edit_note'; 
+                let labelText = 'Unknown';
+                if (el.type === 'text') { 
+                    iconType = 'title'; 
+                    labelText = el.content ? `"${el.content.substring(0, 20)}${el.content.length>20 ? '...' : ''}"` : 'Text'; 
+                } else if (el.type === 'icon') { 
+                    iconType = el.iconLigature || 'mood'; 
+                    labelText = el.iconLigature || 'Icon'; 
+                } else if (el.type === 'bar') { 
+                    iconType = 'horizontal_rule'; 
+                    labelText = `Bar (${el.width ?? '?'}x${el.height ?? '?'})`; 
+                } else if (el.type === 'rectangle') { 
+                    iconType = el.fill ? 'check_box' : 'check_box_outline_blank'; 
+                    labelText = `Rect (${el.width ?? '?'}x${el.height ?? '?'})`; 
+                }
+
+                const typeIcon = document.createElement('span');
+                typeIcon.classList.add('material-symbols-outlined');
+                typeIcon.textContent = iconType;
+                labelDiv.appendChild(typeIcon);
+
+                const label = document.createElement('span');
+                label.textContent = labelText;
+                labelDiv.appendChild(label);
+
+                li.appendChild(labelDiv);
+
+                if (el.id === selectedElementId) { 
+                    li.classList.add('selected'); 
+                }
+
+                const controls = document.createElement('span'); 
+                controls.classList.add('element-controls'); 
+                const delBtn = document.createElement('button'); 
+                delBtn.innerHTML = `<span class="material-symbols-outlined">delete</span>`; 
+                delBtn.classList.add('danger'); 
+                delBtn.title = "Remove Element"; 
+                delBtn.onclick = (e) => { 
+                    e.stopPropagation(); 
+                    removeElement(el.id); 
+                }; 
+                controls.appendChild(delBtn); 
+                li.appendChild(controls); 
+                li.onclick = () => { 
+                    selectElement(el.id); 
+                }; 
+                elementList.appendChild(li); 
+            }); 
+            drawPreview(); 
+        }
+        function updateEditorForm() { /* Unchanged */
+             const el = elements.find(e => e.id === selectedElementId);
+             if (!el) { editorPlaceholder.style.display = 'block'; editorContent.style.display = 'none'; editorDetails.open = false; return; }
+             editorPlaceholder.style.display = 'none'; editorContent.style.display = 'block'; editorDetails.open = true;
+             editIdInput.value = el.id;
+             editXInput.value = el.x ?? 0; editXSlider.value = el.x ?? 0; editXValueSpan.textContent = el.x ?? 0;
+             editYInput.value = el.y ?? 0; editYSlider.value = el.y ?? 0; editYValueSpan.textContent = el.y ?? 0;
+             const colorIsRgbString = el.colorId?.match(/^Color\(/i); if (colorIsRgbString) { editColorPicker.value = rgbColorStringToHex(el.colorId) || '#000000'; editColorIdSelect.value = ""; } else { editColorIdSelect.value = el.colorId || ""; editColorPicker.value = '#000000'; }
+             const isText = el.type === 'text'; const isIcon = el.type === 'icon'; const isBar = el.type === 'bar'; const isRect = el.type === 'rectangle';
+             textSpecificDiv.style.display = isText ? 'block' : 'none'; iconSpecificDiv.style.display = isIcon ? 'block' : 'none'; barSpecificDiv.style.display = isBar ? 'block' : 'none'; rectSpecificDiv.style.display = isRect ? 'block' : 'none';
+             fontSelectContainer.style.display = (isText || isIcon) ? 'block' : 'none'; colorSelectContainer.style.display = 'block';
+             if (isText || isIcon) { editFontIdSelect.value = el.fontId || ''; }
+             if (isText) { editContentInput.value = el.content || ''; editArgsInput.value = el.args || ''; editAlignSelect.value = el.align || 'LEFT'; }
+             else if (isIcon) { editIconLigatureInput.value = el.iconLigature || ''; iconSuggestionsDiv.style.display='none'; }
+             else if (isBar) { const defaultWidth = previewCanvas.width || 128; editWidthInput.value = el.width ?? defaultWidth; editHeightInput.value = el.height ?? 1; }
+             else if (isRect) { const defaultWidth = 50; const defaultHeight = 30; editRectWidthInput.value = el.width ?? defaultWidth; editRectHeightInput.value = el.height ?? defaultHeight; editRectThicknessInput.value = el.thickness ?? 1; editRectFillCheckbox.checked = el.fill ?? false; editRectRadiusSlider.value = el.cornerRadius ?? 0; editRectRadiusValueSpan.textContent = el.cornerRadius ?? 0; }
+        }
+        function updateElementFromEditor() { /* Unchanged */
+             if (selectedElementId === null) return; const elIndex = elements.findIndex(e => e.id === selectedElementId); if (elIndex === -1) return; const el = elements[elIndex];
+             el.x = parseInt(editXInput.value || 0); el.y = parseInt(editYInput.value || 0);
+             const pickerValue = editColorPicker.value; const selectValue = editColorIdSelect.value;
+             if (selectValue) { el.colorId = selectValue; } else if (pickerValue !== '#000000') { el.colorId = hexToRgbColorString(pickerValue); } else { el.colorId = 'black'; }
+             if (el.type === 'text' || el.type === 'icon') { el.fontId = editFontIdSelect.value; if (el.type === 'text') { el.content = editContentInput.value; el.args = editArgsInput.value; el.align = editAlignSelect.value; } else { el.iconLigature = editIconLigatureInput.value.trim().toLowerCase(); } }
+             else if (el.type === 'bar') { el.width = parseInt(editWidthInput.value || 10); el.height = parseInt(editHeightInput.value || 1); }
+             else if (el.type === 'rectangle') { el.width = parseInt(editRectWidthInput.value || 10); el.height = parseInt(editRectHeightInput.value || 10); el.thickness = parseInt(editRectThicknessInput.value || 1); el.fill = editRectFillCheckbox.checked; el.cornerRadius = parseInt(editRectRadiusSlider.value || 0); }
+             renderElementList(); drawPreview();
+        }
+        function addElement(type) { /* Unchanged */
+            const defaultFontId = getAvailableFonts()[0] || 'id(roboto_12)'; const defaultColor = getAvailableColors().find(c => c.toLowerCase() === 'white') || getAvailableColors()[0] || 'white'; const defaultY = (elements.length * 20) + 10; const defaultX = 10; const newElement = { id: nextId++, type: type, x: defaultX, y: defaultY, colorId: defaultColor, }; if (type === 'text') { newElement.fontId = defaultFontId; newElement.content = "Text"; newElement.args = ""; newElement.align = "LEFT"; } else if (type === 'icon') { newElement.fontId = getAvailableFonts().find(f => f.includes('symbol') || f.includes('icon')) || 'id(material_symbols_24)'; newElement.iconLigature = "home"; } else if (type === 'bar') { newElement.width = previewCanvas.width ? Math.round(previewCanvas.width * 0.8) : 100; newElement.height = 1; } else if (type === 'rectangle') { newElement.width = 50; newElement.height = 30; newElement.thickness = 1; newElement.fill = false; newElement.cornerRadius = 0; } elements.push(newElement); selectElement(newElement.id); renderElementList(); }
+         function removeElement(id) { /* Unchanged */ elements = elements.filter(el => el.id !== id); if (selectedElementId === id) { selectedElementId = null; updateEditorForm(); } renderElementList(); }
+         function selectElement(id) { /* Unchanged */ selectedElementId = id; renderElementList(); updateEditorForm(); }
+        function generateLambdaCode() {
+            let code = "lambda: |-\n";
+            // Reverse the elements array to render from bottom to top (last element first)
+            [...elements].reverse().forEach(el => {
+                const x = el.x ?? 0;
+                const y = el.y ?? 0;
+                const color = el.colorId || 'white';
+                if (el.type === 'text') {
+                    const font = el.fontId || 'id(default_font)';
+                    const formatStr = JSON.stringify(el.content || "");
+                    const args = (el.args || "").trim();
+                    const align = el.align || 'LEFT';
+                    code += `  it.printf(${x}, ${y}, ${font}, ${color}, `;
+                    if (align !== 'LEFT') code += `TextAlign::${align}, `;
+                    code += `${formatStr}`;
+                    if (args) {
+                        if (args.includes('.state') && !args.endsWith('.c_str()')) code += `, ${args}.c_str()`;
+                        else code += `, ${args}`;
+                    }
+                    code += ");\n";
+                } else if (el.type === 'icon') {
+                    const font = el.fontId || 'id(default_icon_font)';
+                    const codepointHex = getIconCodepoint(el.iconLigature);
+                    if (codepointHex) {
+                        try {
+                            const codePointInt = parseInt(codepointHex, 16);
+                            const character = String.fromCodePoint(codePointInt);
+                            const cppStringLiteral = JSON.stringify(character);
+                            code += `  it.printf(${x}, ${y}, ${font}, ${color}, ${cppStringLiteral}); // Ligature: ${el.iconLigature}\n`;
+                        } catch (e) {
+                            code += `  // Error: Could not generate code for icon ligature: ${el.iconLigature}\n`;
+                        }
+                    } else {
+                        code += `  // Warning: Unknown icon ligature: ${el.iconLigature}\n`;
+                    }
+                } else if (el.type === 'bar') {
+                    const w = el.width ?? 10;
+                    const h = el.height ?? 1;
+                    code += `  it.filled_rectangle(${x}, ${y}, ${w}, ${h}, ${color});\n`;
+                } else if (el.type === 'rectangle') {
+                    const w = el.width ?? 10;
+                    const h = el.height ?? 10;
+                    if (el.fill) {
+                        code += `  it.filled_rectangle(${x}, ${y}, ${w}, ${h}, ${color});`;
+                    } else {
+                        code += `  it.rectangle(${x}, ${y}, ${w}, ${h}, ${color});`;
+                    }
+                    if (!el.fill && el.thickness && el.thickness > 1) code += ` // Note: Thickness ignored`;
+                    if (el.cornerRadius && el.cornerRadius > 0) code += ` // Note: Corner radius ignored`;
+                    code += "\n";
+                }
+            });
+            generatedCodeOutput.value = code;
+            codeSectionDetails.open = true;
+        }
+        function generateFontYaml() { /* Unchanged */
+             const fontIds = getAvailableFonts(); if (fontIds.length === 0) { generatedFontCodeOutput.value = "# No font IDs listed in configuration."; fontCodeSectionDetails.open = true; return; } let yaml = "font:\n"; const addedFiles = new Set(); fontIds.forEach(fontId => { let idName = fontId; let baseName = 'unknown'; let size = 12; let type = ''; const match = fontId.match(/id\(([a-zA-Z0-9_]+?)_?(\d+)?\)/); if (match && match[1]) { idName = `id(${match[1]}${match[2] ? '_' + match[2] : ''})`; baseName = match[1].replace(/_$/, ''); size = match[2] ? parseInt(match[2]) : size; } let filePath = `fonts/${baseName.charAt(0).toUpperCase() + baseName.slice(1)}.ttf`; if (baseName.includes('material') || baseName.includes('symbol') || baseName.includes('icon')) { type = '    type: ICON\n'; if (baseName.includes('material')) filePath = 'fonts/materialdesignicons-webfont.ttf'; if (baseName.includes('symbols')) filePath = 'fonts/MaterialSymbols-Regular.ttf'; } if (baseName.includes('roboto')) filePath = `fonts/Roboto-${baseName.includes('bold') ? 'Bold' : 'Regular'}.ttf`; if (baseName.includes('open_sans')) filePath = `fonts/OpenSans-${baseName.includes('bold') ? 'Bold' : 'Regular'}.ttf`; yaml += `  - file: ${filePath} # VERIFY PATH!\n`; yaml += `    id: ${idName}\n`; yaml += `    size: ${size}\n`; if (type) yaml += type; }); generatedFontCodeOutput.value = yaml; fontCodeSectionDetails.open = true; }
+
+
+        // --- Initialization and Event Listeners ---
+        function initializeConfig() { // Reverted
+             const fonts = getAvailableFonts(); populateSelect(editFontIdSelect, fonts, "-- Font ID --");
+             const colors = getAvailableColors(); populateSelect(editColorIdSelect, colors, "-- Color ID --"); }
+        configResolutionSelect.addEventListener('change', updateScreenSize);
+        configCustomFontsTextarea.addEventListener('input', initializeConfig);
+        configColorsInput.addEventListener('input', initializeConfig);
+        // REMOVED common font selector listener
+        addTextBtn.addEventListener('click', () => addElement('text')); addIconBtn.addEventListener('click', () => addElement('icon')); addBarBtn.addEventListener('click', () => addElement('bar')); addRectBtn.addEventListener('click', () => addElement('rectangle'));
+        function syncCoordControls(sourceInput, targetSlider, valueSpan) { const value = parseInt(sourceInput.value || 0); if (targetSlider.value != value) { targetSlider.value = value; } valueSpan.textContent = value; updateElementFromEditor(); }
+        function syncCoordControlsFromSlider(sourceSlider, targetInput, valueSpan) { const value = parseInt(sourceSlider.value || 0); if (targetInput.value != value) { targetInput.value = value; } valueSpan.textContent = value; updateElementFromEditor(); }
+        editXInput.addEventListener('input', () => syncCoordControls(editXInput, editXSlider, editXValueSpan)); editXSlider.addEventListener('input', () => syncCoordControlsFromSlider(editXSlider, editXInput, editXValueSpan)); editYInput.addEventListener('input', () => syncCoordControls(editYInput, editYSlider, editYValueSpan)); editYSlider.addEventListener('input', () => syncCoordControlsFromSlider(editYSlider, editYInput, editYValueSpan));
+        editColorPicker.addEventListener('input', () => { editColorIdSelect.value = ""; updateElementFromEditor(); }); editColorIdSelect.addEventListener('change', () => { updateElementFromEditor(); });
+        editRectRadiusSlider.addEventListener('input', () => { editRectRadiusValueSpan.textContent = editRectRadiusSlider.value; updateElementFromEditor(); });
+        editIconLigatureInput.addEventListener('input', () => { populateIconSuggestions(editIconLigatureInput.value); }); editIconLigatureInput.addEventListener('focus', () => { populateIconSuggestions(editIconLigatureInput.value); }); document.addEventListener('click', (event) => { if (iconSearchContainer && !iconSearchContainer.contains(event.target)) { iconSuggestionsDiv.style.display = 'none'; } });
+
+        // Reverted general editor listeners
+        editorContent.addEventListener('input', (event) => {
+            if (![editXInput, editXSlider, editYInput, editYSlider, editColorPicker, editIconLigatureInput, editRectRadiusSlider].includes(event.target)) {
+                 updateElementFromEditor();
+             }
+             // Removed preview slider handler
+        });
+        editorContent.addEventListener('change', (event) => {
+             // Handle selects (now including font ID) and checkboxes
+             if (event.target.tagName === 'SELECT' || event.target.type === 'checkbox' ) {
+                 updateElementFromEditor();
+             }
+        });
+
+
+        generateCodeBtn.addEventListener('click', generateLambdaCode);
+        copyCodeBtn.addEventListener('click', () => { if (!navigator.clipboard) { alert("Clipboard API not available."); return; } navigator.clipboard.writeText(generatedCodeOutput.value).then(() => { const originalText = copyCodeBtn.innerHTML; copyCodeBtn.innerHTML = `<span class="material-symbols-outlined">done</span> Copied!`; copyCodeBtn.classList.add('success'); setTimeout(() => { copyCodeBtn.innerHTML = originalText; copyCodeBtn.classList.remove('success'); }, 1500); }).catch(err => { console.error('Failed to copy: ', err); alert("Failed to copy."); }); });
+        generateFontCodeBtn.addEventListener('click', generateFontYaml);
+        const copyFontCodeBtn = document.getElementById('copyFontCodeBtn');
+        copyFontCodeBtn.addEventListener('click', () => {
+            if (!navigator.clipboard) {
+                alert("Clipboard API not available.");
+                return;
+            }
+            navigator.clipboard.writeText(generatedFontCodeOutput.value).then(() => {
+                const originalText = copyFontCodeBtn.innerHTML;
+                copyFontCodeBtn.innerHTML = `<span class="material-symbols-outlined">done</span> Copied!`;
+                copyFontCodeBtn.classList.add('success');
+                setTimeout(() => {
+                    copyFontCodeBtn.innerHTML = originalText;
+                    copyFontCodeBtn.classList.remove('success');
+                }, 1500);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert("Failed to copy.");
+            });
+        });
+
+        // --- Initial Setup ---
+        initializeConfig();
+        updateScreenSize();
+        renderElementList();
+
+        // Drag and Drop Handlers
+        let draggedItem = null;
+
+        function handleDragStart(e) {
+            draggedItem = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', this.dataset.id);
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            const items = document.querySelectorAll('#elementList li');
+            items.forEach(item => item.classList.remove('drag-over'));
+            draggedItem = null;
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragEnter(e) {
+            this.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.stopPropagation();
+            e.preventDefault();
+
+            if (draggedItem !== this) {
+                const draggedId = parseInt(draggedItem.dataset.id);
+                const dropId = parseInt(this.dataset.id);
+                
+                const draggedIndex = elements.findIndex(el => el.id === draggedId);
+                const dropIndex = elements.findIndex(el => el.id === dropId);
+                
+                const [draggedElement] = elements.splice(draggedIndex, 1);
+                elements.splice(dropIndex, 0, draggedElement);
+                
+                renderElementList();
+                generateLambdaCode();
+            }
+
+            return false;
+        }
+
+    </script>
+
+</body>
+</html>
