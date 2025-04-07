@@ -23,6 +23,9 @@
     <!-- https://material.io/resources/icons/?style=twotone -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Two+Tone"rel="stylesheet">
 
+    <!-- Add html2pdf library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <style>
         :root {
             --md-primary-color: #3f51b5; 
@@ -105,6 +108,29 @@
         .top-nav .nav-icons .material-symbols-outlined:hover {
             color: var(--md-text-primary-on-background);
             transform: scale(1.1);
+        }
+
+        .export-button {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            color: var(--md-primary-color) !important;
+            background: transparent;
+        }
+
+        .export-button:hover {
+            transform: translateY(-1px);
+            color: var(--md-primary-dark) !important;
+        }
+
+        .export-button .material-symbols-outlined {
+            color: inherit !important;
         }
 
         .panel {
@@ -678,9 +704,9 @@
             <span class="material-symbols-outlined">developer_board</span> ESPHome Display Designer
         </div>
         <div class="nav-icons">
-             <span class="material-symbols-outlined" title="Search (Placeholder)">search</span>
-             <span class="material-symbols-outlined" title="Notifications (Placeholder)">notifications</span>
-             <span class="material-symbols-outlined" title="Account (Placeholder)">account_circle</span>
+            <span class="material-symbols-outlined export-button" id="exportBtn" title="Export PDF">picture_as_pdf</span>
+            <span class="material-symbols-outlined" id="clearCacheBtn" title="Clear Saved Data">delete_sweep</span>
+            <span class="material-symbols-outlined" title="Account (Placeholder)">account_circle</span>
         </div>
     </header>
 
@@ -877,6 +903,74 @@
         function getAvailableColors() { return configColorsInput.value.split(',').map(s => s.trim()).filter(s => s); }
         function populateSelect(selectElement, options, defaultText = "-- Select --") { selectElement.innerHTML = ''; const defaultOption = document.createElement('option'); defaultOption.value = ""; defaultOption.textContent = defaultText; selectElement.appendChild(defaultOption); options.forEach(optionValue => { const option = document.createElement('option'); option.value = optionValue; option.textContent = optionValue; selectElement.appendChild(option); }); }
         function mapFontPreview(fontId) { if (!fontId) return '10px sans-serif'; let sizeMatch = fontId.match(/_(\d+)$/); if (!sizeMatch) sizeMatch = fontId.match(/(\d+)\)$/); if (!sizeMatch) sizeMatch = fontId.match(/_(\d+)_/); let baseSize = 12; if (sizeMatch && sizeMatch[1]) { baseSize = parseInt(sizeMatch[1], 10); } const finalSize = Math.max(5, baseSize); const family = (fontId.includes('material') || fontId.includes('symbol') || fontId.includes('icon')) ? "'Material Symbols Outlined', 'Roboto', sans-serif" : "'Roboto', sans-serif"; const weight = (fontId.includes('bold') || fontId.includes('black')) ? 'bold' : 'normal'; return `${weight} ${finalSize}px ${family}`; }
+
+        // --- Cache Functions ---
+        function saveToCache() {
+            const cacheData = {
+                resolution: configResolutionSelect.value,
+                customFonts: configCustomFontsTextarea.value,
+                colors: configColorsInput.value,
+                elements: elements,
+                nextId: nextId
+            };
+            localStorage.setItem('esphomeDisplayDesignerCache', JSON.stringify(cacheData));
+        }
+
+        // Make sure cache loads completely by enhancing the load function
+        function loadFromCache() {
+            const cachedData = localStorage.getItem('esphomeDisplayDesignerCache');
+            if (!cachedData) return false;
+            
+            try {
+                const data = JSON.parse(cachedData);
+                
+                // Restore configuration
+                if (data.resolution) configResolutionSelect.value = data.resolution;
+                if (data.customFonts) configCustomFontsTextarea.value = data.customFonts;
+                if (data.colors) configColorsInput.value = data.colors;
+                
+                // Restore elements
+                if (Array.isArray(data.elements) && data.elements.length > 0) {
+                    elements = data.elements;
+                    
+                    // Fix for icons: Ensure each icon has proper font settings
+                    elements.forEach(el => {
+                        if (el.type === 'icon' && (!el.fontId || el.fontId === '')) {
+                            // Set a default material icon font from available fonts
+                            const fonts = getAvailableFonts();
+                            const materialFont = fonts.find(f => 
+                                f.toLowerCase().includes('material') || 
+                                f.toLowerCase().includes('symbol') || 
+                                f.toLowerCase().includes('icon')
+                            );
+                            
+                            if (materialFont) {
+                                el.fontId = materialFont;
+                            } else {
+                                // If no material font found, use the first available font
+                                el.fontId = fonts.length > 0 ? fonts[0] : 'id(material_symbols_24)';
+                            }
+                        }
+                    });
+                    
+                    nextId = data.nextId || elements.length;
+                    return true;
+                }
+            } catch (e) {
+                console.error('Error loading cache:', e);
+                return false;
+            }
+            
+            return false;
+        }
+
+        function clearCache() {
+            if (confirm('Are you sure you want to clear all saved elements and configuration?')) {
+                localStorage.removeItem('esphomeDisplayDesignerCache');
+                location.reload();
+            }
+        }
+
         function mapColorPreview(colorId) { if (!colorId) return '#FFFFFF'; const lowerColor = colorId.toLowerCase(); const colorMatch = colorId.match(/Color\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i); if (colorMatch) { return `rgb(${colorMatch[1]}, ${colorMatch[2]}, ${colorMatch[3]})`; } if (lowerColor === 'white') return '#FFFFFF'; if (lowerColor === 'black') return '#000000'; if (lowerColor === 'red' || lowerColor.includes('red')) return '#FF0000'; if (lowerColor === 'green' || lowerColor.includes('green')) return '#00FF00'; if (lowerColor === 'blue' || lowerColor.includes('blue')) return '#0000FF'; if (lowerColor.includes('primary')) return getComputedStyle(document.documentElement).getPropertyValue('--md-primary-color').trim() || '#3f51b5'; if (lowerColor.includes('accent')) return getComputedStyle(document.documentElement).getPropertyValue('--md-accent-color').trim() || '#ff4081'; return '#CCCCCC'; }
         function populateIconSuggestions(searchTerm) {
             iconSuggestionsDiv.innerHTML = '';
@@ -1113,8 +1207,12 @@
     selectElement(newElement.id);
     renderElementList();
 }
-         function removeElement(id) { /* Unchanged */ elements = elements.filter(el => el.id !== id); if (selectedElementId === id) { selectedElementId = null; updateEditorForm(); } renderElementList(); }
-         function selectElement(id) { /* Unchanged */ selectedElementId = id; renderElementList(); updateEditorForm(); }
+         function removeElement(id) { /* Unchanged */ elements = elements.filter(el => el.id !== id); if (selectedElementId === id) { selectedElementId = null; updateEditorForm(); } renderElementList(); saveToCache(); }
+         function selectElement(id) { 
+            selectedElementId = id; 
+            renderElementList(); 
+            updateEditorForm(); 
+        }
         function generateLambdaCode() {
             let code = "lambda: |-\n";
             // Reverse the elements array to render from bottom to top (last element first)
@@ -1184,30 +1282,92 @@
             editIconLigatureInput.value = name;
             iconSuggestionsDiv.style.display = 'none';
             updateElementFromEditor();
+            saveToCache();
         }
 
         // --- Initialization and Event Listeners ---
-        function initializeConfig() { // Reverted
-             const fonts = getAvailableFonts(); populateSelect(editFontIdSelect, fonts, "-- Font ID --");
-             const colors = getAvailableColors(); populateSelect(editColorIdSelect, colors, "-- Color ID --"); }
-        configResolutionSelect.addEventListener('change', updateScreenSize);
-        configCustomFontsTextarea.addEventListener('input', initializeConfig);
-        configColorsInput.addEventListener('input', initializeConfig);
+        function initializeConfig() { 
+             const fonts = getAvailableFonts(); 
+             populateSelect(editFontIdSelect, fonts, "-- Font ID --");
+             const colors = getAvailableColors(); 
+             populateSelect(editColorIdSelect, colors, "-- Color ID --"); 
+        }
+
+        configResolutionSelect.addEventListener('change', () => {
+            updateScreenSize();
+            saveToCache();
+        });
+        configCustomFontsTextarea.addEventListener('input', () => {
+            initializeConfig();
+            saveToCache();
+        });
+        configColorsInput.addEventListener('input', () => {
+            initializeConfig();
+            saveToCache();
+        });
         // REMOVED common font selector listener
-        addTextBtn.addEventListener('click', () => addElement('text')); addIconBtn.addEventListener('click', () => addElement('icon')); addBarBtn.addEventListener('click', () => addElement('bar')); addRectBtn.addEventListener('click', () => addElement('rectangle'));
+        addTextBtn.addEventListener('click', () => {
+            addElement('text');
+            saveToCache();
+        });
+        addIconBtn.addEventListener('click', () => {
+            addElement('icon');
+            saveToCache();
+        });
+        addBarBtn.addEventListener('click', () => {
+            addElement('bar');
+            saveToCache();
+        });
+        addRectBtn.addEventListener('click', () => {
+            addElement('rectangle');
+            saveToCache();
+        });
         const addCircleBtn = document.getElementById('addCircleBtn');
-        addCircleBtn.addEventListener('click', () => addElement('circle'));
-        function syncCoordControls(sourceInput, targetSlider, valueSpan) { const value = parseInt(sourceInput.value || 0); if (targetSlider.value != value) { targetSlider.value = value; } valueSpan.textContent = value; updateElementFromEditor(); }
-        function syncCoordControlsFromSlider(sourceSlider, targetInput, valueSpan) { const value = parseInt(sourceSlider.value || 0); if (targetInput.value != value) { targetInput.value = value; } valueSpan.textContent = value; updateElementFromEditor(); }
+        addCircleBtn.addEventListener('click', () => {
+            addElement('circle');
+            saveToCache();
+        });
+        function syncCoordControls(sourceInput, targetSlider, valueSpan) { const value = parseInt(sourceInput.value || 0); if (targetSlider.value != value) { targetSlider.value = value; } valueSpan.textContent = value; updateElementFromEditor(); saveToCache(); }
+        function syncCoordControlsFromSlider(sourceSlider, targetInput, valueSpan) { const value = parseInt(sourceSlider.value || 0); if (targetInput.value != value) { targetInput.value = value; } valueSpan.textContent = value; updateElementFromEditor(); saveToCache(); }
         editXInput.addEventListener('input', () => syncCoordControls(editXInput, editXSlider, editXValueSpan)); editXSlider.addEventListener('input', () => syncCoordControlsFromSlider(editXSlider, editXInput, editXValueSpan)); editYInput.addEventListener('input', () => syncCoordControls(editYInput, editYSlider, editYValueSpan)); editYSlider.addEventListener('input', () => syncCoordControlsFromSlider(editYSlider, editYInput, editYValueSpan));
-        editColorPicker.addEventListener('input', () => { editColorIdSelect.value = ""; updateElementFromEditor(); }); editColorIdSelect.addEventListener('change', () => { updateElementFromEditor(); });
-        editRectRadiusSlider.addEventListener('input', () => { editRectRadiusValueSpan.textContent = editRectRadiusSlider.value; updateElementFromEditor(); });
-        editIconLigatureInput.addEventListener('input', () => { populateIconSuggestions(editIconLigatureInput.value); }); editIconLigatureInput.addEventListener('focus', () => { populateIconSuggestions(editIconLigatureInput.value); }); document.addEventListener('click', (event) => { if (iconSearchContainer && !iconSearchContainer.contains(event.target)) { iconSuggestionsDiv.style.display = 'none'; } });
+        editColorPicker.addEventListener('input', () => { 
+            editColorIdSelect.value = ""; 
+            updateElementFromEditor(); 
+            saveToCache();
+        }); 
+        
+        editColorIdSelect.addEventListener('change', () => { 
+            updateElementFromEditor(); 
+            saveToCache();
+        });
+        
+        editRectRadiusSlider.addEventListener('input', () => { 
+            editRectRadiusValueSpan.textContent = editRectRadiusSlider.value; 
+            updateElementFromEditor(); 
+            saveToCache();
+        });
+        
+        editIconLigatureInput.addEventListener('input', () => { 
+            populateIconSuggestions(editIconLigatureInput.value); 
+            updateElementFromEditor();
+            saveToCache();
+        });
+        
+        editIconLigatureInput.addEventListener('focus', () => { 
+            populateIconSuggestions(editIconLigatureInput.value); 
+        }); 
+        
+        document.addEventListener('click', (event) => { 
+            if (iconSearchContainer && !iconSearchContainer.contains(event.target)) { 
+                iconSuggestionsDiv.style.display = 'none'; 
+            } 
+        });
 
         // Reverted general editor listeners
         editorContent.addEventListener('input', (event) => {
             if (![editXInput, editXSlider, editYInput, editYSlider, editColorPicker, editIconLigatureInput, editRectRadiusSlider].includes(event.target)) {
                  updateElementFromEditor();
+                 saveToCache();
              }
              // Removed preview slider handler
         });
@@ -1215,6 +1375,7 @@
              // Handle selects (now including font ID) and checkboxes
              if (event.target.tagName === 'SELECT' || event.target.type === 'checkbox' ) {
                  updateElementFromEditor();
+                 saveToCache();
              }
         });
 
@@ -1246,6 +1407,19 @@
 
         // --- Initial Setup ---
         initializeConfig();
+        
+        // Setup Clear Cache Button explicitly
+        document.getElementById('clearCacheBtn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all saved elements and configuration?')) {
+                localStorage.removeItem('esphomeDisplayDesignerCache');
+                location.reload();
+            }
+        });
+        
+        const hasLoadedCache = loadFromCache();
+        if (hasLoadedCache) {
+            initializeConfig(); // Reinitialize after loading cache
+        }
         updateScreenSize();
         renderElementList();
 
@@ -1298,10 +1472,65 @@
                 
                 renderElementList();
                 generateLambdaCode();
+                saveToCache();
             }
 
             return false;
         }
+
+        // Add PDF Export functionality
+        document.getElementById('exportBtn').addEventListener('click', async () => {
+            // Generate codes first
+            generateLambdaCode();
+            generateFontYaml();
+            
+            // Get canvas image
+            const canvasDataUrl = previewCanvas.toDataURL('image/png');
+            
+            // Create a PDF-optimized layout
+            const pdfContent = document.createElement('div');
+            pdfContent.style.padding = '20px';
+            pdfContent.style.fontFamily = 'Roboto, sans-serif';
+            
+            pdfContent.innerHTML = `
+                <h2 style="color: #3f51b5; margin-bottom: 20px;">Display Preview</h2>
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <img src="${canvasDataUrl}" style="max-width: 100%; border: 2px solid #444; border-radius: 4px;" />
+                </div>
+                
+                <h2 style="color: #3f51b5; margin: 30px 0 20px;">Generated Lambda Code</h2>
+                <div style="font-family: monospace; background: #f5f5f5; padding: 15px; border-radius: 4px; white-space: pre-wrap; margin-bottom: 30px; font-size: 12px; line-height: 1.4;">${generatedCodeOutput.value.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</div>
+                
+                <h2 style="color: #3f51b5; margin: 30px 0 20px;">Generated Font Code</h2>
+                <div style="font-family: monospace; background: #f5f5f5; padding: 15px; border-radius: 4px; white-space: pre-wrap; font-size: 12px; line-height: 1.4;">${generatedFontCodeOutput.value.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</div>
+            `;
+            
+            // Configure PDF options for better text handling
+            const opt = {
+                margin: 15,
+                filename: 'esphome-display-config.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    logging: false
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait'
+                },
+                enableLinks: true,
+                pagebreak: { mode: 'avoid-all' }
+            };
+            
+            try {
+                await html2pdf().set(opt).from(pdfContent).save();
+            } catch (error) {
+                console.error('PDF generation failed:', error);
+                alert('Failed to generate PDF. Please try again.');
+            }
+        });
 
     </script>
 
