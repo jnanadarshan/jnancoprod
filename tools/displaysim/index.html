@@ -17,11 +17,13 @@
     <!-- https://material.io/resources/icons/?style=round -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Round"rel="stylesheet">
     
-    <!-- https://material.io/resources/icons/?style=sharp -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Sharp"rel="stylesheet">
-
+    <!-- https://fonts.googleapis.com/css2?family=Material+Icons+Sharp"rel="stylesheet">
+    
     <!-- https://material.io/resources/icons/?style=twotone -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Two+Tone"rel="stylesheet">
+
+    <!-- Add html2pdf library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         :root {
@@ -105,6 +107,29 @@
         .top-nav .nav-icons .material-symbols-outlined:hover {
             color: var(--md-text-primary-on-background);
             transform: scale(1.1);
+        }
+
+        .export-button {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            color: var(--md-primary-color) !important;
+            background: transparent;
+        }
+
+        .export-button:hover {
+            transform: translateY(-1px);
+            color: var(--md-primary-dark) !important;
+        }
+
+        .export-button .material-symbols-outlined {
+            color: inherit !important;
         }
 
         .panel {
@@ -406,6 +431,16 @@
             position: relative; 
             box-shadow: var(--md-shadow-1);
             border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #previewCanvas {
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
         }
 
         #generatedCodeOutput, 
@@ -609,7 +644,7 @@
         #copyCodeBtn.success, #copyFontCodeBtn.success {
             background-color: var(--md-success-color);
             color: white;
-            border-color: var(--md-success-color);
+            border-color: var (--md-success-color);
         }
 
         .code-output {
@@ -639,6 +674,26 @@
             outline: none;
             box-shadow: none;
         }
+
+        .color-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .color-control select {
+            flex: 1;
+        }
+
+        .color-control input[type="color"] {
+            width: 40px;
+            height: 40px;
+            padding: 2px;
+            border: 1px solid var(--md-border-color);
+            border-radius: var(--md-radius-sm);
+            background: white;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -648,9 +703,12 @@
             <span class="material-symbols-outlined">developer_board</span> ESPHome Display Designer
         </div>
         <div class="nav-icons">
-             <span class="material-symbols-outlined" title="Search (Placeholder)">search</span>
-             <span class="material-symbols-outlined" title="Notifications (Placeholder)">notifications</span>
-             <span class="material-symbols-outlined" title="Account (Placeholder)">account_circle</span>
+            <span class="material-symbols-outlined export-button" id="exportBtn" title="Export PDF">picture_as_pdf</span>
+            <span class="material-symbols-outlined" id="clearCacheBtn" title="Clear Saved Data">delete_sweep</span>
+            <span class="material-symbols-outlined" title="Account (Placeholder)">account_circle</span>
+            <span class="material-symbols-outlined" id="export-text-btn" title="Export Lambda and Font Codes (TXT)" style="cursor: pointer; margin-left: 10px; vertical-align: middle;">download</span>
+            <span class="material-symbols-outlined" id="import-text-btn" title="Import Lambda and Font Codes (TXT)" style="cursor: pointer; margin-left: 10px; vertical-align: middle;">upload</span>
+            <input type="file" id="import-file-input" accept=".txt" style="display: none;">
         </div>
     </header>
 
@@ -669,6 +727,8 @@
                     <button id="addIconBtn"><span class="material-symbols-outlined">mood</span>Icon</button> 
                     <button id="addBarBtn"><span class="material-symbols-outlined">horizontal_rule</span>Bar</button> 
                     <button id="addRectBtn"><span class="material-symbols-outlined">check_box_outline_blank</span>Rect</button> 
+                    <button id="addCircleBtn"><span class="material-symbols-outlined">radio_button_unchecked</span>Circle</button> <!-- New Circle Button -->
+                    
                 </div>
                 <ul id="elementList"></ul>
             </div>
@@ -681,22 +741,39 @@
                     <label>Position:</label>
                     <div class="coord-control"> <label for="editX">X</label> <input type="number" id="editX" value="0" step="1"> <input type="range" id="editXSlider" min="0" max="128" step="1" title="X Coordinate"> <span class="slider-value" id="editXValue">0</span><span class="material-symbols-outlined coord-indicator">swap_horiz</span> </div>
                     <div class="coord-control"> <label for="editY">Y</label> <input type="number" id="editY" value="0" step="1"> <input type="range" id="editYSlider" min="0" max="160" step="1" title="Y Coordinate"> <span class="slider-value" id="editYValue">0</span><span class="material-symbols-outlined coord-indicator">swap_vert</span> </div>
-                    <div id="colorSelectContainer"> <label for="editColorId">Color:</label> <div class="color-control"> <select id="editColorId"></select> <input type="color" id="editColorPicker" value="#FFFFFF" title="Choose Custom Color"> </div> </div>
+                    <div id="colorSelectContainer"> 
+                        <label for="editColorId">Color:</label> 
+                        <div class="color-control"> 
+                            <select id="editColorId"></select> 
+                            <input type="color" id="editColorPicker" value="#FFFFFF" title="Choose Custom Color"> 
+                        </div> 
+                    </div>
                     <div id="fontSelectContainer"> <label for="editFontId">Font ID:</label> <select id="editFontId"></select> </div>
                     <div id="textSpecific"> <label for="editContent">Format String:</label> <input type="text" id="editContent" placeholder='"Temp: %.1f C"'> <label for="editArgs">Argument(s):</label> <input type="text" id="editArgs" placeholder="id(sensor).state"> <label for="editAlign">Alignment:</label> <select id="editAlign"> <option value="LEFT">Left</option> <option value="CENTER">Center</option> <option value="RIGHT">Right</option> </select> </div>
                     <div id="iconSpecific"> <label for="editIconLigature">Icon Ligature (<a href="https://fonts.google.com/icons?selected=Material+Symbols+Outlined" target="_blank" rel="noopener">Find Names</a>):</label> <div id="iconSearchContainer"> <input type="text" id="editIconLigature" placeholder="e.g., home, settings..."> <div id="iconSuggestions"></div> </div> </div>
                     <div id="barSpecific"> <div class="flex-row"> <div class="flex-grow"> <label for="editWidth">Width:</label> <input type="number" id="editWidth" value="128"> </div> <div class="flex-grow"> <label for="editHeight">Height:</label> <input type="number" id="editHeight" value="1"> </div> </div> </div>
                     <div id="rectSpecific"> <div class="flex-row"> <div class="flex-grow"> <label for="editRectWidth">Width:</label> <input type="number" id="editRectWidth" value="50"> </div> <div class="flex-grow"> <label for="editRectHeight">Height:</label> <input type="number" id="editRectHeight" value="30"> </div> </div> <div> <label for="editRectThickness">Line Thickness (Preview Only):</label> <input type="number" id="editRectThickness" value="1" min="1"> </div> <div> <label for="editRectRadius">Corner Radius (Preview Only): <span id="editRectRadiusValue">0</span>px</label> <input type="range" id="editRectRadius" min="0" max="15" step="1" value="0" style="width: 100%; accent-color: var(--md-primary-color); height: 4px;"> </div> <div class="checkbox-control"> <input type="checkbox" id="editRectFill"> <label for="editRectFill">Fill Rectangle</label> </div> </div>
+                    <div id="circleSpecific">
+                        <label for="editCircleRadius">Radius:</label>
+                        <input type="number" id="editCircleRadius" value="10" min="1">
+                        <div class="checkbox-control">
+                            <input type="checkbox" id="editCircleFill">
+                            <label for="editCircleFill">Fill Circle</label>
+                        </div>
+                    </div>
                  </div>
              </div>
         </details>
-    </div> <div class="right-panel panel"> <div id="previewContainer">
-             <div class="section-header">
-                 <h2><span class="material-symbols-outlined">visibility</span>Preview</h2>
-             </div>
-             <div id="screenPreview"> <canvas id="previewCanvas"></canvas> </div>
-             <p style="font-size: 0.85em; color: var(--md-text-secondary-on-background); margin-top: 10px;">Note: Fonts & corners are approximations.</p>
-         </div>
+    </div> <div class="right-panel panel"> 
+        <details id="previewSection" open> 
+            <summary><span class="material-symbols-outlined">visibility</span>Preview</summary>
+            <div class="details-content">
+                <div id="screenPreview"> 
+                    <canvas id="previewCanvas"></canvas> 
+                </div>
+                <p style="font-size: 0.85em; color: var(--md-text-secondary-on-background); margin-top: 10px;">Note: Fonts & corners are approximations.</p>
+            </div>
+        </details>
         <details id="codeSection"> 
             <summary><span class="material-symbols-outlined">code</span> Generated Lambda Code</summary> 
             <div class="details-content">
@@ -818,6 +895,7 @@
         const iconSpecificDiv = document.getElementById('iconSpecific'); const editIconLigatureInput = document.getElementById('editIconLigature'); const iconSearchContainer = document.getElementById('iconSearchContainer'); const iconSuggestionsDiv = document.getElementById('iconSuggestions');
         const barSpecificDiv = document.getElementById('barSpecific'); const editWidthInput = document.getElementById('editWidth'); const editHeightInput = document.getElementById('editHeight');
         const rectSpecificDiv = document.getElementById('rectSpecific'); const editRectWidthInput = document.getElementById('editRectWidth'); const editRectHeightInput = document.getElementById('editRectHeight'); const editRectThicknessInput = document.getElementById('editRectThickness'); const editRectFillCheckbox = document.getElementById('editRectFill'); const editRectRadiusSlider = document.getElementById('editRectRadius'); const editRectRadiusValueSpan = document.getElementById('editRectRadiusValue');
+        const circleSpecificDiv = document.getElementById('circleSpecific'); const editCircleRadiusInput = document.getElementById('editCircleRadius'); const editCircleFillCheckbox = document.getElementById('editCircleFill');
         const screenPreviewDiv = document.getElementById('screenPreview'); const previewCanvas = document.getElementById('previewCanvas'); const previewCtx = previewCanvas.getContext('2d');
         const generateCodeBtn = document.getElementById('generateCodeBtn'); const copyCodeBtn = document.getElementById('copyCodeBtn'); const generatedCodeOutput = document.getElementById('generatedCodeOutput'); const codeSectionDetails = document.getElementById('codeSection');
         const generateFontCodeBtn = document.getElementById('generateFontCodeBtn'); const generatedFontCodeOutput = document.getElementById('generatedFontCodeOutput'); const fontCodeSectionDetails = document.getElementById('fontCodeSection');
@@ -828,6 +906,74 @@
         function getAvailableColors() { return configColorsInput.value.split(',').map(s => s.trim()).filter(s => s); }
         function populateSelect(selectElement, options, defaultText = "-- Select --") { selectElement.innerHTML = ''; const defaultOption = document.createElement('option'); defaultOption.value = ""; defaultOption.textContent = defaultText; selectElement.appendChild(defaultOption); options.forEach(optionValue => { const option = document.createElement('option'); option.value = optionValue; option.textContent = optionValue; selectElement.appendChild(option); }); }
         function mapFontPreview(fontId) { if (!fontId) return '10px sans-serif'; let sizeMatch = fontId.match(/_(\d+)$/); if (!sizeMatch) sizeMatch = fontId.match(/(\d+)\)$/); if (!sizeMatch) sizeMatch = fontId.match(/_(\d+)_/); let baseSize = 12; if (sizeMatch && sizeMatch[1]) { baseSize = parseInt(sizeMatch[1], 10); } const finalSize = Math.max(5, baseSize); const family = (fontId.includes('material') || fontId.includes('symbol') || fontId.includes('icon')) ? "'Material Symbols Outlined', 'Roboto', sans-serif" : "'Roboto', sans-serif"; const weight = (fontId.includes('bold') || fontId.includes('black')) ? 'bold' : 'normal'; return `${weight} ${finalSize}px ${family}`; }
+
+        // --- Cache Functions ---
+        function saveToCache() {
+            const cacheData = {
+                resolution: configResolutionSelect.value,
+                customFonts: configCustomFontsTextarea.value,
+                colors: configColorsInput.value,
+                elements: elements,
+                nextId: nextId
+            };
+            localStorage.setItem('esphomeDisplayDesignerCache', JSON.stringify(cacheData));
+        }
+
+        // Make sure cache loads completely by enhancing the load function
+        function loadFromCache() {
+            const cachedData = localStorage.getItem('esphomeDisplayDesignerCache');
+            if (!cachedData) return false;
+            
+            try {
+                const data = JSON.parse(cachedData);
+                
+                // Restore configuration
+                if (data.resolution) configResolutionSelect.value = data.resolution;
+                if (data.customFonts) configCustomFontsTextarea.value = data.customFonts;
+                if (data.colors) configColorsInput.value = data.colors;
+                
+                // Restore elements
+                if (Array.isArray(data.elements) && data.elements.length > 0) {
+                    elements = data.elements;
+                    
+                    // Fix for icons: Ensure each icon has proper font settings
+                    elements.forEach(el => {
+                        if (el.type === 'icon' && (!el.fontId || el.fontId === '')) {
+                            // Set a default material icon font from available fonts
+                            const fonts = getAvailableFonts();
+                            const materialFont = fonts.find(f => 
+                                f.toLowerCase().includes('material') || 
+                                f.toLowerCase().includes('symbol') || 
+                                f.toLowerCase().includes('icon')
+                            );
+                            
+                            if (materialFont) {
+                                el.fontId = materialFont;
+                            } else {
+                                // If no material font found, use the first available font
+                                el.fontId = fonts.length > 0 ? fonts[0] : 'id(material_symbols_24)';
+                            }
+                        }
+                    });
+                    
+                    nextId = data.nextId || elements.length;
+                    return true;
+                }
+            } catch (e) {
+                console.error('Error loading cache:', e);
+                return false;
+            }
+            
+            return false;
+        }
+
+        function clearCache() {
+            if (confirm('Are you sure you want to clear all saved elements and configuration?')) {
+                localStorage.removeItem('esphomeDisplayDesignerCache');
+                location.reload();
+            }
+        }
+
         function mapColorPreview(colorId) { if (!colorId) return '#FFFFFF'; const lowerColor = colorId.toLowerCase(); const colorMatch = colorId.match(/Color\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i); if (colorMatch) { return `rgb(${colorMatch[1]}, ${colorMatch[2]}, ${colorMatch[3]})`; } if (lowerColor === 'white') return '#FFFFFF'; if (lowerColor === 'black') return '#000000'; if (lowerColor === 'red' || lowerColor.includes('red')) return '#FF0000'; if (lowerColor === 'green' || lowerColor.includes('green')) return '#00FF00'; if (lowerColor === 'blue' || lowerColor.includes('blue')) return '#0000FF'; if (lowerColor.includes('primary')) return getComputedStyle(document.documentElement).getPropertyValue('--md-primary-color').trim() || '#3f51b5'; if (lowerColor.includes('accent')) return getComputedStyle(document.documentElement).getPropertyValue('--md-accent-color').trim() || '#ff4081'; return '#CCCCCC'; }
         function populateIconSuggestions(searchTerm) {
             iconSuggestionsDiv.innerHTML = '';
@@ -871,12 +1017,57 @@
         function rgbColorStringToHex(colorString) { const match = colorString.match(/Color\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i); if (match) { const r = parseInt(match[1]); const g = parseInt(match[2]); const b = parseInt(match[3]); return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`; } return null; }
 
         // --- Screen Size Logic ---
-        function updateScreenSize() { const resolution = configResolutionSelect.value; const [baseWidth, baseHeight] = resolution.split('x').map(Number); const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--canvas-scale-factor') || 1.5); previewCanvas.width = baseWidth; previewCanvas.height = baseHeight; screenPreviewDiv.style.width = `${baseWidth * scale}px`; screenPreviewDiv.style.height = `${baseHeight * scale}px`; document.documentElement.style.setProperty('--canvas-base-width', `${baseWidth}px`); document.documentElement.style.setProperty('--canvas-base-height', `${baseHeight}px`); editXSlider.max = baseWidth; editYSlider.max = baseHeight; editRectRadiusSlider.max = Math.floor(Math.min(baseWidth, baseHeight) / 2); drawPreview(); }
+        function updateScreenSize() { 
+            const resolution = configResolutionSelect.value; 
+            const [baseWidth, baseHeight] = resolution.split('x').map(Number); 
+            const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--canvas-scale-factor') || 1.5); 
+            
+            // Set the canvas dimensions to match the selected resolution
+            previewCanvas.width = baseWidth; 
+            previewCanvas.height = baseHeight; 
+            
+            // Set the canvas display size
+            previewCanvas.style.width = '100%';
+            previewCanvas.style.height = '100%';
+            
+            // Size the container div according to the resolution and scale
+            screenPreviewDiv.style.width = `${baseWidth * scale}px`; 
+            screenPreviewDiv.style.height = `${baseHeight * scale}px`;
+            
+            // Make sure the screenPreview div uses CSS that maintains the aspect ratio
+            screenPreviewDiv.style.display = 'flex';
+            screenPreviewDiv.style.alignItems = 'center';
+            screenPreviewDiv.style.justifyContent = 'center';
+            
+            document.documentElement.style.setProperty('--canvas-base-width', `${baseWidth}px`); 
+            document.documentElement.style.setProperty('--canvas-base-height', `${baseHeight}px`); 
+            
+            // Update slider maximums
+            editXSlider.max = baseWidth; 
+            editYSlider.max = baseHeight; 
+            editRectRadiusSlider.max = Math.floor(Math.min(baseWidth, baseHeight) / 2); 
+            
+            // Redraw with the new dimensions
+            drawPreview(); 
+        }
 
         // --- Core Logic ---
         function drawPreview() { /* Unchanged */
              previewCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--md-canvas-background').trim(); previewCtx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
-             elements.forEach(el => { const x = parseInt(el.x || 0); const y = parseInt(el.y || 0); if (el.type === 'text' || el.type === 'icon') { previewCtx.font = mapFontPreview(el.fontId); previewCtx.fillStyle = mapColorPreview(el.colorId); const fontSizeMatch = previewCtx.font.match(/(\d+)px/); const fontSize = fontSizeMatch ? parseInt(fontSizeMatch[1]) : 12; const drawY = y + Math.round(fontSize * 0.8); if (el.type === 'text') { const align = el.align || 'LEFT'; previewCtx.textAlign = align.toLowerCase(); let displayText = el.content || ''; if (el.args) displayText = displayText.replace(/%[.\d]*[fdis]/, `[${el.args.split('.')[0].replace('id(','').replace(')','')}]`); previewCtx.fillText(displayText, x, drawY); } else { previewCtx.textAlign = 'start'; previewCtx.fillText(el.iconLigature || '', x, drawY); } previewCtx.textAlign = 'start'; } else if (el.type === 'bar') { previewCtx.fillStyle = mapColorPreview(el.colorId); const w = parseInt(el.width || 10); const h = parseInt(el.height || 1); previewCtx.fillRect(x, y, w, h); } else if (el.type === 'rectangle') { const w = parseInt(el.width || 10); const h = parseInt(el.height || 10); const radius = parseInt(el.cornerRadius || 0); previewCtx.beginPath(); if (radius > 0 && previewCtx.roundRect) { previewCtx.roundRect(x, y, w, h, radius); } else { previewCtx.rect(x, y, w, h); } previewCtx.closePath(); if (el.fill) { previewCtx.fillStyle = mapColorPreview(el.colorId); previewCtx.fill(); } else { previewCtx.strokeStyle = mapColorPreview(el.colorId); previewCtx.lineWidth = parseInt(el.thickness || 1); previewCtx.stroke(); } } }); }
+             elements.forEach(el => { const x = parseInt(el.x || 0); const y = parseInt(el.y || 0); if (el.type === 'text' || el.type === 'icon') { previewCtx.font = mapFontPreview(el.fontId); previewCtx.fillStyle = mapColorPreview(el.colorId); const fontSizeMatch = previewCtx.font.match(/(\d+)px/); const fontSize = fontSizeMatch ? parseInt(fontSizeMatch[1]) : 12; const drawY = y + Math.round(fontSize * 0.8); if (el.type === 'text') { const align = el.align || 'LEFT'; previewCtx.textAlign = align.toLowerCase(); let displayText = el.content || ''; if (el.args) displayText = displayText.replace(/%[.\d]*[fdis]/, `[${el.args.split('.')[0].replace('id(','').replace(')','')}]`); previewCtx.fillText(displayText, x, drawY); } else { previewCtx.textAlign = 'start'; previewCtx.fillText(el.iconLigature || '', x, drawY); } previewCtx.textAlign = 'start'; } else if (el.type === 'bar') { previewCtx.fillStyle = mapColorPreview(el.colorId); const w = parseInt(el.width || 10); const h = parseInt(el.height || 1); previewCtx.fillRect(x, y, w, h); } else if (el.type === 'rectangle') { const w = parseInt(el.width || 10); const h = parseInt(el.height || 10); const radius = parseInt(el.cornerRadius || 0); previewCtx.beginPath(); if (radius > 0 && previewCtx.roundRect) { previewCtx.roundRect(x, y, w, h, radius); } else { previewCtx.rect(x, y, w, h); } previewCtx.closePath(); if (el.fill) { previewCtx.fillStyle = mapColorPreview(el.colorId); previewCtx.fill(); } else { previewCtx.strokeStyle = mapColorPreview(el.colorId); previewCtx.lineWidth = parseInt(el.thickness || 1); previewCtx.stroke(); } } else if (el.type === 'circle') {
+    const radius = parseInt(el.radius || 10);
+    previewCtx.beginPath();
+    previewCtx.arc(x, y, radius, 0, 2 * Math.PI);
+    previewCtx.closePath();
+    if (el.fill) {
+        previewCtx.fillStyle = mapColorPreview(el.colorId);
+        previewCtx.fill();
+    } else {
+        previewCtx.strokeStyle = mapColorPreview(el.colorId);
+        previewCtx.stroke();
+    }
+}
+}); }
         function renderElementList() {
             elementList.innerHTML = ''; 
             elements.forEach((el, index) => { 
@@ -960,13 +1151,20 @@
              editYInput.value = el.y ?? 0; editYSlider.value = el.y ?? 0; editYValueSpan.textContent = el.y ?? 0;
              const colorIsRgbString = el.colorId?.match(/^Color\(/i); if (colorIsRgbString) { editColorPicker.value = rgbColorStringToHex(el.colorId) || '#000000'; editColorIdSelect.value = ""; } else { editColorIdSelect.value = el.colorId || ""; editColorPicker.value = '#000000'; }
              const isText = el.type === 'text'; const isIcon = el.type === 'icon'; const isBar = el.type === 'bar'; const isRect = el.type === 'rectangle';
+             const isCircle = el.type === 'circle';
              textSpecificDiv.style.display = isText ? 'block' : 'none'; iconSpecificDiv.style.display = isIcon ? 'block' : 'none'; barSpecificDiv.style.display = isBar ? 'block' : 'none'; rectSpecificDiv.style.display = isRect ? 'block' : 'none';
+             circleSpecificDiv.style.display = isCircle ? 'block' : 'none';
+
              fontSelectContainer.style.display = (isText || isIcon) ? 'block' : 'none'; colorSelectContainer.style.display = 'block';
              if (isText || isIcon) { editFontIdSelect.value = el.fontId || ''; }
              if (isText) { editContentInput.value = el.content || ''; editArgsInput.value = el.args || ''; editAlignSelect.value = el.align || 'LEFT'; }
              else if (isIcon) { editIconLigatureInput.value = el.iconLigature || ''; iconSuggestionsDiv.style.display='none'; }
              else if (isBar) { const defaultWidth = previewCanvas.width || 128; editWidthInput.value = el.width ?? defaultWidth; editHeightInput.value = el.height ?? 1; }
              else if (isRect) { const defaultWidth = 50; const defaultHeight = 30; editRectWidthInput.value = el.width ?? defaultWidth; editRectHeightInput.value = el.height ?? defaultHeight; editRectThicknessInput.value = el.thickness ?? 1; editRectFillCheckbox.checked = el.fill ?? false; editRectRadiusSlider.value = el.cornerRadius ?? 0; editRectRadiusValueSpan.textContent = el.cornerRadius ?? 0; }
+             if (isCircle) {
+                 editCircleRadiusInput.value = el.radius ?? 10;
+                 editCircleFillCheckbox.checked = el.fill ?? false;
+             }
         }
         function updateElementFromEditor() { /* Unchanged */
              if (selectedElementId === null) return; const elIndex = elements.findIndex(e => e.id === selectedElementId); if (elIndex === -1) return; const el = elements[elIndex];
@@ -976,12 +1174,48 @@
              if (el.type === 'text' || el.type === 'icon') { el.fontId = editFontIdSelect.value; if (el.type === 'text') { el.content = editContentInput.value; el.args = editArgsInput.value; el.align = editAlignSelect.value; } else { el.iconLigature = editIconLigatureInput.value.trim().toLowerCase(); } }
              else if (el.type === 'bar') { el.width = parseInt(editWidthInput.value || 10); el.height = parseInt(editHeightInput.value || 1); }
              else if (el.type === 'rectangle') { el.width = parseInt(editRectWidthInput.value || 10); el.height = parseInt(editRectHeightInput.value || 10); el.thickness = parseInt(editRectThicknessInput.value || 1); el.fill = editRectFillCheckbox.checked; el.cornerRadius = parseInt(editRectRadiusSlider.value || 0); }
+             if (el.type === 'circle') {
+                 el.radius = parseInt(editCircleRadiusInput.value || 10);
+                 el.fill = editCircleFillCheckbox.checked;
+             }
              renderElementList(); drawPreview();
         }
-        function addElement(type) { /* Unchanged */
-            const defaultFontId = getAvailableFonts()[0] || 'id(roboto_12)'; const defaultColor = getAvailableColors().find(c => c.toLowerCase() === 'white') || getAvailableColors()[0] || 'white'; const defaultY = (elements.length * 20) + 10; const defaultX = 10; const newElement = { id: nextId++, type: type, x: defaultX, y: defaultY, colorId: defaultColor, }; if (type === 'text') { newElement.fontId = defaultFontId; newElement.content = "Text"; newElement.args = ""; newElement.align = "LEFT"; } else if (type === 'icon') { newElement.fontId = getAvailableFonts().find(f => f.includes('symbol') || f.includes('icon')) || 'id(material_symbols_24)'; newElement.iconLigature = "home"; } else if (type === 'bar') { newElement.width = previewCanvas.width ? Math.round(previewCanvas.width * 0.8) : 100; newElement.height = 1; } else if (type === 'rectangle') { newElement.width = 50; newElement.height = 30; newElement.thickness = 1; newElement.fill = false; newElement.cornerRadius = 0; } elements.push(newElement); selectElement(newElement.id); renderElementList(); }
-         function removeElement(id) { /* Unchanged */ elements = elements.filter(el => el.id !== id); if (selectedElementId === id) { selectedElementId = null; updateEditorForm(); } renderElementList(); }
-         function selectElement(id) { /* Unchanged */ selectedElementId = id; renderElementList(); updateEditorForm(); }
+        function addElement(type) {
+    const defaultColor = getAvailableColors().find(c => c.toLowerCase() === 'white') || 'white';
+    
+    // Calculate Y position based on existing elements
+    let maxY = 10;
+    if (elements.length > 0) {
+        elements.forEach(el => {
+            const elementHeight = el.type === 'text' || el.type === 'icon' ? 24 : // approximate text/icon height
+                                el.type === 'bar' ? (el.height || 1) :
+                                el.type === 'rectangle' ? (el.height || 10) :
+                                el.type === 'circle' ? (el.radius * 2 || 20) : 24;
+            const elementBottom = (el.y || 0) + elementHeight;
+            maxY = Math.max(maxY, elementBottom + 10); // Add 10px padding
+        });
+    }
+    
+    const newElement = { id: nextId++, type, x: 10, y: maxY, colorId: defaultColor };
+
+    if (type === 'icon') {
+        newElement.iconLigature = 'sunny';
+        newElement.fontId = 'id(material_symbols_24)';
+    } else if (type === 'circle') {
+        newElement.radius = 10;
+        newElement.fill = false;
+    }
+
+    elements.push(newElement);
+    selectElement(newElement.id);
+    renderElementList();
+}
+         function removeElement(id) { /* Unchanged */ elements = elements.filter(el => el.id !== id); if (selectedElementId === id) { selectedElementId = null; updateEditorForm(); } renderElementList(); saveToCache(); }
+         function selectElement(id) { 
+            selectedElementId = id; 
+            renderElementList(); 
+            updateEditorForm(); 
+        }
         function generateLambdaCode() {
             let code = "lambda: |-\n";
             // Reverse the elements array to render from bottom to top (last element first)
@@ -1032,7 +1266,14 @@
                     if (!el.fill && el.thickness && el.thickness > 1) code += ` // Note: Thickness ignored`;
                     if (el.cornerRadius && el.cornerRadius > 0) code += ` // Note: Corner radius ignored`;
                     code += "\n";
-                }
+                } else if (el.type === 'circle') {
+    const radius = el.radius ?? 10;
+    if (el.fill) {
+        code += `  it.filled_circle(${x}, ${y}, ${radius}, ${color});\n`;
+    } else {
+        code += `  it.circle(${x}, ${y}, ${radius}, ${color});\n`;
+    }
+}
             });
             generatedCodeOutput.value = code;
             codeSectionDetails.open = true;
@@ -1044,28 +1285,92 @@
             editIconLigatureInput.value = name;
             iconSuggestionsDiv.style.display = 'none';
             updateElementFromEditor();
+            saveToCache();
         }
 
         // --- Initialization and Event Listeners ---
-        function initializeConfig() { // Reverted
-             const fonts = getAvailableFonts(); populateSelect(editFontIdSelect, fonts, "-- Font ID --");
-             const colors = getAvailableColors(); populateSelect(editColorIdSelect, colors, "-- Color ID --"); }
-        configResolutionSelect.addEventListener('change', updateScreenSize);
-        configCustomFontsTextarea.addEventListener('input', initializeConfig);
-        configColorsInput.addEventListener('input', initializeConfig);
+        function initializeConfig() { 
+             const fonts = getAvailableFonts(); 
+             populateSelect(editFontIdSelect, fonts, "-- Font ID --");
+             const colors = getAvailableColors(); 
+             populateSelect(editColorIdSelect, colors, "-- Color ID --"); 
+        }
+
+        configResolutionSelect.addEventListener('change', () => {
+            updateScreenSize();
+            saveToCache();
+        });
+        configCustomFontsTextarea.addEventListener('input', () => {
+            initializeConfig();
+            saveToCache();
+        });
+        configColorsInput.addEventListener('input', () => {
+            initializeConfig();
+            saveToCache();
+        });
         // REMOVED common font selector listener
-        addTextBtn.addEventListener('click', () => addElement('text')); addIconBtn.addEventListener('click', () => addElement('icon')); addBarBtn.addEventListener('click', () => addElement('bar')); addRectBtn.addEventListener('click', () => addElement('rectangle'));
-        function syncCoordControls(sourceInput, targetSlider, valueSpan) { const value = parseInt(sourceInput.value || 0); if (targetSlider.value != value) { targetSlider.value = value; } valueSpan.textContent = value; updateElementFromEditor(); }
-        function syncCoordControlsFromSlider(sourceSlider, targetInput, valueSpan) { const value = parseInt(sourceSlider.value || 0); if (targetInput.value != value) { targetInput.value = value; } valueSpan.textContent = value; updateElementFromEditor(); }
+        addTextBtn.addEventListener('click', () => {
+            addElement('text');
+            saveToCache();
+        });
+        addIconBtn.addEventListener('click', () => {
+            addElement('icon');
+            saveToCache();
+        });
+        addBarBtn.addEventListener('click', () => {
+            addElement('bar');
+            saveToCache();
+        });
+        addRectBtn.addEventListener('click', () => {
+            addElement('rectangle');
+            saveToCache();
+        });
+        const addCircleBtn = document.getElementById('addCircleBtn');
+        addCircleBtn.addEventListener('click', () => {
+            addElement('circle');
+            saveToCache();
+        });
+        function syncCoordControls(sourceInput, targetSlider, valueSpan) { const value = parseInt(sourceInput.value || 0); if (targetSlider.value != value) { targetSlider.value = value; } valueSpan.textContent = value; updateElementFromEditor(); saveToCache(); }
+        function syncCoordControlsFromSlider(sourceSlider, targetInput, valueSpan) { const value = parseInt(sourceSlider.value || 0); if (targetInput.value != value) { targetInput.value = value; } valueSpan.textContent = value; updateElementFromEditor(); saveToCache(); }
         editXInput.addEventListener('input', () => syncCoordControls(editXInput, editXSlider, editXValueSpan)); editXSlider.addEventListener('input', () => syncCoordControlsFromSlider(editXSlider, editXInput, editXValueSpan)); editYInput.addEventListener('input', () => syncCoordControls(editYInput, editYSlider, editYValueSpan)); editYSlider.addEventListener('input', () => syncCoordControlsFromSlider(editYSlider, editYInput, editYValueSpan));
-        editColorPicker.addEventListener('input', () => { editColorIdSelect.value = ""; updateElementFromEditor(); }); editColorIdSelect.addEventListener('change', () => { updateElementFromEditor(); });
-        editRectRadiusSlider.addEventListener('input', () => { editRectRadiusValueSpan.textContent = editRectRadiusSlider.value; updateElementFromEditor(); });
-        editIconLigatureInput.addEventListener('input', () => { populateIconSuggestions(editIconLigatureInput.value); }); editIconLigatureInput.addEventListener('focus', () => { populateIconSuggestions(editIconLigatureInput.value); }); document.addEventListener('click', (event) => { if (iconSearchContainer && !iconSearchContainer.contains(event.target)) { iconSuggestionsDiv.style.display = 'none'; } });
+        editColorPicker.addEventListener('input', () => { 
+            editColorIdSelect.value = ""; 
+            updateElementFromEditor(); 
+            saveToCache();
+        }); 
+        
+        editColorIdSelect.addEventListener('change', () => { 
+            updateElementFromEditor(); 
+            saveToCache();
+        });
+        
+        editRectRadiusSlider.addEventListener('input', () => { 
+            editRectRadiusValueSpan.textContent = editRectRadiusSlider.value; 
+            updateElementFromEditor(); 
+            saveToCache();
+        });
+        
+        editIconLigatureInput.addEventListener('input', () => { 
+            populateIconSuggestions(editIconLigatureInput.value); 
+            updateElementFromEditor();
+            saveToCache();
+        });
+        
+        editIconLigatureInput.addEventListener('focus', () => { 
+            populateIconSuggestions(editIconLigatureInput.value); 
+        }); 
+        
+        document.addEventListener('click', (event) => { 
+            if (iconSearchContainer && !iconSearchContainer.contains(event.target)) { 
+                iconSuggestionsDiv.style.display = 'none'; 
+            } 
+        });
 
         // Reverted general editor listeners
         editorContent.addEventListener('input', (event) => {
             if (![editXInput, editXSlider, editYInput, editYSlider, editColorPicker, editIconLigatureInput, editRectRadiusSlider].includes(event.target)) {
                  updateElementFromEditor();
+                 saveToCache();
              }
              // Removed preview slider handler
         });
@@ -1073,9 +1378,12 @@
              // Handle selects (now including font ID) and checkboxes
              if (event.target.tagName === 'SELECT' || event.target.type === 'checkbox' ) {
                  updateElementFromEditor();
+                 saveToCache();
              }
         });
 
+        editCircleRadiusInput.addEventListener('input', updateElementFromEditor);
+        editCircleFillCheckbox.addEventListener('change', updateElementFromEditor);
 
         generateCodeBtn.addEventListener('click', generateLambdaCode);
         copyCodeBtn.addEventListener('click', () => { if (!navigator.clipboard) { alert("Clipboard API not available."); return; } navigator.clipboard.writeText(generatedCodeOutput.value).then(() => { const originalText = copyCodeBtn.innerHTML; copyCodeBtn.innerHTML = `<span class="material-symbols-outlined">done</span> Copied!`; copyCodeBtn.classList.add('success'); setTimeout(() => { copyCodeBtn.innerHTML = originalText; copyCodeBtn.classList.remove('success'); }, 1500); }).catch(err => { console.error('Failed to copy: ', err); alert("Failed to copy."); }); });
@@ -1102,6 +1410,19 @@
 
         // --- Initial Setup ---
         initializeConfig();
+        
+        // Setup Clear Cache Button explicitly
+        document.getElementById('clearCacheBtn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all saved elements and configuration?')) {
+                localStorage.removeItem('esphomeDisplayDesignerCache');
+                location.reload();
+            }
+        });
+        
+        const hasLoadedCache = loadFromCache();
+        if (hasLoadedCache) {
+            initializeConfig(); // Reinitialize after loading cache
+        }
         updateScreenSize();
         renderElementList();
 
@@ -1154,10 +1475,495 @@
                 
                 renderElementList();
                 generateLambdaCode();
+                saveToCache();
             }
 
             return false;
         }
+
+        // Add PDF Export functionality
+        document.getElementById('exportBtn').addEventListener('click', async () => {
+            // Generate codes first
+            generateLambdaCode();
+            generateFontYaml();
+            
+            // Get canvas image
+            const canvasDataUrl = previewCanvas.toDataURL('image/png');
+            
+            // Create a PDF-optimized layout
+            const pdfContent = document.createElement('div');
+            pdfContent.style.padding = '20px';
+            pdfContent.style.fontFamily = 'Roboto, sans-serif';
+            
+            pdfContent.innerHTML = `
+                <h2 style="color: #3f51b5; margin-bottom: 20px;">Display Preview</h2>
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <img src="${canvasDataUrl}" style="max-width: 100%; border: 2px solid #444; border-radius: 4px;" />
+                </div>
+                
+                <h2 style="color: #3f51b5; margin: 30px 0 20px;">Generated Lambda Code</h2>
+                <div style="font-family: monospace; background: #f5f5f5; padding: 15px; border-radius: 4px; white-space: pre-wrap; margin-bottom: 30px; font-size: 12px; line-height: 1.4;">${generatedCodeOutput.value.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</div>
+                
+                <h2 style="color: #3f51b5; margin: 30px 0 20px;">Generated Font Code</h2>
+                <div style="font-family: monospace; background: #f5f5f5; padding: 15px; border-radius: 4px; white-space: pre-wrap; font-size: 12px; line-height: 1.4;">${generatedFontCodeOutput.value.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</div>
+            `;
+            
+            // Configure PDF options for better text handling
+            const opt = {
+                margin: 15,
+                filename: 'esphome-display-config.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    logging: false
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait'
+                },
+                enableLinks: true,
+                pagebreak: { mode: 'avoid-all' }
+            };
+            
+            try {
+                await html2pdf().set(opt).from(pdfContent).save();
+            } catch (error) {
+                console.error('PDF generation failed:', error);
+                alert('Failed to generate PDF. Please try again.');
+            }
+        });
+
+        // --- Add this JavaScript code ---
+
+        // Function to trigger text file download
+        function downloadTextFile(filename, text) {
+        const element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        element.setAttribute('download', filename);
+
+        element.style.display = 'none';
+        document.body.appendChild(element);
+
+        element.click();
+
+        document.body.removeChild(element);
+        }
+
+        // Get the button element
+        const exportTextButton = document.getElementById('export-text-btn');
+
+        // Add click event listener to the button
+        exportTextButton.addEventListener('click', () => {
+        // Assume 'generatedCodeOutput' and 'generatedFontCodeOutput' are the IDs
+        // of the textareas holding the generated code.
+        // If they have different IDs, update the querySelector accordingly.
+        // If they are JS variables holding the string directly, use those variables instead.
+        const lambdaCodeElement = document.getElementById('generatedCodeOutput'); // Or appropriate selector/variable
+        const fontCodeElement = document.getElementById('generatedFontCodeOutput'); // Or appropriate selector/variable
+
+        const lambdaCode = lambdaCodeElement ? lambdaCodeElement.value : 'Lambda code area not found.';
+        const fontCode = fontCodeElement ? fontCodeElement.value : 'Font code area not found.';
+
+        // Combine the codes into one string with headers
+        const combinedCode = `// --- Generated Lambda Code --- \n\n${lambdaCode}\n\n\n// --- Generated Font Code --- \n\n${fontCode}`;
+
+        // Trigger the download
+        downloadTextFile('esphome-display-codes.txt', combinedCode);
+        });
+
+        // --- Add this JavaScript code for IMPORT functionality ---
+
+        const importTextButton = document.getElementById('import-text-btn');
+        const importFileInput = document.getElementById('import-file-input');
+
+        // 1. Trigger hidden file input when icon is clicked
+        importTextButton.addEventListener('click', () => {
+        importFileInput.click(); // Open the file selection dialog
+        });
+
+        // 2. Handle file selection
+        importFileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) {
+            return; // No file selected
+        }
+
+        if (!file.name.endsWith('.txt')) {
+            alert('Please select a valid .txt file exported from this tool.');
+            event.target.value = null; // Reset file input
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            const fileContent = e.target.result;
+            try {
+            const importedData = parseImportedText(fileContent);
+            if (importedData) {
+                applyImportedData(importedData);
+                alert('Import successful!');
+            } else {
+                alert('Could not parse the file content. Ensure it is a valid export.');
+            }
+            } catch (error) {
+            console.error('Error processing imported file:', error);
+            alert(`An error occurred during import: ${error.message}`);
+            } finally {
+            // Reset file input to allow selecting the same file again
+            event.target.value = null;
+            }
+        };
+
+        reader.onerror = (e) => {
+            console.error('Error reading file:', e);
+            alert('Error reading the selected file.');
+            event.target.value = null; // Reset file input
+        };
+
+        reader.readAsText(file); // Read the file as text
+        });
+
+        // 3. Parsing Logic (NEEDS CAREFUL IMPLEMENTATION)
+        function parseImportedText(text) {
+        const lambdaMarker = '// --- Generated Lambda Code ---';
+        const fontMarker = '// --- Generated Font Code ---';
+
+        const lambdaIndex = text.indexOf(lambdaMarker);
+        const fontIndex = text.indexOf(fontMarker);
+
+        if (lambdaIndex === -1 || fontIndex === -1) {
+            console.error('Markers not found in file');
+            return null; // Markers not found
+        }
+
+        const lambdaCodeBlock = text.substring(lambdaIndex + lambdaMarker.length, fontIndex).trim();
+        const fontCodeBlock = text.substring(fontIndex + fontMarker.length).trim();
+
+        const fonts = parseFontCode(fontCodeBlock);
+        const elements = parseLambdaCode(lambdaCodeBlock);
+
+        if (!fonts || !elements) {
+            return null; // Parsing failed
+        }
+
+        return { fonts, elements };
+        }
+
+        // 3a. Parse Font Code (Example Skeleton - NEEDS REFINEMENT)
+        function parseFontCode(fontCode) {
+        const parsedFonts = [];
+        // Example: Extract id and size. Needs robust YAML-like parsing or regex.
+        // This simple regex might work for the provided example format:
+        const fontRegex = /id:\s*id\((.*?)\)\s*size:\s*(\d+)/g;
+        let match;
+        while ((match = fontRegex.exec(fontCode)) !== null) {
+            // You might need more properties depending on how your simulator stores fonts
+            parsedFonts.push({
+                id: match[1], // e.g., "roboto_12"
+                size: parseInt(match[2], 10), // e.g., 12
+                // Potentially add 'type: ICON' if found
+            });
+        }
+        // Add basic validation if needed
+        console.log("Parsed Fonts:", parsedFonts);
+        return parsedFonts;
+        }
+
+        // 3b. Parse Lambda Code (Example Skeleton - VERY COMPLEX - NEEDS MAJOR REFINEMENT)
+        function parseLambdaCode(lambdaCode) {
+        const parsedElements = [];
+        const lines = lambdaCode.split('\n');
+
+        // Regex examples (need to be robust and cover all element types and variations)
+        const printfRegex = /it\.printf\(\s*(\S+)\s*,\s*(\S+)\s*,\s*id\((.*?)\)\s*,\s*(\S+)\s*,\s*"(.*?)"(?:.*?\/\/\s*Ligature:\s*(.*))?\s*\);?/;
+        const rectRegex = /it\.rectangle\(\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*\);?/;
+        const filledRectRegex = /it\.filled_rectangle\(\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*\);?/;
+        // ... add regex for circle, filled_circle, line, etc.
+
+        lines.forEach(line => {
+            line = line.trim();
+            if (!line.startsWith('it.')) return; // Skip empty lines or comments
+
+            let match;
+
+            // Try matching printf (Text/Icon)
+            match = line.match(printfRegex);
+            if (match) {
+            const isIcon = match[3].includes('material_symbols'); // Simple check for icon font
+            parsedElements.push({
+                type: isIcon ? 'icon' : 'text', // Distinguish between text and icon
+                x: parseInt(match[1]),
+                y: parseInt(match[2]),
+                fontId: match[3],
+                color: match[4], // Might need mapping if color is an id()
+                text: isIcon ? (match[6] || match[5]) : match[5], // Use ligature if available, else raw char for icon
+                // Add other text properties if applicable (e.g., alignment - needs parsing)
+            });
+            return; // Move to next line
+            }
+
+            // Try matching rectangle
+            match = line.match(rectRegex);
+            if (match) {
+            parsedElements.push({
+                type: 'rect',
+                x: parseInt(match[1]),
+                y: parseInt(match[2]),
+                width: parseInt(match[3]),
+                height: parseInt(match[4]),
+                color: match[5], // Might need mapping
+                // Add other rect properties (fill: false, thickness)
+                fill: false, // Assuming it.rectangle is outline only
+                thickness: 1, // Default thickness
+            });
+            return;
+            }
+
+            // Try matching filled_rectangle
+            match = line.match(filledRectRegex);
+            if (match) {
+            parsedElements.push({
+                type: 'rect', // Treat filled_rectangle as a rect type with fill=true
+                x: parseInt(match[1]),
+                y: parseInt(match[2]),
+                width: parseInt(match[3]),
+                height: parseInt(match[4]),
+                color: match[5], // Might need mapping
+                fill: true, // Set fill to true
+                thickness: 0, // Filled usually implies no outline thickness shown separately
+            });
+            return;
+            }
+
+            // ... Add similar blocks for it.circle, it.filled_circle, it.line etc.
+
+
+            console.warn("Could not parse lambda line:", line);
+        });
+
+        console.log("Parsed Elements:", parsedElements);
+        return parsedElements;
+        }
+
+
+        // 4. Apply Parsed Data to Simulator (NEEDS IMPLEMENTATION based on your specific code)
+        function applyImportedData(data) {
+    console.log("Applying imported data:", data);
+
+    // Clear existing elements and fonts
+    elements = []; // Clear the elements array
+    selectedElementId = null; // Reset selected element
+    nextId = 0; // Reset ID counter
+
+    // Apply fonts
+    if (data.fonts) {
+        configCustomFontsTextarea.value = data.fonts.map(font => `id(${font.id})`).join(', ');
+        initializeConfig(); // Reinitialize font dropdowns
+    }
+
+    // Apply elements
+    if (data.elements) {
+        data.elements.forEach(elementData => {
+            const newElement = { ...elementData, id: nextId++ }; // Assign a new unique ID
+            elements.push(newElement);
+        });
+    }
+
+    // Update UI and redraw
+    renderElementList();
+    updateEditorForm();
+    drawPreview();
+    saveToCache();
+}
+
+function parseImportedText(text) {
+    const lambdaMarker = '// --- Generated Lambda Code ---';
+    const fontMarker = '// --- Generated Font Code ---';
+
+    const lambdaIndex = text.indexOf(lambdaMarker);
+    const fontIndex = text.indexOf(fontMarker);
+
+    if (lambdaIndex === -1 || fontIndex === -1) {
+        console.error('Markers not found in file');
+        return null;
+    }
+
+    const lambdaCodeBlock = text.substring(lambdaIndex + lambdaMarker.length, fontIndex).trim();
+    const fontCodeBlock = text.substring(fontIndex + fontMarker.length).trim();
+
+    const fonts = parseFontCode(fontCodeBlock);
+    const elements = parseLambdaCode(lambdaCodeBlock);
+
+    if (!fonts || !elements) {
+        return null;
+    }
+
+    return { fonts, elements };
+}
+
+function parseFontCode(fontCode) {
+    const parsedFonts = [];
+    const fontRegex = /id:\s*id\((.*?)\)\s*size:\s*(\d+)(?:\s*type:\s*(ICON))?/g;
+    let match;
+    while ((match = fontRegex.exec(fontCode)) !== null) {
+        parsedFonts.push({
+            id: match[1],
+            size: parseInt(match[2], 10),
+            type: match[3] || null, // Optional ICON type
+        });
+    }
+    return parsedFonts;
+}
+
+function parseLambdaCode(lambdaCode) {
+    const parsedElements = [];
+    const lines = lambdaCode.split('\n');
+
+    // Regex patterns for different element types
+    const printfRegex = /it\.printf\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(?:id\((.*?)\)|(\w+))\s*,\s*(\S+?)(?:\s*,\s*(?:TextAlign::(\w+)\s*,\s*)?)?(?:\s*,\s*)?"(.*?)"(?:.*?\/\/\s*Ligature:\s*(.*?))?\s*\);/;
+    const rectRegex = /it\.rectangle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
+    const filledRectRegex = /it\.filled_rectangle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
+    const circleRegex = /it\.circle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
+    const filledCircleRegex = /it\.filled_circle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
+
+    lines.forEach(line => {
+        line = line.trim();
+        if (!line.startsWith('it.')) return;
+
+        let match;
+
+        // Match printf for text or icon
+        match = line.match(printfRegex);
+        if (match) {
+            const [_, x, y, fontId, defaultFont, colorId, align, content, ligature] = match;
+            const isIcon = !!ligature;
+            const actualFontId = fontId || defaultFont;
+            
+            parsedElements.push({
+                type: isIcon ? 'icon' : 'text',
+                x: parseInt(x),
+                y: parseInt(y),
+                fontId: actualFontId,
+                colorId: colorId,
+                content: isIcon ? undefined : content,
+                args: '', // Default empty for now
+                align: align || 'LEFT',
+                iconLigature: ligature,
+            });
+            return;
+        }
+
+        // Match regular rectangle
+        match = line.match(rectRegex);
+        if (match) {
+            parsedElements.push({
+                type: 'rectangle',
+                x: parseInt(match[1]),
+                y: parseInt(match[2]),
+                width: parseInt(match[3]),
+                height: parseInt(match[4]),
+                colorId: match[5],
+                fill: false,
+                thickness: 1,
+            });
+            return;
+        }
+
+        // Match filled rectangle
+        match = line.match(filledRectRegex);
+        if (match) {
+            parsedElements.push({
+                type: 'bar', // Use correct type based on height
+                x: parseInt(match[1]),
+                y: parseInt(match[2]),
+                width: parseInt(match[3]),
+                height: parseInt(match[4]),
+                colorId: match[5],
+            });
+            return;
+        }
+
+        // Match circle
+        match = line.match(circleRegex);
+        if (match) {
+            parsedElements.push({
+                type: 'circle',
+                x: parseInt(match[1]),
+                y: parseInt(match[2]),
+                radius: parseInt(match[3]),
+                colorId: match[4],
+                fill: false
+            });
+            return;
+        }
+
+        // Match filled circle
+        match = line.match(filledCircleRegex);
+        if (match) {
+            parsedElements.push({
+                type: 'circle',
+                x: parseInt(match[1]),
+                y: parseInt(match[2]),
+                radius: parseInt(match[3]),
+                colorId: match[4],
+                fill: true
+            });
+            return;
+        }
+
+        console.warn("Could not parse lambda line:", line);
+    });
+
+    return parsedElements;
+}
+
+function applyImportedData(data) {
+    console.log("Applying imported data:", data);
+
+    // Clear existing elements
+    elements = [];
+    selectedElementId = null;
+    nextId = 0;
+
+    // Apply fonts first
+    if (data.fonts && data.fonts.length > 0) {
+        configCustomFontsTextarea.value = data.fonts
+            .map(font => `id(${font.id})`)
+            .join(', ');
+        initializeConfig();
+    }
+
+    // Apply elements with proper type mapping
+    if (data.elements && data.elements.length > 0) {
+        data.elements.forEach(el => {
+            // Create new element with fresh ID
+            const newElement = {
+                ...el,
+                id: nextId++,
+                // Ensure required properties exist
+                colorId: el.colorId || 'white',
+                fontId: el.fontId || (el.type === 'icon' ? 'id(material_symbols_24)' : 'id(roboto_12)')
+            };
+            elements.push(newElement);
+        });
+    }
+
+    // Update UI
+    renderElementList();
+    drawPreview();
+    saveToCache();
+    
+    // Generate fresh code
+    generateLambdaCode();
+    generateFontYaml();
+}
+
+// --- End of added JavaScript code for IMPORT ---
+
+        // --- End of added JavaScript code ---
 
     </script>
 
