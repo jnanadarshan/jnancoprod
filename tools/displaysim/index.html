@@ -853,7 +853,7 @@
                         </div> 
                     </div>
                     <div id="fontSelectContainer"> <label for="editFontId">Font ID:</label> <select id="editFontId"></select> </div>
-                    <div id="textSpecific"> <label for="editContent">Format String:</label> <input type="text" id="editContent" placeholder='"Temp: %.1f C"'> <label for="editArgs">Argument(s):</label> <input type="text" id="editArgs" placeholder="id(sensor).state"> <label for="editAlign">Alignment:</label> <select id="editAlign"> <option value="LEFT">Left</option> <option value="CENTER">Center</option> <option value="RIGHT">Right</option> </select> </div>
+                    <div id="textSpecific"> <label for="editContent">Text or Format String:</label> <input type="text" id="editContent" placeholder='Saturday or "Temp: %.1f C"'> <label for="editArgs">Arguments(Optional):</label> <input type="text" id="editArgs" placeholder="Homeassistant id(sensor).state"> <label for="editAlign">Alignment:</label> <select id="editAlign"> <option value="LEFT">Left</option> <option value="CENTER">Center</option> <option value="RIGHT">Right</option> </select> </div>
                     <div id="iconSpecific"> <label for="editIconLigature">Icon Ligature (<a href="https://fonts.google.com/icons?selected=Material+Symbols+Outlined" target="_blank" rel="noopener">Find Names</a>):</label> <div id="iconSearchContainer"> <input type="text" id="editIconLigature" placeholder="e.g., home, settings..."> <div id="iconSuggestions"></div> </div> </div>
                     <div id="barSpecific"> <div class="flex-row"> <div class="flex-grow"> <label for="editWidth">Width:</label> <input type="number" id="editWidth" value="128"> </div> <div class="flex-grow"> <label for="editHeight">Height:</label> <input type="number" id="editHeight" value="1"> </div> </div> </div>
                     <div id="rectSpecific"> <div class="flex-row"> <div class="flex-grow"> <label for="editRectWidth">Width:</label> <input type="number" id="editRectWidth" value="50"> </div> <div class="flex-grow"> <label for="editRectHeight">Height:</label> <input type="number" id="editRectHeight" value="30"> </div> </div> <div> <label for="editRectThickness">Line Thickness (Preview Only):</label> <input type="number" id="editRectThickness" value="1" min="1"> </div> <div> <label for="editRectRadius">Corner Radius (Preview Only): <span id="editRectRadiusValue">0</span>px</label> <input type="range" id="editRectRadius" min="0" max="15" step="1" value="0" style="width: 100%; accent-color: var(--md-primary-color); height: 4px;"> </div> <div class="checkbox-control"> <input type="checkbox" id="editRectFill"> <label for="editRectFill">Fill Rectangle</label> </div> </div>
@@ -875,7 +875,7 @@
                 <div id="screenPreview"> 
                     <canvas id="previewCanvas"></canvas> 
                 </div>
-                <p style="font-size: 0.85em; color: var(--md-text-secondary-on-background); margin-top: 10px;">Note: Fonts & corners are approximations.</p>
+                <p style="font-size: 0.85em; color: var(--md-text-secondary-on-background); margin-top: 10px;">Note: Fonts & corners are approximations. If preview shows names instead of actual Icon, select the element/Icon list on left panel or ensure the Front ID is "id(material_symbol_size)"</p>
             </div>
         </details>
         <details id="codeSection"> 
