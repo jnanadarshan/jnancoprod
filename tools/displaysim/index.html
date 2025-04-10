@@ -614,7 +614,7 @@
         .code-actions-container button:hover {
             background-color: var(--md-primary-color);
             color: white;
-            border-color: var(--md-primary-color);
+            border-color: var (--md-primary-color);
         }
 
         .code-actions-container button .material-symbols-outlined {
@@ -694,6 +694,103 @@
             background: white;
             cursor: pointer;
         }
+
+        /* Info Overlay Styles */
+        .info-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(3px);
+        }
+
+        .info-overlay.active {
+            display: flex;
+        }
+
+        .info-content {
+            background-color: var(--md-surface-color);
+            border-radius: var(--md-radius-lg);
+            padding: 24px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: var(--md-shadow-3);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .info-content h2 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--md-primary-color);
+            margin-bottom: 24px;
+        }
+
+        .info-body {
+            margin-bottom: 24px;
+        }
+
+        .info-body h3 {
+            color: var(--md-text-primary-on-background);
+            margin-top: 20px;
+        }
+
+        .info-body ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .info-body ul li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--md-text-secondary-on-background);
+        }
+
+        .info-body ul li::before {
+            content: "";
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: var(--md-primary-color);
+            border-radius: 50%;
+        }
+
+        .info-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--md-border-color);
+        }
+
+        .info-actions button.secondary {
+            background-color: transparent;
+            color: var(--md-text-primary-on-background);
+            border: 1px solid var(--md-border-color);
+        }
+
+        .info-actions button.secondary:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        @media (max-width: 600px) {
+            .info-content {
+                width: 95%;
+                padding: 16px;
+                margin: 16px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -703,12 +800,13 @@
             <span class="material-symbols-outlined">developer_board</span> ESPHome Display Designer
         </div>
         <div class="nav-icons">
+            <span class="material-symbols-outlined local_cafe" id="buycoffee" title="Buy me a Coffee"><a href="https://buymeacoffee.com/jdnayak" target="_blank" rel="noopener">local_cafe</a></span>
             <span class="material-symbols-outlined export-button" id="exportBtn" title="Export PDF">picture_as_pdf</span>
             <span class="material-symbols-outlined" id="clearCacheBtn" title="Clear Saved Data">delete_sweep</span>
-            <span class="material-symbols-outlined" title="Account (Placeholder)">account_circle</span>
             <span class="material-symbols-outlined" id="export-text-btn" title="Export Lambda and Font Codes (TXT)" style="cursor: pointer; margin-left: 10px; vertical-align: middle;">download</span>
             <span class="material-symbols-outlined" id="import-text-btn" title="Import Lambda and Font Codes (TXT)" style="cursor: pointer; margin-left: 10px; vertical-align: middle;">upload</span>
             <input type="file" id="import-file-input" accept=".txt" style="display: none;">
+            <span class="material-symbols-outlined" id="showInfoBtn" title="About">help</span>
         </div>
     </header>
 
@@ -731,7 +829,13 @@
                     
                 </div>
                 <ul id="elementList"></ul>
+                <p style="font-size: 0.8em; color: var(--md-text-secondary-on-background); text-align: center; margin-top: auto; padding-top: 20px;">
+                    This Software is Free and Open Source Software licensed under the <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPL 3.0</a>
+    
+                </p>
             </div>
+
+        
         </details>
     </div> <div class="center-panel panel"> <details id="editorDetails" open> <summary><span class="material-symbols-outlined">edit</span> Properties</summary>
              <div class="details-content">
@@ -799,7 +903,50 @@
                 </div>
             </div>
         </details>
-    </div> <script>
+    </div> 
+
+    <!-- Add this after the top navigation but before the panels -->
+    <div class="info-overlay" id="infoOverlay">
+        <div class="info-content">
+            <h2><span class="material-symbols-outlined">info</span> About ESPHome Display Designer</h2>
+            <div class="info-body">
+                <h3>Key Features</h3>
+                <ul>
+                    <li>Design ESPHome display layouts visually</li>
+                    <li>Support for text, icons, shapes, and bars</li>
+                    <li>Live preview with Material Icons</li>
+                    <li>Export to ESPHome-compatible code</li>
+                    <li>Save/load designs</li>
+                </ul>
+                
+                <h3>Known Limitations</h3>
+                <ul>
+                    <li>Font previews are approximate</li>
+                    <li>All Material Icons will not appear in search window. </li>
+                    <li>Need search to Icon Names from <a href="https://fonts.google.com/icons">https://fonts.google.com/icons</a> manually </li>
+                    <li>Corner radius is preview-only</li>
+                    <li>Some Material Icons may not render correctly</li>
+                    <li>UI does not render properly on a Mobile Device></li>
+                </ul>
+                <h3>Known Bugs</h3>
+                <ul>
+                    <li>Import YAML feature is broken</li>
+                    <li>On page reload need to click on elements name for Icons to display</li>
+                    <li>Screen Resolution beyond 480px overflows in UI</li>
+                </ul>
+            </div>
+            <div class="info-actions">
+                <button class="secondary" id="closeInfoBtn">
+                    <span class="material-symbols-outlined">close</span>Close
+                </button>
+                <button id="readMoreBtn">
+                    <span class="material-symbols-outlined">open_in_new</span>Read More
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
         // --- Expanded Google Icons Ligature-to-Codepoint Data ---
         const googleIconsLigatureToCodepoint = {
             // Navigation
@@ -1777,6 +1924,10 @@
     updateEditorForm();
     drawPreview();
     saveToCache();
+    
+    // Generate fresh code
+    generateLambdaCode();
+    generateFontYaml();
 }
 
 function parseImportedText(text) {
@@ -1964,6 +2115,42 @@ function applyImportedData(data) {
 // --- End of added JavaScript code for IMPORT ---
 
         // --- End of added JavaScript code ---
+
+        // Info Overlay functionality
+        const infoOverlay = document.getElementById('infoOverlay');
+        const showInfoBtn = document.getElementById('showInfoBtn');
+        const closeInfoBtn = document.getElementById('closeInfoBtn');
+        const readMoreBtn = document.getElementById('readMoreBtn');
+
+        function showOverlay() {
+            infoOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideOverlay() {
+            infoOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        showInfoBtn.addEventListener('click', showOverlay);
+        closeInfoBtn.addEventListener('click', hideOverlay);
+        readMoreBtn.addEventListener('click', () => {
+            window.open('https://www.jnan.co/tools/displaysim', '_blank');
+        });
+
+        // Close overlay when clicking outside content
+        infoOverlay.addEventListener('click', (e) => {
+            if (e.target === infoOverlay) {
+                hideOverlay();
+            }
+        });
+
+        // Close overlay with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && infoOverlay.classList.contains('active')) {
+                hideOverlay();
+            }
+        });
 
     </script>
         <!-- Google tag (gtag.js) -->
