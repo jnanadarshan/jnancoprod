@@ -23,6 +23,21 @@
             --center-panel-width: 420px;
             --canvas-scale-factor: 1.5;
             --top-nav-height: 64px;
+
+            /* Dark Mode */
+            --md-dark-primary-color: #7986cb; /* Lighter primary for dark */
+            --md-dark-primary-dark: #5c6bc0;
+            --md-dark-accent-color: #ff80ab; /* Lighter accent */
+            --md-dark-background-color: #121212; /* Standard dark bg */
+            --md-dark-surface-color: #1e1e1e; /* Slightly lighter surface */
+            --md-dark-text-primary: rgba(255, 255, 255, 0.87); /* White primary text */
+            --md-dark-text-secondary: rgba(255, 255, 255, 0.6); /* White secondary text */
+            --md-dark-text-hint: rgba(255, 255, 255, 0.38); /* White hint text */
+            --md-dark-border-color: rgba(255, 255, 255, 0.12); /* Lighter border */
+            --md-dark-selected-item-bg: rgba(121, 134, 203, 0.2); /* Primary color with alpha */
+            --md-dark-shadow-1: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.24); /* Darker shadows */
+            --md-dark-shadow-2: 0 3px 6px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.22);
+        
         }
 
         html { height: 100%; }
@@ -800,4 +815,259 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
+        }
+        /* --- Dark Mode Styles --- */
+        body.dark-mode {
+            background-color: var(--md-dark-background-color);
+            color: var(--md-dark-text-primary); /* Default text color */
+        }
+
+        body.dark-mode .top-nav {
+            background-color: var(--md-dark-surface-color);
+            border-color: var(--md-dark-border-color);
+            box-shadow: var(--md-dark-shadow-1);
+        }
+
+        body.dark-mode .top-nav .title {
+            color: var(--md-dark-primary-color); /* Use lighter primary */
+        }
+
+        body.dark-mode .top-nav .nav-icons .material-symbols-outlined {
+            color: var(--md-dark-text-secondary);
+        }
+        body.dark-mode .top-nav .nav-icons .material-symbols-outlined:hover {
+            color: var(--md-dark-text-primary);
+        }
+        body.dark-mode .export-button {
+            color: var(--md-dark-primary-color) !important;
+        }
+        body.dark-mode .export-button:hover {
+            color: var(--md-dark-primary-dark) !important;
+        }
+
+        body.dark-mode .panel {
+            /* background-color is handled by specific panel rules if needed */
+            border-color: var(--md-dark-border-color); /* Ensure panel borders update */
+        }
+
+        body.dark-mode .left-panel {
+            background-color: var(--md-dark-surface-color); /* Use surface color */
+            border-right-color: var(--md-dark-border-color);
+        }
+
+        body.dark-mode .center-panel {
+            background-color: var(--md-dark-surface-color);
+            border-right-color: var(--md-dark-border-color);
+        }
+
+        body.dark-mode .right-panel {
+            background-color: var(--md-dark-background-color); /* Match body background */
+        }
+
+        body.dark-mode details {
+            background-color: var(--md-dark-surface-color);
+            border-color: var(--md-dark-border-color);
+            box-shadow: var(--md-dark-shadow-1);
+        }
+        body.dark-mode details:hover { box-shadow: var(--md-dark-shadow-2); }
+        body.dark-mode details[open] { box-shadow: var(--md-dark-shadow-2); }
+
+        body.dark-mode summary {
+            color: var(--md-dark-text-primary);
+        }
+        body.dark-mode summary:hover {
+            background-color: rgba(255, 255, 255, 0.04); /* Lighter hover for dark */
+        }
+        body.dark-mode details[open] > summary {
+            border-bottom-color: var(--md-dark-border-color);
+            background-color: var(--md-dark-surface-color);
+        }
+        body.dark-mode .details-content {
+            border-top-color: var(--md-dark-border-color);
+        }
+
+        /* Text elements */
+        body.dark-mode h1,
+        body.dark-mode h2,
+        body.dark-mode h3,
+        body.dark-mode p,
+        body.dark-mode span:not(.material-symbols-outlined):not(.material-icons), /* Avoid overriding icon styles */
+        body.dark-mode div:not(#screenPreview):not(.code-output):not(.info-content) /* Avoid broad div styling */
+        {
+            color: var(--md-dark-text-primary);
+        }
+        body.dark-mode label,
+        body.dark-mode .slider-value,
+        body.dark-mode .code-note,
+        body.dark-mode p[style*="color: var(--md-text-secondary-on-background)"] /* Target specific secondary text paragraphs */
+        {
+            color: var(--md-dark-text-secondary);
+        }
+        body.dark-mode a {
+            color: var(--md-dark-primary-color); /* Link color */
+        }
+        body.dark-mode a:hover {
+            color: var(--md-dark-accent-color);
+        }
+
+        /* Input elements */
+        body.dark-mode input[type="text"],
+        body.dark-mode input[type="number"],
+        body.dark-mode select,
+        body.dark-mode textarea {
+            background-color: var(--md-dark-background-color); /* Slightly darker than surface */
+            border-color: var(--md-dark-border-color);
+            color: var(--md-dark-text-primary);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        body.dark-mode input:focus,
+        body.dark-mode select:focus,
+        body.dark-mode textarea:focus {
+            border-color: var(--md-dark-primary-color);
+            box-shadow: 0 0 0 3px rgba(121, 134, 203, 0.2); /* Use dark primary with alpha */
+        }
+        body.dark-mode input[type="color"] {
+            background-color: var(--md-dark-surface-color);
+            border-color: var(--md-dark-border-color);
+        }
+        body.dark-mode input[type="range"] {
+            accent-color: var(--md-dark-primary-color);
+        }
+        body.dark-mode .checkbox-control input[type="checkbox"] {
+            accent-color: var(--md-dark-primary-color);
+        }
+
+        /* Buttons */
+        body.dark-mode button {
+            /* Keep primary button colors or adjust if needed */
+            /* Example: Use lighter primary for better contrast */
+            /* background-color: var(--md-dark-primary-color); */
+            /* color: var(--md-dark-text-primary); */
+        }
+        body.dark-mode button:hover {
+            /* background-color: var(--md-dark-primary-dark); */
+        }
+        body.dark-mode .add-elements-container button,
+        body.dark-mode .code-actions-container button {
+            background-color: var(--md-dark-surface-color);
+            color: var(--md-dark-text-primary);
+            border-color: var(--md-dark-border-color);
+            box-shadow: var(--md-dark-shadow-1);
+        }
+        body.dark-mode .add-elements-container button:hover,
+        body.dark-mode .code-actions-container button:hover {
+            background-color: var(--md-dark-primary-color);
+            color: var(--md-dark-background-color); /* Dark text on light button */
+            border-color: var(--md-dark-primary-color);
+        }
+        body.dark-mode #copyCodeBtn,
+        body.dark-mode #copyFontCodeBtn {
+            background-color: var(--md-dark-surface-color);
+            color: var(--md-dark-text-secondary);
+        }
+        body.dark-mode #copyCodeBtn:hover,
+        body.dark-mode #copyFontCodeBtn:hover {
+            background-color: var(--md-dark-text-secondary);
+            color: var(--md-dark-background-color);
+        }
+        body.dark-mode #copyCodeBtn.success,
+        body.dark-mode #copyFontCodeBtn.success {
+            background-color: var(--md-success-color); /* Keep success color */
+            color: white;
+            border-color: var(--md-success-color);
+        }
+
+        /* Element List */
+        body.dark-mode #elementList li {
+            border-bottom-color: var(--md-dark-border-color);
+            color: var(--md-dark-text-primary);
+        }
+        body.dark-mode #elementList li:hover {
+            background-color: rgba(255, 255, 255, 0.04);
+        }
+        body.dark-mode #elementList li.selected {
+            background-color: var(--md-dark-selected-item-bg);
+        }
+        body.dark-mode #elementList li.selected .element-label .material-symbols-outlined {
+            color: var(--md-dark-primary-color);
+        }
+        body.dark-mode #elementList li .element-label .material-symbols-outlined {
+            color: var(--md-dark-text-secondary);
+        }
+        body.dark-mode #elementList li .drag-handle {
+            color: var(--md-dark-text-hint);
+        }
+        body.dark-mode .element-controls button {
+            color: var(--md-dark-text-secondary);
+        }
+        body.dark-mode .element-controls button:hover {
+            color: var(--md-error-color); /* Keep error color */
+            background-color: rgba(244, 67, 54, 0.15); /* Slightly stronger alpha */
+        }
+
+        /* Icon Suggestions */
+        body.dark-mode #iconSuggestions {
+            background-color: var(--md-dark-surface-color);
+            border-color: var(--md-dark-border-color);
+            box-shadow: var(--md-dark-shadow-2);
+        }
+        body.dark-mode #iconSuggestions div {
+            color: var(--md-dark-text-primary);
+        }
+        body.dark-mode #iconSuggestions div:hover {
+            background-color: rgba(255, 255, 255, 0.06);
+        }
+        body.dark-mode #iconSuggestions .material-symbols-outlined {
+            color: var(--md-dark-text-secondary);
+        }
+        body.dark-mode #iconSuggestions div.selected,
+        body.dark-mode #iconSuggestions div:active {
+            background-color: var(--md-dark-selected-item-bg);
+        }
+        body.dark-mode #iconSuggestions::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        body.dark-mode #iconSuggestions::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Code Output */
+        body.dark-mode .code-output {
+            background-color: #282c34; /* Keep code editor dark */
+            border-color: var(--md-dark-border-color);
+        }
+        body.dark-mode .code-output textarea {
+            background: transparent;
+            color: #abb2bf; /* Keep code editor text color */
+        }
+
+        /* Preview Area */
+        body.dark-mode #previewContainer {
+            background-color: var(--md-dark-surface-color);
+            border-color: var(--md-dark-border-color);
+        }
+        body.dark-mode #screenPreview {
+            border-color: #555; /* Darker border for preview */
+            /* Canvas background is set via JS, no change needed here */
+        }
+
+        /* Info Overlay */
+        body.dark-mode .info-overlay {
+            background-color: rgba(0, 0, 0, 0.7); /* Darker overlay */
+        }
+        body.dark-mode .info-content {
+            background-color: var(--md-dark-surface-color);
+            color: var(--md-dark-text-primary);
+            box-shadow: var(--md-dark-shadow-3);
+        }
+        body.dark-mode .info-content h2 {
+            color: var(--md-dark-primary-color);
+        }
+        body.dark-mode .info-actions button.secondary {
+            background-color: var(--md-dark-surface-color);
+            color: var(--md-dark-text-secondary);
+            border: 1px solid var(--md-dark-border-color);
+        }
+        body.dark-mode .info-actions button.secondary:hover {
+            background-color: rgba(255, 255, 255, 0.05);
         }
