@@ -1071,3 +1071,354 @@
         body.dark-mode .info-actions button.secondary:hover {
             background-color: rgba(255, 255, 255, 0.05);
         }
+
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background-color: var(--md-dark-background-color);
+            color: var(--md-dark-text-primary);
+        }
+
+        body.dark-mode .top-nav {
+            background-color: var(--md-dark-surface-color);
+            border-color: var(--md-dark-border-color);
+        }
+
+        body.dark-mode .panel {
+            background-color: var(--md-dark-surface-color);
+        }
+
+        body.dark-mode details {
+            background-color: var(--md-dark-surface-color);
+            border-color: var(--md-dark-border-color);
+        }
+
+        body.dark-mode input,
+        body.dark-mode select,
+        body.dark-mode textarea {
+            background-color: var(--md-dark-surface-color);
+            border-color: var(--md-dark-border-color);
+            color: var(--md-dark-text-primary);
+        }
+
+        body.dark-mode .left-panel,
+        body.dark-mode .center-panel {
+            border-color: var(--md-dark-border-color);
+        }
+
+        /* --- Hamburger Menu & Collapsible Panel --- */
+        
+        .hamburger-menu {
+            background: none;
+            border: none;
+            padding: 8px;
+            margin-right: 12px; /* Space between hamburger and title icon */
+            cursor: pointer;
+            color: var(--md-text-secondary-on-background);
+            display: inline-flex; /* Use flex to center icon */
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%; /* Make it circular */
+            width: 40px; /* Explicit size */
+            height: 40px; /* Explicit size */
+            transition: background-color 0.2s ease, color 0.2s ease;
+            box-shadow: none; /* Override default button shadow if any */
+        }
+        
+        .hamburger-menu:hover {
+            background-color: rgba(0, 0, 0, 0.04); /* Subtle hover */
+            color: var(--md-text-primary-on-background);
+            transform: none; /* Override default button transform */
+        }
+        
+        .hamburger-menu .material-symbols-outlined {
+            font-size: 24px; /* Adjust icon size */
+            display: block;
+        }
+        
+        /* Adjust body grid for transition */
+        body {
+            /* ... keep existing body styles ... */
+            transition: grid-template-columns 0.3s ease-in-out; /* Add transition for grid */
+        }
+        
+        /* Adjust left panel for transition */
+        .left-panel {
+            /* ... keep existing left-panel styles ... */
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, padding 0.3s ease-in-out, border-right-width 0.3s ease-in-out, width 0.3s ease-in-out; /* Add width transition */
+            overflow: hidden; /* Hide content when collapsing */
+            transform: translateX(0);
+            opacity: 1;
+            border-right-width: 1px; /* Ensure border width is transitionable */
+        }
+        
+        /* Styles for when the left panel is collapsed */
+        body.left-panel-collapsed {
+            /* Set the first column (left panel) width to 0 */
+            grid-template-columns: 0px var(--center-panel-width) 1fr;
+        }
+        
+        body.left-panel-collapsed .left-panel {
+            padding-top: 0;
+            padding-bottom: 0;
+            padding-left: 0;
+            padding-right: 0;
+            border-right-width: 0; /* Collapse border */
+            opacity: 0;
+            transform: translateX(-100%); /* Slide out effect */
+            width: 0; /* Ensure width collapses */
+            overflow: hidden; /* Hide content */
+        }
+        
+        /* --- Dark Mode Adjustments for Hamburger --- */
+        body.dark-mode .hamburger-menu {
+            color: var(--md-dark-text-secondary);
+        }
+        
+        body.dark-mode .hamburger-menu:hover {
+            background-color: rgba(255, 255, 255, 0.06); /* Subtle hover for dark */
+            color: var(--md-dark-text-primary);
+        }
+        
+        /* --- Dark Mode Adjustments for Collapsed Panel --- */
+        body.dark-mode.left-panel-collapsed .left-panel {
+             /* Ensure border color doesn't linger */
+            border-right-color: transparent;
+        }
+
+        /* --- Floating Action Button (FAB) --- */
+        .fab {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: var(--md-primary-color);
+            color: white;
+            border: none;
+            box-shadow: var(--md-shadow-3);
+            cursor: pointer;
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+            z-index: 99;
+            transition: transform 0.2s ease-out, box-shadow 0.2s ease;
+            padding: 0; /* Remove default button padding */
+            margin: 0; /* Remove default button margin */
+        }
+
+        .fab:hover {
+            background-color: var(--md-primary-dark);
+            box-shadow: var(--md-shadow-4); /* Optional: Define --md-shadow-4 for stronger hover */
+            transform: translateY(-2px);
+        }
+
+        .fab .material-symbols-outlined {
+            font-size: 28px;
+        }
+
+        /* Show FAB only when left panel is collapsed */
+        body.left-panel-collapsed .elements-fab {
+            display: inline-flex; /* Or flex */
+        }
+
+        /* --- Elements Popup --- */
+        .elements-popup {
+            position: fixed;
+            bottom: 90px; /* Position above the FAB */
+            left: 24px;
+            width: 300px; /* Adjust width as needed */
+            max-height: 400px; /* Limit height */
+            background-color: var(--md-surface-color);
+            border-radius: var(--md-radius-md);
+            box-shadow: var(--md-shadow-3);
+            z-index: 100;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid var(--md-border-color);
+        }
+
+        .elements-popup.visible {
+            display: flex;
+        }
+
+        .elements-popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--md-border-color);
+            background-color: #f8f9fc; /* Slightly different bg for header */
+        }
+
+        .elements-popup-header h3 {
+            margin: 0;
+            font-size: 1.1em;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--md-text-primary-on-surface);
+        }
+
+        .elements-popup-header .close-popup-btn {
+            background: none;
+            border: none;
+            color: var(--md-text-secondary-on-background);
+            cursor: pointer;
+            padding: 4px;
+            margin: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s ease;
+        }
+
+        .elements-popup-header .close-popup-btn:hover {
+            background-color: rgba(0, 0, 0, 0.06);
+            color: var(--md-text-primary-on-background);
+        }
+
+        .elements-popup-content {
+            padding: 16px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        /* Style buttons inside popup */
+        .popup-add-elements {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .popup-add-elements button {
+            flex: 1;
+            min-width: calc(50% - 4px);
+            padding: 8px 12px;
+            font-size: 0.85em;
+            background-color: white;
+            color: var(--md-text-primary-on-background);
+            border: 1px solid var(--md-border-color);
+            box-shadow: var(--md-shadow-1);
+            margin: 0; /* Override default button margin */
+            text-transform: none; /* Override default uppercase */
+        }
+
+        .popup-add-elements button:hover {
+            background-color: var(--md-primary-color);
+            color: white;
+            border-color: var(--md-primary-color);
+        }
+
+        .popup-add-elements button .material-symbols-outlined {
+            font-size: 16px;
+        }
+
+        /* Style element list inside popup */
+        .popup-element-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            border: 1px solid var(--md-border-color);
+            border-radius: var(--md-radius-sm);
+            font-size: 0.9em;
+        }
+
+        /* Reuse existing #elementList li styles if possible, or duplicate/adapt */
+        .popup-element-list li {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--md-border-color);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+            min-height: 32px;
+            user-select: none;
+        }
+        .popup-element-list li:last-child { border-bottom: none; }
+        .popup-element-list li:hover { background-color: rgba(0, 0, 0, 0.02); }
+        .popup-element-list li.selected { background-color: var(--md-selected-item-bg); font-weight: 500; }
+        /* Add styles for drag handle, label, controls within popup list items */
+        .popup-element-list li .drag-handle { /* ... copy from #elementList li .drag-handle ... */ cursor: move; color: var(--md-text-hint-on-background); margin-right: 4px; opacity: 0.5; transition: opacity 0.2s ease; }
+        .popup-element-list li:hover .drag-handle { opacity: 1; }
+        .popup-element-list li .element-label { /* ... copy from .element-label ... */ display: flex; align-items: center; gap: 8px; line-height: 1; flex: 1; min-width: 0; }
+        .popup-element-list li .element-label span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .popup-element-list li .element-label .material-symbols-outlined { /* ... copy from .element-label .material-symbols-outlined ... */ font-size: 20px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; color: var(--md-text-secondary-on-background); }
+        .popup-element-list li.selected .element-label .material-symbols-outlined { color: var(--md-primary-color); }
+        .popup-element-list li .element-controls { /* ... copy from .element-controls ... */ display: flex; align-items: center; }
+        .popup-element-list li .element-controls button { /* ... copy from .element-controls button ... */ background: none; border: none; color: var(--md-text-secondary-on-background); cursor: pointer; padding: 4px; margin: 0; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: var(--md-radius-sm); transition: all 0.2s ease; }
+        .popup-element-list li .element-controls button .material-symbols-outlined { font-size: 18px; }
+        .popup-element-list li .element-controls button:hover { color: var(--md-error-color); background-color: rgba(244, 67, 54, 0.08); }
+
+
+        /* --- Dark Mode for FAB and Popup --- */
+        body.dark-mode .fab {
+            background-color: var(--md-dark-primary-color);
+            color: var(--md-dark-text-primary); /* Or white if contrast is better */
+            box-shadow: var(--md-dark-shadow-3);
+        }
+        body.dark-mode .fab:hover {
+            background-color: var(--md-dark-primary-dark);
+            box-shadow: var(--md-dark-shadow-4); /* Define if needed */
+        }
+
+        body.dark-mode .elements-popup {
+            background-color: var(--md-dark-surface-color);
+            border-color: var(--md-dark-border-color);
+            box-shadow: var(--md-dark-shadow-3);
+        }
+        body.dark-mode .elements-popup-header {
+            background-color: var(--md-dark-background-color); /* Slightly different dark bg */
+            border-bottom-color: var(--md-dark-border-color);
+        }
+        body.dark-mode .elements-popup-header h3 {
+            color: var(--md-dark-text-primary);
+        }
+        body.dark-mode .elements-popup-header .close-popup-btn {
+            color: var(--md-dark-text-secondary);
+        }
+        body.dark-mode .elements-popup-header .close-popup-btn:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: var(--md-dark-text-primary);
+        }
+
+        body.dark-mode .popup-add-elements button {
+            background-color: var(--md-dark-surface-color);
+            color: var(--md-dark-text-primary);
+            border-color: var(--md-dark-border-color);
+            box-shadow: var(--md-dark-shadow-1);
+        }
+        body.dark-mode .popup-add-elements button:hover {
+            background-color: var(--md-dark-primary-color);
+            color: var(--md-dark-background-color); /* Dark text on light button */
+            border-color: var(--md-dark-primary-color);
+        }
+
+        body.dark-mode .popup-element-list {
+            border-color: var(--md-dark-border-color);
+        }
+        body.dark-mode .popup-element-list li {
+            border-bottom-color: var(--md-dark-border-color);
+            color: var(--md-dark-text-primary);
+        }
+        body.dark-mode .popup-element-list li:hover {
+            background-color: rgba(255, 255, 255, 0.04);
+        }
+        body.dark-mode .popup-element-list li.selected {
+            background-color: var(--md-dark-selected-item-bg);
+        }
+
+        /* Adapt other popup list item styles for dark mode if needed */
+        body.dark-mode .popup-element-list li .drag-handle { color: var(--md-dark-text-hint); }
+        body.dark-mode .popup-element-list li .element-label .material-symbols-outlined { color: var(--md-dark-text-secondary); }
+        body.dark-mode .popup-element-list li.selected .element-label .material-symbols-outlined { color: var(--md-dark-primary-color); }
+        body.dark-mode .popup-element-list li .element-controls button { color: var(--md-dark-text-secondary); }
+        body.dark-mode .popup-element-list li .element-controls button:hover { color: var(--md-error-color); background-color: rgba(244, 67, 54, 0.15); }
+        

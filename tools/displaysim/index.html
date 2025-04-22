@@ -21,58 +21,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Two+Tone"rel="stylesheet">
     <!-- Add html2pdf library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <style>
-        :root {
-            // ...existing code...
-            /* Add Dark Mode Variables */
-            --md-dark-primary-color: #7986cb;
-            --md-dark-primary-dark: #5c6bc0;
-            --md-dark-accent-color: #ff80ab;
-            --md-dark-background-color: #121212;
-            --md-dark-surface-color: #1e1e1e;
-            --md-dark-text-primary: rgba(255, 255, 255, 0.87);
-            --md-dark-text-secondary: rgba(255, 255, 255, 0.6);
-            --md-dark-text-hint: rgba(255, 255, 255, 0.38);
-            --md-dark-border-color: rgba(255, 255, 255, 0.12);
-        }
 
-        /* Dark Mode Styles */
-        body.dark-mode {
-            background-color: var(--md-dark-background-color);
-            color: var(--md-dark-text-primary);
-        }
-
-        body.dark-mode .top-nav {
-            background-color: var(--md-dark-surface-color);
-            border-color: var(--md-dark-border-color);
-        }
-
-        body.dark-mode .panel {
-            background-color: var(--md-dark-surface-color);
-        }
-
-        body.dark-mode details {
-            background-color: var(--md-dark-surface-color);
-            border-color: var(--md-dark-border-color);
-        }
-
-        body.dark-mode input,
-        body.dark-mode select,
-        body.dark-mode textarea {
-            background-color: var(--md-dark-surface-color);
-            border-color: var(--md-dark-border-color);
-            color: var(--md-dark-text-primary);
-        }
-
-        body.dark-mode .left-panel,
-        body.dark-mode .center-panel {
-            border-color: var(--md-dark-border-color);
-        }
-    </style>
 </head>
 <body>
 
     <header class="top-nav">
+        <button class="hamburger-menu" id="hamburgerBtn" title="Toggle Menu">
+            <span class="material-symbols-outlined">menu</span>
+        </button>
         <div class="title">
             <span class="material-symbols-outlined">developer_board</span> ESPHome Display Designer
         </div>
@@ -228,6 +184,33 @@
             </div>
         </div>
     </div>
+
+    <!-- Floating Action Button for Elements (visible when panel collapsed) -->
+    <button class="fab elements-fab" id="elementsFab" title="Show Elements">
+        <span class="material-symbols-outlined">widgets</span>
+    </button>
+
+    <!-- Popup for Elements -->
+    <div class="elements-popup" id="elementsPopup">
+        <div class="elements-popup-header">
+            <h3><span class="material-symbols-outlined">widgets</span> Elements</h3>
+            <button class="close-popup-btn" id="closeElementsPopupBtn" title="Close">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="elements-popup-content">
+            <!-- Content will be populated/duplicated here -->
+            <div class="add-elements-container popup-add-elements">
+                <button class="popup-add-text"><span class="material-symbols-outlined">title</span>Text</button>
+                <button class="popup-add-icon"><span class="material-symbols-outlined">mood</span>Icon</button>
+                <button class="popup-add-bar"><span class="material-symbols-outlined">horizontal_rule</span>Bar</button>
+                <button class="popup-add-rect"><span class="material-symbols-outlined">check_box_outline_blank</span>Rect</button>
+                <button class="popup-add-circle"><span class="material-symbols-outlined">radio_button_unchecked</span>Circle</button>
+            </div>
+            <ul class="popup-element-list" id="popupElementList"></ul>
+        </div>
+    </div>
+
 
     <script>
         // --- Expanded Google Icons Ligature-to-Codepoint Data ---
@@ -1483,6 +1466,77 @@ function applyImportedData(data) {
       gtag('js', new Date());
     
       gtag('config', 'G-7P5YFV6K4E');
+
+        // --- Collapsible Left Panel Logic ---
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const bodyElement = document.body;
+        const leftPanel = document.querySelector('.left-panel'); // Get reference if needed
+
+        hamburgerBtn.addEventListener('click', () => {
+            bodyElement.classList.toggle('left-panel-collapsed');
+
+            // Optional: Change icon based on state
+            const icon = hamburgerBtn.querySelector('.material-symbols-outlined');
+            if (bodyElement.classList.contains('left-panel-collapsed')) {
+                icon.textContent = 'menu_open'; // Or another appropriate icon
+                hamburgerBtn.title = 'Open Menu';
+                // Optionally save state to localStorage
+                localStorage.setItem('leftPanelCollapsed', 'true');
+            } else {
+                icon.textContent = 'menu';
+                hamburgerBtn.title = 'Close Menu';
+                // Optionally save state to localStorage
+                localStorage.setItem('leftPanelCollapsed', 'false');
+            }
+        });
+
+        // Restore collapsed state on page load
+        if (localStorage.getItem('leftPanelCollapsed') === 'true') {
+            bodyElement.classList.add('left-panel-collapsed');
+            const icon = hamburgerBtn.querySelector('.material-symbols-outlined');
+            icon.textContent = 'menu_open';
+            hamburgerBtn.title = 'Open Menu';
+        }
+        // --- End Collapsible Left Panel Logic ---
+
+        // --- Global State & Elements ---
+        // ... existing references ...
+        const elementsFab = document.getElementById('elementsFab');
+        const elementsPopup = document.getElementById('elementsPopup');
+        const closeElementsPopupBtn = document.getElementById('closeElementsPopupBtn');
+        const popupElementList = document.getElementById('popupElementList');
+        const popupAddElementsContainer = elementsPopup.querySelector('.popup-add-elements'); // Get container for delegation
+        
+        // --- Add near other event listeners ---
+        
+        elementsFab.addEventListener('click', () => {
+            elementsPopup.classList.toggle('visible');
+            // If popup becomes visible, render its list
+            if (elementsPopup.classList.contains('visible')) {
+                renderElementList(true); // Pass flag to indicate popup rendering
+            }
+        });
+        
+        closeElementsPopupBtn.addEventListener('click', () => {
+            elementsPopup.classList.remove('visible');
+        });
+        
+        // Optional: Close popup if clicking outside of it
+        document.addEventListener('click', (event) => {
+            // Close icon suggestions (existing logic)
+            if (iconSearchContainer && !iconSearchContainer.contains(event.target)) {
+                iconSuggestionsDiv.style.display = 'none';
+            }
+            // Close elements popup
+            if (elementsPopup.classList.contains('visible') &&
+                !elementsPopup.contains(event.target) &&
+                !elementsFab.contains(event.target)) {
+                elementsPopup.classList.remove('visible');
+            }
+        });
+        
+        
+
     </script>
 
 </body>
