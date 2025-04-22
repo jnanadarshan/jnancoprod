@@ -1,1424 +1,1421 @@
-        :root {
-            --md-primary-color: #3f51b5; 
-            --md-primary-dark: #303f9f; 
-            --md-accent-color: #ff4081;
-            --md-background-color: #f8f9fa; 
-            --md-surface-color: #ffffff;
-            --md-text-primary-on-background: rgba(0, 0, 0, 0.87); 
-            --md-text-secondary-on-background: rgba(0, 0, 0, 0.6);
-            --md-text-hint-on-background: rgba(0, 0, 0, 0.38); 
-            --md-text-primary-on-surface: rgba(0, 0, 0, 0.87);
-            --md-border-color: rgba(0, 0, 0, 0.08); 
-            --md-canvas-background: #000000; 
-            --md-selected-item-bg: #e8eaf6;
-            --md-error-color: #f44336; 
-            --md-success-color: #4caf50;
-            --md-shadow-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
-            --md-shadow-2: 0 3px 6px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.12);
-            --md-shadow-3: 0 10px 20px rgba(0,0,0,0.15), 0 3px 6px rgba(0,0,0,0.10);
-            --md-radius-sm: 6px;
-            --md-radius-md: 8px;
-            --md-radius-lg: 12px;
-            --left-panel-width: 380px;
-            --center-panel-width: 420px;
-            --canvas-scale-factor: 1.5;
-            --top-nav-height: 64px;
-
-            /* Dark Mode */
-            --md-dark-primary-color: #7986cb; /* Lighter primary for dark */
-            --md-dark-primary-dark: #5c6bc0;
-            --md-dark-accent-color: #ff80ab; /* Lighter accent */
-            --md-dark-background-color: #121212; /* Standard dark bg */
-            --md-dark-surface-color: #1e1e1e; /* Slightly lighter surface */
-            --md-dark-text-primary: rgba(255, 255, 255, 0.87); /* White primary text */
-            --md-dark-text-secondary: rgba(255, 255, 255, 0.6); /* White secondary text */
-            --md-dark-text-hint: rgba(255, 255, 255, 0.38); /* White hint text */
-            --md-dark-border-color: rgba(255, 255, 255, 0.12); /* Lighter border */
-            --md-dark-selected-item-bg: rgba(121, 134, 203, 0.2); /* Primary color with alpha */
-            --md-dark-shadow-1: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.24); /* Darker shadows */
-            --md-dark-shadow-2: 0 3px 6px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.22);
-        
-        }
-
-        html { height: 100%; }
-        body {
-            font-family: 'Roboto', sans-serif; 
-            line-height: 1.6; 
-            margin: 0; 
-            padding: 0;
-            background-color: var(--md-background-color); 
-            color: var(--md-text-primary-on-background);
-            display: grid;
-            grid-template-rows: var(--top-nav-height) 1fr;
-            grid-template-columns: var(--left-panel-width) var(--center-panel-width) 1fr;
-            height: 100vh;
-            font-size: 14px;
-            overflow: hidden;
-        }
-
-        .top-nav {
-            grid-row: 1;
-            grid-column: 1 / -1;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 32px;
-            background-color: var(--md-surface-color);
-            border-bottom: 1px solid var(--md-border-color);
-            box-shadow: var(--md-shadow-1);
-            z-index: 10;
-        }
-        
-        .top-nav .title {
-            font-size: 1.4em;
-            font-weight: 500;
-            color: var(--md-primary-color);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .top-nav .nav-icons {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        
-        .top-nav .nav-icons .material-symbols-outlined {
-            font-size: 1.6em;
-            color: var(--md-text-secondary-on-background);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .top-nav .nav-icons .material-symbols-outlined:hover {
-            color: var(--md-text-primary-on-background);
-            transform: scale(1.1);
-        }
-
-        .export-button {
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            padding: 8px;
-            border-radius: 50%;
-            transition: all 0.2s ease;
-            color: var(--md-primary-color) !important;
-            background: transparent;
-            box-sizing: border-box;
-            align-self: center;
-        }
-
-        .export-button:hover {
-            transform: translateY(-1px);
-            color: var(--md-primary-dark) !important;
-        }
-
-        .export-button .material-symbols-outlined {
-            color: inherit !important;
-            font-size: 20px;
-            line-height: 1;
-            display: block;
-        }
-
-        .panel {
-            padding: 24px;
-            overflow-y: auto;
-            height: calc(100vh - var(--top-nav-height));
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .left-panel {
-            grid-row: 2; 
-            grid-column: 1;
-            background-color: #f8f9fc;
-            border-right: 1px solid var(--md-border-color);
-        }
-
-        .center-panel {
-            grid-row: 2; 
-            grid-column: 2;
-            background-color: var(--md-surface-color);
-            border-right: 1px solid var(--md-border-color);
-        }
-
-        .right-panel {
-            grid-row: 2; 
-            grid-column: 3;
-            align-items: center;
-            background-color: var(--md-background-color);
-            padding: 32px;
-        }
-
-        h1, h2, h3 { 
-            margin-top: 0; 
-            margin-bottom: 20px; 
-            color: var(--md-text-primary-on-surface); 
-            font-weight: 500; 
-        }
-        
-        h2 { 
-            font-size: 1.3em; 
-            border-bottom: 1px solid var(--md-border-color); 
-            padding-bottom: 12px; 
-            width: 100%; 
-            display: flex; 
-            align-items: center; 
-            gap: 10px;
-        }
-        
-        h3 { 
-            font-size: 1.1em; 
-            font-weight: 500; 
-            margin-bottom: 16px;
-        }
-
-        details {
-            border: 1px solid var(--md-border-color);
-            border-radius: var(--md-radius-md);
-            background-color: var(--md-surface-color);
-            width: 100%;
-            margin-bottom: 16px;
-            box-shadow: var(--md-shadow-1);
-            transition: box-shadow 0.2s ease;
-        }
-
-        details:hover {
-            box-shadow: var(--md-shadow-2);
-        }
-
-        details[open] {
-            box-shadow: var(--md-shadow-2);
-        }
-
-        summary { 
-            padding: 14px 20px; 
-            font-weight: 500; 
-            cursor: pointer; 
-            list-style: none; 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            border-bottom: 1px solid transparent; 
-            transition: all 0.2s ease;
-        }
-
-        summary:hover { 
-            background-color: rgba(0, 0, 0, 0.02);
-        }
-
-        details[open] > summary { 
-            border-bottom: 1px solid var(--md-border-color); 
-            background-color: var(--md-surface-color);
-        }
-
-        .details-content { 
-            padding: 20px; 
-            border-top: 1px solid var(--md-border-color);
-        }
-
-        label { 
-            display: block; 
-            margin-top: 16px; 
-            margin-bottom: 6px; 
-            font-weight: 500; 
-            font-size: 0.9em; 
-            color: var(--md-text-secondary-on-background);
-        }
-
-        input[type="text"], 
-        input[type="number"], 
-        select, 
-        textarea { 
-            width: 100%; 
-            padding: 12px 16px; 
-            margin-bottom: 12px; 
-            border: 1px solid var(--md-border-color); 
-            border-radius: var(--md-radius-sm); 
-            box-sizing: border-box; 
-            font-size: 1em; 
-            background-color: #fff; 
-            color: var(--md-text-primary-on-surface); 
-            transition: all 0.2s ease;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-
-        input:focus, 
-        select:focus, 
-        textarea:focus { 
-            border-color: var(--md-primary-color); 
-            outline: none; 
-            box-shadow: 0 0 0 3px rgba(63,81,181,0.1);
-        }
-
-        button { 
-            background-color: var(--md-primary-color); 
-            color: white; 
-            padding: 10px 20px; 
-            border: none; 
-            border-radius: var(--md-radius-sm); 
-            cursor: pointer; 
-            font-size: 0.9em; 
-            font-weight: 500; 
-            text-transform: uppercase; 
-            margin-right: 8px; 
-            margin-top: 8px; 
-            display: inline-flex; 
-            align-items: center; 
-            gap: 8px; 
-            transition: all 0.2s ease;
-            box-shadow: var(--md-shadow-1);
-        }
-
-        button:hover { 
-            background-color: var(--md-primary-dark); 
-            box-shadow: var(--md-shadow-2);
-            transform: translateY(-1px);
-        }
-
-        button:active {
-            transform: translateY(0);
-            box-shadow: var(--md-shadow-1);
-        }
-
-        #elementList { 
-            list-style: none; 
-            padding: 0; 
-            margin: 0; 
-            max-height: 250px; 
-            overflow-y: auto; 
-            margin-top: 16px;
-            border: 1px solid var(--md-border-color);
-            border-radius: var(--md-radius-md);
-            font-size: 0.9em;
-        }
-
-        #elementList li { 
-            padding: 8px 12px; 
-            border-bottom: 1px solid var(--md-border-color); 
-            cursor: pointer; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            transition: all 0.2s ease;
-            min-height: 32px;
-            user-select: none;
-        }
-
-        #elementList li .drag-handle {
-            cursor: move;
-            color: var(--md-text-hint-on-background);
-            margin-right: 4px;
-            opacity: 0.5;
-            transition: opacity 0.2s ease;
-        }
-
-        #elementList li:hover .drag-handle {
-            opacity: 1;
-        }
-
-        #elementList li.dragging {
-            opacity: 0.5;
-            background-color: var(--md-selected-item-bg);
-        }
-
-        #elementList li.drag-over {
-            border-top: 2px solid var(--md-primary-color);
-        }
-
-        #elementList li:hover { 
-            background-color: rgba(0, 0, 0, 0.02);
-        }
-
-        #elementList li.selected { 
-            background-color: var(--md-selected-item-bg);
-            font-weight: 500;
-        }
-
-        #elementList li.selected .element-label .material-symbols-outlined {
-            color: var(--md-primary-color);
-        }
-
-        #elementList li:last-child {
-            border-bottom: none;
-        }
-
-        .element-label { 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-            line-height: 1;
-            flex: 1;
-            min-width: 0;
-        }
-
-        .element-label span:last-child {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .element-label .material-symbols-outlined { 
-            font-size: 20px;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--md-text-secondary-on-background);
-        }
-
-        .element-controls { 
-            display: flex;
-            align-items: center;
-        }
-
-        .element-controls button { 
-            background: none; 
-            border: none; 
-            color: var(--md-text-secondary-on-background); 
-            cursor: pointer; 
-            padding: 4px; 
-            margin: 0;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: var(--md-radius-sm);
-            transition: all 0.2s ease;
-        }
-
-        .element-controls button .material-symbols-outlined {
-            font-size: 18px;
-        }
-
-        .element-controls button:hover { 
-            color: var(--md-error-color);
-            background-color: rgba(244, 67, 54, 0.08);
-        }
-
-        #previewContainer {
-            text-align: left;
-            width: 100%;
-            max-width: 700px;
-            background-color: var(--md-surface-color);
-            border-radius: var(--md-radius-lg);
-            padding: 24px;
-            border: 1px solid var(--md-border-color);
-            box-sizing: border-box;
-            box-shadow: var(--md-shadow-2);
-        }
-
-        #screenPreview { 
-            border: 2px solid #444; 
-            background-color: var(--md-canvas-background); 
-            margin: 16px 0;
-            position: relative; 
-            box-shadow: var(--md-shadow-1);
-            border-radius: 4px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #previewCanvas {
-            display: block;
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
-        }
-
-        #generatedCodeOutput, 
-        #generatedFontCodeOutput { 
-            width: calc(100% - 32px); 
-            height: 300px; 
-            white-space: pre; 
-            font-family: monospace; 
-            font-size: 13px; 
-            background-color: #282c34; 
-            color: #abb2bf; 
-            border: none; 
-            border-radius: 0 0 var(--md-radius-md) var(--md-radius-md);
-            padding: 20px; 
-            margin: 0; 
-            box-sizing: border-box; 
-            resize: vertical;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .coord-control { 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-            margin-bottom: 12px;
-        }
-
-        .coord-control input[type="range"] { 
-            flex: 1; 
-            margin: 0; 
-            height: 4px; 
-            accent-color: var(--md-primary-color); 
-            cursor: pointer;
-        }
-
-        #iconSearchContainer { 
-            position: relative; 
-            margin-bottom: 8px;
-            max-width: 300px;
-        }
-
-        #iconSearchContainer input[type="text"] {
-            padding-right: 32px;
-        }
-
-        #iconSuggestions { 
-            position: absolute; 
-            background-color: white; 
-            border: 1px solid var(--md-border-color); 
-            border-radius: var(--md-radius-sm);
-            max-height: 180px; 
-            overflow-y: auto; 
-            z-index: 10; 
-            width: 100%;
-            max-width: 300px;
-            box-shadow: var(--md-shadow-2);
-            margin-top: 4px;
-        }
-
-        #iconSuggestions div { 
-            padding: 6px 12px; 
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-            font-size: 0.9em;
-            transition: background-color 0.15s ease;
-            min-height: 32px;
-        }
-
-        #iconSuggestions .material-symbols-outlined {
-            font-size: 18px;
-            width: 18px;
-            height: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--md-text-secondary-on-background);
-        }
-
-        #iconSuggestions div:hover { 
-            background-color: rgba(0, 0, 0, 0.04);
-        }
-
-        #iconSuggestions div.selected,
-        #iconSuggestions div:active {
-            background-color: var(--md-selected-item-bg);
-        }
-
-        #iconSuggestions::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        #iconSuggestions::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        #iconSuggestions::-webkit-scrollbar-thumb {
-            background-color: rgba(0, 0, 0, 0.2);
-            border-radius: 4px;
-        }
-
-        #iconSuggestions::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(0, 0, 0, 0.3);
-        }
-
-        .checkbox-control { 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            margin-top: 12px;
-            padding: 4px 0;
-        }
-
-        .checkbox-control input[type="checkbox"] { 
-            margin: 0; 
-            width: 18px;
-            height: 18px;
-            accent-color: var(--md-primary-color);
-        }
-
-        .add-elements-container {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .add-elements-container button {
-            flex: 1;
-            min-width: calc(50% - 4px);
-            padding: 8px 12px;
-            font-size: 0.85em;
-            background-color: white;
-            color: var(--md-text-primary-on-background);
-            border: 1px solid var(--md-border-color);
-            box-shadow: var(--md-shadow-1);
-            margin: 0;
-        }
-
-        .add-elements-container button:hover {
-            background-color: var(--md-primary-color);
-            color: white;
-            border-color: var(--md-primary-color);
-        }
-
-        .add-elements-container button .material-symbols-outlined {
-            font-size: 16px;
-        }
-
-        .add-elements-container button:active {
-            transform: translateY(1px);
-            box-shadow: none;
-        }
-
-        .code-actions-container {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .code-actions-container button {
-            padding: 6px 12px;
-            font-size: 0.85em;
-            background-color: white;
-            color: var(--md-text-primary-on-background);
-            border: 1px solid var(--md-border-color);
-            box-shadow: var(--md-shadow-1);
-            margin: 0;
-        }
-
-        .code-actions-container button:hover {
-            background-color: var(--md-primary-color);
-            color: white;
-            border-color: var (--md-primary-color);
-        }
-
-        .code-actions-container button .material-symbols-outlined {
-            font-size: 16px;
-        }
-
-        .code-actions-container button:active {
-            transform: translateY(1px);
-            box-shadow: none;
-        }
-
-        #generateCodeBtn, #generateFontCodeBtn {
-            background-color: var(--md-primary-color);
-            color: white;
-        }
-
-        #copyCodeBtn, #copyFontCodeBtn {
-            background-color: white;
-            color: var(--md-text-secondary-on-background);
-        }
-
-        #copyCodeBtn:hover, #copyFontCodeBtn:hover {
-            background-color: var(--md-text-secondary-on-background);
-            color: white;
-        }
-
-        #copyCodeBtn.success, #copyFontCodeBtn.success {
-            background-color: var(--md-success-color);
-            color: white;
-            border-color: var (--md-success-color);
-        }
-
-        .code-output {
-            border: 1px solid var(--md-border-color);
-            border-radius: var(--md-radius-sm);
-            background-color: #282c34;
-            padding: 16px;
-            margin-top: 12px;
-            position: relative;
-        }
-
-        .code-output textarea {
-            width: 100%;
-            min-height: 200px;
-            border: none;
-            background: transparent;
-            color: #abb2bf;
-            font-family: monospace;
-            font-size: 13px;
-            line-height: 1.5;
-            resize: vertical;
-            padding: 0;
-            margin: 0;
-        }
-
-        .code-output textarea:focus {
-            outline: none;
-            box-shadow: none;
-        }
-
-        .color-control {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .color-control select {
-            flex: 1;
-        }
-
-        .color-control input[type="color"] {
-            width: 40px;
-            height: 40px;
-            padding: 2px;
-            border: 1px solid var(--md-border-color);
-            border-radius: var(--md-radius-sm);
-            background: white;
-            cursor: pointer;
-        }
-
-        /* Info Overlay Styles */
-        .info-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            backdrop-filter: blur(3px);
-        }
-
-        .info-overlay.active {
-            display: flex;
-        }
-
-        .info-content {
-            background-color: var(--md-surface-color);
-            border-radius: var(--md-radius-lg);
-            padding: 24px;
-            width: 90%;
-            max-width: 600px;
-            box-shadow: var(--md-shadow-3);
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .info-content h2 {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: var(--md-primary-color);
-            margin-bottom: 24px;
-        }
-
-        .info-body {
-            margin-bottom: 24px;
-        }
-
-        .info-body h3 {
-            color: var(--md-text-primary-on-background);
-            margin-top: 20px;
-        }
-
-        .info-body ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .info-body ul li {
-            padding: 8px 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--md-text-secondary-on-background);
-        }
-
-        .info-body ul li::before {
-            content: "";
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            background-color: var(--md-primary-color);
-            border-radius: 50%;
-        }
-
-        .info-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            margin-top: 24px;
-            padding-top: 16px;
-            border-top: 1px solid var(--md-border-color);
-        }
-
-        .info-actions button.secondary {
-            background-color: transparent;
-            color: var(--md-text-primary-on-background);
-            border: 1px solid var(--md-border-color);
-        }
-
-        .info-actions button.secondary:hover {
-            background-color: rgba(0, 0, 0, 0.05);
-        }
-
-        @media (max-width: 600px) {
-            .info-content {
-                width: 95%;
-                padding: 16px;
-                margin: 16px;
-            }
-        }
-
-        .scale-button {
-            background: none;
-            border: none;
-            padding: 4px;
-            margin-left: 8px;
-            cursor: pointer;
-            color: var(--md-text-secondary-on-background);
-            box-shadow: none;
-        }
-
-        .scale-button:hover {
-            color: var(--md-primary-color);
-            background: none;
-            transform: none;
-        }
-
-        .scale-button .material-symbols-outlined {
-            font-size: 18px;
-        }
-
-        #screenPreview.scale-to-fit {
-            width: 100% !important;
-            height: auto !important;
-            aspect-ratio: attr(data-width) / attr(data-height);
-            max-height: 70vh;
-        }
-
-        #screenPreview.scale-to-fit #previewCanvas {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-        /* --- Dark Mode Styles --- */
-        body.dark-mode {
-            background-color: var(--md-dark-background-color);
-            color: var(--md-dark-text-primary); /* Default text color */
-        }
-
-        body.dark-mode .top-nav {
-            background-color: var(--md-dark-surface-color);
-            border-color: var(--md-dark-border-color);
-            box-shadow: var(--md-dark-shadow-1);
-        }
-
-        body.dark-mode .top-nav .title {
-            color: var(--md-dark-primary-color); /* Use lighter primary */
-        }
-
-        body.dark-mode .top-nav .nav-icons .material-symbols-outlined {
-            color: var(--md-dark-text-secondary);
-        }
-        body.dark-mode .top-nav .nav-icons .material-symbols-outlined:hover {
-            color: var(--md-dark-text-primary);
-        }
-        body.dark-mode .export-button {
-            color: var(--md-dark-primary-color) !important;
-        }
-        body.dark-mode .export-button:hover {
-            color: var(--md-dark-primary-dark) !important;
-        }
-
-        body.dark-mode .panel {
-            /* background-color is handled by specific panel rules if needed */
-            border-color: var(--md-dark-border-color); /* Ensure panel borders update */
-        }
-
-        body.dark-mode .left-panel {
-            background-color: var(--md-dark-surface-color); /* Use surface color */
-            border-right-color: var(--md-dark-border-color);
-        }
-
-        body.dark-mode .center-panel {
-            background-color: var(--md-dark-surface-color);
-            border-right-color: var(--md-dark-border-color);
-        }
-
-        body.dark-mode .right-panel {
-            background-color: var(--md-dark-background-color); /* Match body background */
-        }
-
-        body.dark-mode details {
-            background-color: var(--md-dark-surface-color);
-            border-color: var(--md-dark-border-color);
-            box-shadow: var(--md-dark-shadow-1);
-        }
-        body.dark-mode details:hover { box-shadow: var(--md-dark-shadow-2); }
-        body.dark-mode details[open] { box-shadow: var(--md-dark-shadow-2); }
-
-        body.dark-mode summary {
-            color: var(--md-dark-text-primary);
-        }
-        body.dark-mode summary:hover {
-            background-color: rgba(255, 255, 255, 0.04); /* Lighter hover for dark */
-        }
-        body.dark-mode details[open] > summary {
-            border-bottom-color: var(--md-dark-border-color);
-            background-color: var(--md-dark-surface-color);
-        }
-        body.dark-mode .details-content {
-            border-top-color: var(--md-dark-border-color);
-        }
-
-        /* Text elements */
-        body.dark-mode h1,
-        body.dark-mode h2,
-        body.dark-mode h3,
-        body.dark-mode p,
-        body.dark-mode span:not(.material-symbols-outlined):not(.material-icons), /* Avoid overriding icon styles */
-        body.dark-mode div:not(#screenPreview):not(.code-output):not(.info-content) /* Avoid broad div styling */
-        {
-            color: var(--md-dark-text-primary);
-        }
-        body.dark-mode label,
-        body.dark-mode .slider-value,
-        body.dark-mode .code-note,
-        body.dark-mode p[style*="color: var(--md-text-secondary-on-background)"] /* Target specific secondary text paragraphs */
-        {
-            color: var(--md-dark-text-secondary);
-        }
-        body.dark-mode a {
-            color: var(--md-dark-primary-color); /* Link color */
-        }
-        body.dark-mode a:hover {
-            color: var(--md-dark-accent-color);
-        }
-
-        /* Input elements */
-        body.dark-mode input[type="text"],
-        body.dark-mode input[type="number"],
-        body.dark-mode select,
-        body.dark-mode textarea {
-            background-color: var(--md-dark-background-color); /* Slightly darker than surface */
-            border-color: var(--md-dark-border-color);
-            color: var(--md-dark-text-primary);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
-        body.dark-mode input:focus,
-        body.dark-mode select:focus,
-        body.dark-mode textarea:focus {
-            border-color: var(--md-dark-primary-color);
-            box-shadow: 0 0 0 3px rgba(121, 134, 203, 0.2); /* Use dark primary with alpha */
-        }
-        body.dark-mode input[type="color"] {
-            background-color: var(--md-dark-surface-color);
-            border-color: var(--md-dark-border-color);
-        }
-        body.dark-mode input[type="range"] {
-            accent-color: var(--md-dark-primary-color);
-        }
-        body.dark-mode .checkbox-control input[type="checkbox"] {
-            accent-color: var(--md-dark-primary-color);
-        }
-
-        /* Buttons */
-        body.dark-mode button {
-            /* Keep primary button colors or adjust if needed */
-            /* Example: Use lighter primary for better contrast */
-            /* background-color: var(--md-dark-primary-color); */
-            /* color: var(--md-dark-text-primary); */
-        }
-        body.dark-mode button:hover {
-            /* background-color: var(--md-dark-primary-dark); */
-        }
-        body.dark-mode .add-elements-container button,
-        body.dark-mode .code-actions-container button {
-            background-color: var(--md-dark-surface-color);
-            color: var(--md-dark-text-primary);
-            border-color: var(--md-dark-border-color);
-            box-shadow: var(--md-dark-shadow-1);
-        }
-        body.dark-mode .add-elements-container button:hover,
-        body.dark-mode .code-actions-container button:hover {
-            background-color: var(--md-dark-primary-color);
-            color: var(--md-dark-background-color); /* Dark text on light button */
-            border-color: var(--md-dark-primary-color);
-        }
-        body.dark-mode #copyCodeBtn,
-        body.dark-mode #copyFontCodeBtn {
-            background-color: var(--md-dark-surface-color);
-            color: var(--md-dark-text-secondary);
-        }
-        body.dark-mode #copyCodeBtn:hover,
-        body.dark-mode #copyFontCodeBtn:hover {
-            background-color: var(--md-dark-text-secondary);
-            color: var(--md-dark-background-color);
-        }
-        body.dark-mode #copyCodeBtn.success,
-        body.dark-mode #copyFontCodeBtn.success {
-            background-color: var(--md-success-color); /* Keep success color */
-            color: white;
-            border-color: var(--md-success-color);
-        }
-
-        /* Element List */
-        body.dark-mode #elementList li {
-            border-bottom-color: var(--md-dark-border-color);
-            color: var(--md-dark-text-primary);
-        }
-        body.dark-mode #elementList li:hover {
-            background-color: rgba(255, 255, 255, 0.04);
-        }
-        body.dark-mode #elementList li.selected {
-            background-color: var(--md-dark-selected-item-bg);
-        }
-        body.dark-mode #elementList li.selected .element-label .material-symbols-outlined {
-            color: var(--md-dark-primary-color);
-        }
-        body.dark-mode #elementList li .element-label .material-symbols-outlined {
-            color: var(--md-dark-text-secondary);
-        }
-        body.dark-mode #elementList li .drag-handle {
-            color: var(--md-dark-text-hint);
-        }
-        body.dark-mode .element-controls button {
-            color: var(--md-dark-text-secondary);
-        }
-        body.dark-mode .element-controls button:hover {
-            color: var(--md-error-color); /* Keep error color */
-            background-color: rgba(244, 67, 54, 0.15); /* Slightly stronger alpha */
-        }
-
-        /* Icon Suggestions */
-        body.dark-mode #iconSuggestions {
-            background-color: var(--md-dark-surface-color);
-            border-color: var(--md-dark-border-color);
-            box-shadow: var(--md-dark-shadow-2);
-        }
-        body.dark-mode #iconSuggestions div {
-            color: var(--md-dark-text-primary);
-        }
-        body.dark-mode #iconSuggestions div:hover {
-            background-color: rgba(255, 255, 255, 0.06);
-        }
-        body.dark-mode #iconSuggestions .material-symbols-outlined {
-            color: var(--md-dark-text-secondary);
-        }
-        body.dark-mode #iconSuggestions div.selected,
-        body.dark-mode #iconSuggestions div:active {
-            background-color: var(--md-dark-selected-item-bg);
-        }
-        body.dark-mode #iconSuggestions::-webkit-scrollbar-thumb {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-        body.dark-mode #iconSuggestions::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-        }
-
-        /* Code Output */
-        body.dark-mode .code-output {
-            background-color: #282c34; /* Keep code editor dark */
-            border-color: var(--md-dark-border-color);
-        }
-        body.dark-mode .code-output textarea {
-            background: transparent;
-            color: #abb2bf; /* Keep code editor text color */
-        }
-
-        /* Preview Area */
-        body.dark-mode #previewContainer {
-            background-color: var(--md-dark-surface-color);
-            border-color: var(--md-dark-border-color);
-        }
-        body.dark-mode #screenPreview {
-            border-color: #555; /* Darker border for preview */
-            /* Canvas background is set via JS, no change needed here */
-        }
-
-        /* Info Overlay */
-        body.dark-mode .info-overlay {
-            background-color: rgba(0, 0, 0, 0.7); /* Darker overlay */
-        }
-        body.dark-mode .info-content {
-            background-color: var(--md-dark-surface-color);
-            color: var(--md-dark-text-primary);
-            box-shadow: var(--md-dark-shadow-3);
-        }
-        body.dark-mode .info-content h2 {
-            color: var(--md-dark-primary-color);
-        }
-        body.dark-mode .info-actions button.secondary {
-            background-color: var(--md-dark-surface-color);
-            color: var(--md-dark-text-secondary);
-            border: 1px solid var(--md-dark-border-color);
-        }
-        body.dark-mode .info-actions button.secondary:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        /* Dark Mode Styles */
-        body.dark-mode {
-            background-color: var(--md-dark-background-color);
-            color: var(--md-dark-text-primary);
-        }
-
-        body.dark-mode .top-nav {
-            background-color: var(--md-dark-surface-color);
-            border-color: var(--md-dark-border-color);
-        }
-
-        body.dark-mode .panel {
-            background-color: var(--md-dark-surface-color);
-        }
-
-        body.dark-mode details {
-            background-color: var(--md-dark-surface-color);
-            border-color: var(--md-dark-border-color);
-        }
-
-        body.dark-mode input,
-        body.dark-mode select,
-        body.dark-mode textarea {
-            background-color: var(--md-dark-surface-color);
-            border-color: var(--md-dark-border-color);
-            color: var(--md-dark-text-primary);
-        }
-
-        body.dark-mode .left-panel,
-        body.dark-mode .center-panel {
-            border-color: var(--md-dark-border-color);
-        }
-
-        /* --- Hamburger Menu & Collapsible Panel --- */
-        
-        .hamburger-menu {
-            background: none;
-            border: none;
-            padding: 8px;
-            margin-right: 12px; /* Space between hamburger and title icon */
-            cursor: pointer;
-            color: var(--md-text-secondary-on-background);
-            display: inline-flex; /* Use flex to center icon */
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%; /* Make it circular */
-            width: 40px; /* Explicit size */
-            height: 40px; /* Explicit size */
-            transition: background-color 0.2s ease, color 0.2s ease;
-            box-shadow: none; /* Override default button shadow if any */
-        }
-        
-        .hamburger-menu:hover {
-            background-color: rgba(0, 0, 0, 0.04); /* Subtle hover */
-            color: var(--md-text-primary-on-background);
-            transform: none; /* Override default button transform */
-        }
-        
-        .hamburger-menu .material-symbols-outlined {
-            font-size: 24px; /* Adjust icon size */
-            display: block;
-        }
-        
-        /* Adjust body grid for transition */
-        body {
-            /* ... keep existing body styles ... */
-            transition: grid-template-columns 0.3s ease-in-out; /* Add transition for grid */
-        }
-        
-        /* Adjust left panel for transition */
-        .left-panel {
-            /* ... keep existing left-panel styles ... */
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, padding 0.3s ease-in-out, border-right-width 0.3s ease-in-out, width 0.3s ease-in-out; /* Add width transition */
-            overflow: hidden; /* Hide content when collapsing */
-            transform: translateX(0);
-            opacity: 1;
-            border-right-width: 1px; /* Ensure border width is transitionable */
-        }
-        
-        /* Styles for when the left panel is collapsed */
-        body.left-panel-collapsed {
-            /* Set the first column (left panel) width to 0 */
-            grid-template-columns: 0px var(--center-panel-width) 1fr;
-        }
-        
-        body.left-panel-collapsed .left-panel {
-            padding-top: 0;
-            padding-bottom: 0;
-            padding-left: 0;
-            padding-right: 0;
-            border-right-width: 0; /* Collapse border */
-            opacity: 0;
-            transform: translateX(-100%); /* Slide out effect */
-            width: 0; /* Ensure width collapses */
-            overflow: hidden; /* Hide content */
-        }
-        
-        /* --- Dark Mode Adjustments for Hamburger --- */
-        body.dark-mode .hamburger-menu {
-            color: var(--md-dark-text-secondary);
-        }
-        
-        body.dark-mode .hamburger-menu:hover {
-            background-color: rgba(255, 255, 255, 0.06); /* Subtle hover for dark */
-            color: var(--md-dark-text-primary);
-        }
-        
-        /* --- Dark Mode Adjustments for Collapsed Panel --- */
-        body.dark-mode.left-panel-collapsed .left-panel {
-             /* Ensure border color doesn't linger */
-            border-right-color: transparent;
-        }
-
-        /* --- Floating Action Button (FAB) --- */
-        .fab {
-            position: fixed;
-            bottom: 24px;
-            left: 24px;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background-color: var(--md-primary-color);
-            color: white;
-            border: none;
-            box-shadow: var(--md-shadow-3);
-            cursor: pointer;
-            display: none; /* Hidden by default */
-            align-items: center;
-            justify-content: center;
-            z-index: 99;
-            transition: transform 0.2s ease-out, box-shadow 0.2s ease;
-            padding: 0; /* Remove default button padding */
-            margin: 0; /* Remove default button margin */
-        }
-
-        .fab:hover {
-            background-color: var(--md-primary-dark);
-            box-shadow: var(--md-shadow-4); /* Optional: Define --md-shadow-4 for stronger hover */
-            transform: translateY(-2px);
-        }
-
-        .fab .material-symbols-outlined {
-            font-size: 28px;
-        }
-
-        /* Show FAB only when left panel is collapsed */
-        body.left-panel-collapsed .elements-fab {
-            display: inline-flex; /* Or flex */
-        }
-
-        /* --- Elements Popup --- */
-        .elements-popup {
-            position: fixed;
-            bottom: 90px; /* Position above the FAB */
-            left: 24px;
-            width: 300px; /* Adjust width as needed */
-            max-height: 400px; /* Limit height */
-            background-color: var(--md-surface-color);
-            border-radius: var(--md-radius-md);
-            box-shadow: var(--md-shadow-3);
-            z-index: 100;
-            display: none; /* Hidden by default */
-            flex-direction: column;
-            overflow: hidden;
-            border: 1px solid var(--md-border-color);
-        }
-
-        .elements-popup.visible {
-            display: flex;
-        }
-
-        .elements-popup-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--md-border-color);
-            background-color: #f8f9fc; /* Slightly different bg for header */
-        }
-
-        .elements-popup-header h3 {
-            margin: 0;
-            font-size: 1.1em;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--md-text-primary-on-surface);
-        }
-
-        .elements-popup-header .close-popup-btn {
-            background: none;
-            border: none;
-            color: var(--md-text-secondary-on-background);
-            cursor: pointer;
-            padding: 4px;
-            margin: 0;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: background-color 0.2s ease;
-        }
-
-        .elements-popup-header .close-popup-btn:hover {
-            background-color: rgba(0, 0, 0, 0.06);
-            color: var(--md-text-primary-on-background);
-        }
-
-        .elements-popup-content {
-            padding: 16px;
-            overflow-y: auto;
-            flex-grow: 1;
-        }
-
-        /* Style buttons inside popup */
-        .popup-add-elements {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-        }
-
-        .popup-add-elements button {
-            flex: 1;
-            min-width: calc(50% - 4px);
-            padding: 8px 12px;
-            font-size: 0.85em;
-            background-color: white;
-            color: var(--md-text-primary-on-background);
-            border: 1px solid var(--md-border-color);
-            box-shadow: var(--md-shadow-1);
-            margin: 0; /* Override default button margin */
-            text-transform: none; /* Override default uppercase */
-        }
-
-        .popup-add-elements button:hover {
-            background-color: var(--md-primary-color);
-            color: white;
-            border-color: var(--md-primary-color);
-        }
-
-        .popup-add-elements button .material-symbols-outlined {
-            font-size: 16px;
-        }
-
-        /* Style element list inside popup */
-        .popup-element-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            border: 1px solid var(--md-border-color);
-            border-radius: var(--md-radius-sm);
-            font-size: 0.9em;
-        }
-
-        /* Reuse existing #elementList li styles if possible, or duplicate/adapt */
-        .popup-element-list li {
-            padding: 8px 12px;
-            border-bottom: 1px solid var(--md-border-color);
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.2s ease;
-            min-height: 32px;
-            user-select: none;
-        }
-        .popup-element-list li:last-child { border-bottom: none; }
-        .popup-element-list li:hover { background-color: rgba(0, 0, 0, 0.02); }
-        .popup-element-list li.selected { background-color: var(--md-selected-item-bg); font-weight: 500; }
-        /* Add styles for drag handle, label, controls within popup list items */
-        .popup-element-list li .drag-handle { /* ... copy from #elementList li .drag-handle ... */ cursor: move; color: var(--md-text-hint-on-background); margin-right: 4px; opacity: 0.5; transition: opacity 0.2s ease; }
-        .popup-element-list li:hover .drag-handle { opacity: 1; }
-        .popup-element-list li .element-label { /* ... copy from .element-label ... */ display: flex; align-items: center; gap: 8px; line-height: 1; flex: 1; min-width: 0; }
-        .popup-element-list li .element-label span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .popup-element-list li .element-label .material-symbols-outlined { /* ... copy from .element-label .material-symbols-outlined ... */ font-size: 20px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; color: var(--md-text-secondary-on-background); }
-        .popup-element-list li.selected .element-label .material-symbols-outlined { color: var(--md-primary-color); }
-        .popup-element-list li .element-controls { /* ... copy from .element-controls ... */ display: flex; align-items: center; }
-        .popup-element-list li .element-controls button { /* ... copy from .element-controls button ... */ background: none; border: none; color: var(--md-text-secondary-on-background); cursor: pointer; padding: 4px; margin: 0; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: var(--md-radius-sm); transition: all 0.2s ease; }
-        .popup-element-list li .element-controls button .material-symbols-outlined { font-size: 18px; }
-        .popup-element-list li .element-controls button:hover { color: var(--md-error-color); background-color: rgba(244, 67, 54, 0.08); }
-
-
-        /* --- Dark Mode for FAB and Popup --- */
-        body.dark-mode .fab {
-            background-color: var(--md-dark-primary-color);
-            color: var(--md-dark-text-primary); /* Or white if contrast is better */
-            box-shadow: var(--md-dark-shadow-3);
-        }
-        body.dark-mode .fab:hover {
-            background-color: var(--md-dark-primary-dark);
-            box-shadow: var(--md-dark-shadow-4); /* Define if needed */
-        }
-
-        body.dark-mode .elements-popup {
-            background-color: var(--md-dark-surface-color);
-            border-color: var(--md-dark-border-color);
-            box-shadow: var(--md-dark-shadow-3);
-        }
-        body.dark-mode .elements-popup-header {
-            background-color: var(--md-dark-background-color); /* Slightly different dark bg */
-            border-bottom-color: var(--md-dark-border-color);
-        }
-        body.dark-mode .elements-popup-header h3 {
-            color: var(--md-dark-text-primary);
-        }
-        body.dark-mode .elements-popup-header .close-popup-btn {
-            color: var(--md-dark-text-secondary);
-        }
-        body.dark-mode .elements-popup-header .close-popup-btn:hover {
-            background-color: rgba(255, 255, 255, 0.08);
-            color: var(--md-dark-text-primary);
-        }
-
-        body.dark-mode .popup-add-elements button {
-            background-color: var(--md-dark-surface-color);
-            color: var(--md-dark-text-primary);
-            border-color: var(--md-dark-border-color);
-            box-shadow: var(--md-dark-shadow-1);
-        }
-        body.dark-mode .popup-add-elements button:hover {
-            background-color: var(--md-dark-primary-color);
-            color: var(--md-dark-background-color); /* Dark text on light button */
-            border-color: var(--md-dark-primary-color);
-        }
-
-        body.dark-mode .popup-element-list {
-            border-color: var(--md-dark-border-color);
-        }
-        body.dark-mode .popup-element-list li {
-            border-bottom-color: var(--md-dark-border-color);
-            color: var(--md-dark-text-primary);
-        }
-        body.dark-mode .popup-element-list li:hover {
-            background-color: rgba(255, 255, 255, 0.04);
-        }
-        body.dark-mode .popup-element-list li.selected {
-            background-color: var(--md-dark-selected-item-bg);
-        }
-
-        /* Adapt other popup list item styles for dark mode if needed */
-        body.dark-mode .popup-element-list li .drag-handle { color: var(--md-dark-text-hint); }
-        body.dark-mode .popup-element-list li .element-label .material-symbols-outlined { color: var(--md-dark-text-secondary); }
-        body.dark-mode .popup-element-list li.selected .element-label .material-symbols-outlined { color: var(--md-dark-primary-color); }
-        body.dark-mode .popup-element-list li .element-controls button { color: var(--md-dark-text-secondary); }
-        body.dark-mode .popup-element-list li .element-controls button:hover { color: var(--md-error-color); background-color: rgba(244, 67, 54, 0.15); }
-        
+:root {
+    --md-primary-color: #3f51b5; 
+    --md-primary-dark: #303f9f; 
+    --md-accent-color: #ff4081;
+    --md-background-color: #f8f9fa; 
+    --md-surface-color: #ffffff;
+    --md-text-primary-on-background: rgba(0, 0, 0, 0.87); 
+    --md-text-secondary-on-background: rgba(0, 0, 0, 0.6);
+    --md-text-hint-on-background: rgba(0, 0, 0, 0.38); 
+    --md-text-primary-on-surface: rgba(0, 0, 0, 0.87);
+    --md-border-color: rgba(0, 0, 0, 0.08); 
+    --md-canvas-background: #000000; 
+    --md-selected-item-bg: #e8eaf6;
+    --md-error-color: #f44336; 
+    --md-success-color: #4caf50;
+    --md-shadow-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
+    --md-shadow-2: 0 3px 6px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.12);
+    --md-shadow-3: 0 10px 20px rgba(0,0,0,0.15), 0 3px 6px rgba(0,0,0,0.10);
+    --md-radius-sm: 6px;
+    --md-radius-md: 8px;
+    --md-radius-lg: 12px;
+    --left-panel-width: 320px;  /* Reduced from 380px */
+    --center-panel-width: 360px; /* Reduced from 420px */
+    --canvas-scale-factor: 1.5;
+    --top-nav-height: 48px;     /* Reduced from 64px */
+
+    /* Dark Mode */
+    --md-dark-primary-color: #7986cb; /* Lighter primary for dark */
+    --md-dark-primary-dark: #5c6bc0;
+    --md-dark-accent-color: #ff80ab; /* Lighter accent */
+    --md-dark-background-color: #121212; /* Standard dark bg */
+    --md-dark-surface-color: #1e1e1e; /* Slightly lighter surface */
+    --md-dark-text-primary: rgba(255, 255, 255, 0.87); /* White primary text */
+    --md-dark-text-secondary: rgba(255, 255, 255, 0.6); /* White secondary text */
+    --md-dark-text-hint: rgba(255, 255, 255, 0.38); /* White hint text */
+    --md-dark-border-color: rgba(255, 255, 255, 0.12); /* Lighter border */
+    --md-dark-selected-item-bg: rgba(121, 134, 203, 0.2); /* Primary color with alpha */
+    --md-dark-shadow-1: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.24); /* Darker shadows */
+    --md-dark-shadow-2: 0 3px 6px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.22);
+}
+
+html { height: 100%; }
+body {
+    font-family: 'Roboto', sans-serif; 
+    line-height: 1.6; 
+    margin: 0; 
+    padding: 0;
+    background-color: var(--md-background-color); 
+    color: var(--md-text-primary-on-background);
+    display: grid;
+    grid-template-rows: var(--top-nav-height) 1fr;
+    grid-template-columns: var(--left-panel-width) var(--center-panel-width) 1fr;
+    height: 100vh;
+    font-size: 14px;
+    overflow: hidden;
+}
+
+.top-nav {
+    grid-row: 1;
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px; /* Reduced from 32px */
+    background-color: var(--md-surface-color);
+    border-bottom: 1px solid var(--md-border-color);
+    box-shadow: var(--md-shadow-1);
+    z-index: 10;
+}
+
+.top-nav .title {
+    font-size: 1.2em; /* Reduced from 1.4em */
+    font-weight: 500;
+    color: var(--md-primary-color);
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Reduced from 12px */
+}
+
+.top-nav .nav-icons {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Reduced from 20px */
+}
+
+.top-nav .nav-icons .material-symbols-outlined {
+    font-size: 1.6em;
+    color: var(--md-text-secondary-on-background);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.top-nav .nav-icons .material-symbols-outlined:hover {
+    color: var(--md-text-primary-on-background);
+    transform: scale(1.1);
+}
+
+.export-button {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    color: var(--md-primary-color) !important;
+    background: transparent;
+    box-sizing: border-box;
+    align-self: center;
+}
+
+.export-button:hover {
+    transform: translateY(-1px);
+    color: var(--md-primary-dark) !important;
+}
+
+.export-button .material-symbols-outlined {
+    color: inherit !important;
+    font-size: 20px;
+    line-height: 1;
+    display: block;
+}
+
+.panel {
+    padding: 16px; /* Reduced from 24px */
+    overflow-y: auto;
+    height: calc(100vh - var(--top-nav-height));
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Reduced from 20px */
+}
+
+.left-panel {
+    grid-row: 2; 
+    grid-column: 1;
+    background-color: #f8f9fc;
+    border-right: 1px solid var(--md-border-color);
+}
+
+.center-panel {
+    grid-row: 2; 
+    grid-column: 2;
+    background-color: var(--md-surface-color);
+    border-right: 1px solid var(--md-border-color);
+}
+
+.right-panel {
+    grid-row: 2; 
+    grid-column: 3;
+    align-items: center;
+    background-color: var(--md-background-color);
+    padding: 32px;
+}
+
+h1, h2, h3 { 
+    margin-top: 0; 
+    margin-bottom: 20px; 
+    color: var(--md-text-primary-on-surface); 
+    font-weight: 500; 
+}
+
+h2 { 
+    font-size: 1.3em; 
+    border-bottom: 1px solid var(--md-border-color); 
+    padding-bottom: 12px; 
+    width: 100%; 
+    display: flex; 
+    align-items: center; 
+    gap: 10px;
+}
+
+h3 { 
+    font-size: 1.1em; 
+    font-weight: 500; 
+    margin-bottom: 16px;
+}
+
+details {
+    border: 1px solid var(--md-border-color);
+    border-radius: var(--md-radius-md);
+    background-color: var(--md-surface-color);
+    width: 100%;
+    margin-bottom: 8px; /* Reduced from 16px */
+    box-shadow: var(--md-shadow-1);
+    transition: box-shadow 0.2s ease;
+}
+
+details:hover {
+    box-shadow: var(--md-shadow-2);
+}
+
+details[open] {
+    box-shadow: var(--md-shadow-2);
+}
+
+summary { 
+    padding: 8px 12px; /* Reduced from 14px 20px */
+    font-weight: 500; 
+    cursor: pointer; 
+    list-style: none; 
+    display: flex; 
+    align-items: center; 
+    gap: 6px; /* Reduced from 10px */
+    border-bottom: 1px solid transparent; 
+    transition: all 0.2s ease;
+}
+
+summary:hover { 
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+details[open] > summary { 
+    border-bottom: 1px solid var(--md-border-color); 
+    background-color: var(--md-surface-color);
+}
+
+.details-content { 
+    padding: 12px; /* Reduced from 20px */
+    border-top: 1px solid var(--md-border-color);
+}
+
+label { 
+    display: block; 
+    margin-top: 8px; /* Reduced from 16px */
+    margin-bottom: 4px; /* Reduced from 6px */
+    font-weight: 500; 
+    font-size: 0.9em; 
+    color: var(--md-text-secondary-on-background);
+}
+
+input[type="text"], 
+input[type="number"], 
+select, 
+textarea { 
+    width: 100%; 
+    padding: 8px 12px; /* Reduced from 12px 16px */
+    margin-bottom: 8px; /* Reduced from 12px */
+    border: 1px solid var(--md-border-color); 
+    border-radius: var(--md-radius-sm); 
+    box-sizing: border-box; 
+    font-size: 1em; 
+    background-color: #fff; 
+    color: var(--md-text-primary-on-surface); 
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+input:focus, 
+select:focus, 
+textarea:focus { 
+    border-color: var(--md-primary-color); 
+    outline: none; 
+    box-shadow: 0 0 0 3px rgba(63,81,181,0.1);
+}
+
+button { 
+    background-color: var(--md-primary-color); 
+    color: white; 
+    padding: 6px 12px; /* Reduced from 10px 20px */
+    border: none; 
+    border-radius: var(--md-radius-sm); 
+    cursor: pointer; 
+    font-size: 0.9em; 
+    font-weight: 500; 
+    text-transform: uppercase; 
+    margin-right: 4px; /* Reduced from 8px */
+    margin-top: 4px; /* Reduced from 8px */
+    display: inline-flex; 
+    align-items: center; 
+    gap: 4px; /* Reduced from 8px */
+    transition: all 0.2s ease;
+    box-shadow: var(--md-shadow-1);
+}
+
+button:hover { 
+    background-color: var(--md-primary-dark); 
+    box-shadow: var(--md-shadow-2);
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: var(--md-shadow-1);
+}
+
+#elementList { 
+    list-style: none; 
+    padding: 0; 
+    margin: 0; 
+    max-height: 200px; /* Reduced from 250px */
+    overflow-y: auto; 
+    margin-top: 8px; /* Reduced from 16px */
+    border: 1px solid var(--md-border-color);
+    border-radius: var(--md-radius-md);
+    font-size: 0.9em;
+}
+
+#elementList li { 
+    padding: 6px 8px; /* Reduced from 8px 12px */
+    border-bottom: 1px solid var(--md-border-color); 
+    cursor: pointer; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    transition: all 0.2s ease;
+    min-height: 28px; /* Reduced from 32px */
+    user-select: none;
+}
+
+#elementList li .drag-handle {
+    cursor: move;
+    color: var(--md-text-hint-on-background);
+    margin-right: 4px;
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+}
+
+#elementList li:hover .drag-handle {
+    opacity: 1;
+}
+
+#elementList li.dragging {
+    opacity: 0.5;
+    background-color: var(--md-selected-item-bg);
+}
+
+#elementList li.drag-over {
+    border-top: 2px solid var(--md-primary-color);
+}
+
+#elementList li:hover { 
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+#elementList li.selected { 
+    background-color: var(--md-selected-item-bg);
+    font-weight: 500;
+}
+
+#elementList li.selected .element-label .material-symbols-outlined {
+    color: var(--md-primary-color);
+}
+
+#elementList li:last-child {
+    border-bottom: none;
+}
+
+.element-label { 
+    display: flex; 
+    align-items: center; 
+    gap: 6px; /* Reduced from 8px */
+    line-height: 1;
+    flex: 1;
+    min-width: 0;
+}
+
+.element-label span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.element-label .material-symbols-outlined { 
+    font-size: 18px; /* Reduced from 20px */
+    width: 18px; /* Reduced from 20px */
+    height: 18px; /* Reduced from 20px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--md-text-secondary-on-background);
+}
+
+.element-controls { 
+    display: flex;
+    align-items: center;
+}
+
+.element-controls button { 
+    background: none; 
+    border: none; 
+    color: var(--md-text-secondary-on-background); 
+    cursor: pointer; 
+    padding: 2px; /* Reduced from 4px */
+    margin: 0;
+    width: 24px; /* Reduced from 28px */
+    height: 24px; /* Reduced from 28px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--md-radius-sm);
+    transition: all 0.2s ease;
+}
+
+.element-controls button .material-symbols-outlined {
+    font-size: 16px; /* Reduced from 18px */
+}
+
+.element-controls button:hover { 
+    color: var(--md-error-color);
+    background-color: rgba(244, 67, 54, 0.08);
+}
+
+#previewContainer {
+    text-align: left;
+    width: 100%;
+    max-width: 700px;
+    background-color: var(--md-surface-color);
+    border-radius: var(--md-radius-lg);
+    padding: 24px;
+    border: 1px solid var(--md-border-color);
+    box-sizing: border-box;
+    box-shadow: var(--md-shadow-2);
+}
+
+#screenPreview { 
+    border: 2px solid #444; 
+    background-color: var(--md-canvas-background); 
+    margin: 16px 0;
+    position: relative; 
+    box-shadow: var(--md-shadow-1);
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#previewCanvas {
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+#generatedCodeOutput, 
+#generatedFontCodeOutput { 
+    width: calc(100% - 32px); 
+    height: 300px; 
+    white-space: pre; 
+    font-family: monospace; 
+    font-size: 12px; /* Reduced from 13px */
+    background-color: #282c34; 
+    color: #abb2bf; 
+    border: none; 
+    border-radius: 0 0 var(--md-radius-md) var(--md-radius-md);
+    padding: 12px; /* Reduced from 20px */
+    margin: 0; 
+    box-sizing: border-box; 
+    resize: vertical;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.coord-control { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; /* Reduced from 12px */
+    margin-bottom: 8px; /* Reduced from 12px */
+}
+
+.coord-control input[type="range"] { 
+    flex: 1; 
+    margin: 0; 
+    height: 4px; 
+    accent-color: var(--md-primary-color); 
+    cursor: pointer;
+}
+
+#iconSearchContainer { 
+    position: relative; 
+    margin-bottom: 4px; /* Reduced from 8px */
+    max-width: 300px;
+}
+
+#iconSearchContainer input[type="text"] {
+    padding-right: 32px;
+}
+
+#iconSuggestions { 
+    position: absolute; 
+    background-color: white; 
+    border: 1px solid var(--md-border-color); 
+    border-radius: var(--md-radius-sm);
+    max-height: 180px; 
+    overflow-y: auto; 
+    z-index: 10; 
+    width: 100%;
+    max-width: 300px;
+    box-shadow: var(--md-shadow-2);
+    margin-top: 4px;
+}
+
+#iconSuggestions div { 
+    padding: 4px 8px; /* Reduced from 6px 12px */
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    font-size: 0.9em;
+    transition: background-color 0.15s ease;
+    min-height: 28px; /* Reduced from 32px */
+}
+
+#iconSuggestions .material-symbols-outlined {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--md-text-secondary-on-background);
+}
+
+#iconSuggestions div:hover { 
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+#iconSuggestions div.selected,
+#iconSuggestions div:active {
+    background-color: var(--md-selected-item-bg);
+}
+
+#iconSuggestions::-webkit-scrollbar {
+    width: 6px; /* Reduced from 8px */
+}
+
+#iconSuggestions::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#iconSuggestions::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+#iconSuggestions::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.checkbox-control { 
+    display: flex; 
+    align-items: center; 
+    gap: 6px; /* Reduced from 10px */
+    margin-top: 8px; /* Reduced from 12px */
+    padding: 2px 0; /* Reduced from 4px 0 */
+}
+
+.checkbox-control input[type="checkbox"] { 
+    margin: 0; 
+    width: 18px;
+    height: 18px;
+    accent-color: var(--md-primary-color);
+}
+
+.add-elements-container {
+    display: flex;
+    gap: 4px; /* Reduced from 8px */
+    flex-wrap: wrap;
+}
+
+.add-elements-container button {
+    flex: 1;
+    min-width: calc(50% - 4px);
+    padding: 6px 8px; /* Reduced from 8px 12px */
+    font-size: 0.85em;
+    background-color: white;
+    color: var(--md-text-primary-on-background);
+    border: 1px solid var(--md-border-color);
+    box-shadow: var(--md-shadow-1);
+    margin: 0;
+}
+
+.add-elements-container button:hover {
+    background-color: var(--md-primary-color);
+    color: white;
+    border-color: var(--md-primary-color);
+}
+
+.add-elements-container button .material-symbols-outlined {
+    font-size: 16px;
+}
+
+.add-elements-container button:active {
+    transform: translateY(1px);
+    box-shadow: none;
+}
+
+.code-actions-container {
+    display: flex;
+    gap: 4px; /* Reduced from 8px */
+    margin-bottom: 8px; /* Reduced from 12px */
+}
+
+.code-actions-container button {
+    padding: 6px 12px;
+    font-size: 0.85em;
+    background-color: white;
+    color: var(--md-text-primary-on-background);
+    border: 1px solid var(--md-border-color);
+    box-shadow: var(--md-shadow-1);
+    margin: 0;
+}
+
+.code-actions-container button:hover {
+    background-color: var(--md-primary-color);
+    color: white;
+    border-color: var (--md-primary-color);
+}
+
+.code-actions-container button .material-symbols-outlined {
+    font-size: 16px;
+}
+
+.code-actions-container button:active {
+    transform: translateY(1px);
+    box-shadow: none;
+}
+
+#generateCodeBtn, #generateFontCodeBtn {
+    background-color: var(--md-primary-color);
+    color: white;
+}
+
+#copyCodeBtn, #copyFontCodeBtn {
+    background-color: white;
+    color: var(--md-text-secondary-on-background);
+}
+
+#copyCodeBtn:hover, #copyFontCodeBtn:hover {
+    background-color: var(--md-text-secondary-on-background);
+    color: white;
+}
+
+#copyCodeBtn.success, #copyFontCodeBtn.success {
+    background-color: var(--md-success-color);
+    color: white;
+    border-color: var (--md-success-color);
+}
+
+.code-output {
+    border: 1px solid var(--md-border-color);
+    border-radius: var(--md-radius-sm);
+    background-color: #282c34;
+    padding: 16px;
+    margin-top: 12px;
+    position: relative;
+}
+
+.code-output textarea {
+    width: 100%;
+    min-height: 200px;
+    border: none;
+    background: transparent;
+    color: #abb2bf;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    resize: vertical;
+    padding: 0;
+    margin: 0;
+}
+
+.code-output textarea:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.color-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.color-control select {
+    flex: 1;
+}
+
+.color-control input[type="color"] {
+    width: 40px;
+    height: 40px;
+    padding: 2px;
+    border: 1px solid var(--md-border-color);
+    border-radius: var(--md-radius-sm);
+    background: white;
+    cursor: pointer;
+}
+
+/* Info Overlay Styles */
+.info-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(3px);
+}
+
+.info-overlay.active {
+    display: flex;
+}
+
+.info-content {
+    background-color: var(--md-surface-color);
+    border-radius: var(--md-radius-lg);
+    padding: 16px; /* Reduced from 24px */
+    width: 90%;
+    max-width: 600px;
+    box-shadow: var(--md-shadow-3);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.info-content h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--md-primary-color);
+    margin-bottom: 24px;
+}
+
+.info-body {
+    margin-bottom: 16px; /* Reduced from 24px */
+}
+
+.info-body h3 {
+    color: var(--md-text-primary-on-background);
+    margin-top: 20px;
+}
+
+.info-body ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.info-body ul li {
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--md-text-secondary-on-background);
+}
+
+.info-body ul li::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background-color: var(--md-primary-color);
+    border-radius: 50%;
+}
+
+.info-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px; /* Reduced from 12px */
+    margin-top: 16px; /* Reduced from 24px */
+    padding-top: 12px; /* Reduced from 16px */
+    border-top: 1px solid var(--md-border-color);
+}
+
+.info-actions button.secondary {
+    background-color: transparent;
+    color: var(--md-text-primary-on-background);
+    border: 1px solid var(--md-border-color);
+}
+
+.info-actions button.secondary:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 600px) {
+    .info-content {
+        width: 95%;
+        padding: 16px;
+        margin: 16px;
+    }
+}
+
+.scale-button {
+    background: none;
+    border: none;
+    padding: 4px;
+    margin-left: 8px;
+    cursor: pointer;
+    color: var(--md-text-secondary-on-background);
+    box-shadow: none;
+}
+
+.scale-button:hover {
+    color: var(--md-primary-color);
+    background: none;
+    transform: none;
+}
+
+.scale-button .material-symbols-outlined {
+    font-size: 18px;
+}
+
+#screenPreview.scale-to-fit {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: attr(data-width) / attr(data-height);
+    max-height: 70vh;
+}
+
+#screenPreview.scale-to-fit #previewCanvas {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+/* --- Dark Mode Styles --- */
+body.dark-mode {
+    background-color: var(--md-dark-background-color);
+    color: var(--md-dark-text-primary); /* Default text color */
+}
+
+body.dark-mode .top-nav {
+    background-color: var(--md-dark-surface-color);
+    border-color: var(--md-dark-border-color);
+    box-shadow: var(--md-dark-shadow-1);
+}
+
+body.dark-mode .top-nav .title {
+    color: var(--md-dark-primary-color); /* Use lighter primary */
+}
+
+body.dark-mode .top-nav .nav-icons .material-symbols-outlined {
+    color: var(--md-dark-text-secondary);
+}
+body.dark-mode .top-nav .nav-icons .material-symbols-outlined:hover {
+    color: var(--md-dark-text-primary);
+}
+body.dark-mode .export-button {
+    color: var(--md-dark-primary-color) !important;
+}
+body.dark-mode .export-button:hover {
+    color: var(--md-dark-primary-dark) !important;
+}
+
+body.dark-mode .panel {
+    /* background-color is handled by specific panel rules if needed */
+    border-color: var(--md-dark-border-color); /* Ensure panel borders update */
+}
+
+body.dark-mode .left-panel {
+    background-color: var(--md-dark-surface-color); /* Use surface color */
+    border-right-color: var(--md-dark-border-color);
+}
+
+body.dark-mode .center-panel {
+    background-color: var(--md-dark-surface-color);
+    border-right-color: var(--md-dark-border-color);
+}
+
+body.dark-mode .right-panel {
+    background-color: var(--md-dark-background-color); /* Match body background */
+}
+
+body.dark-mode details {
+    background-color: var(--md-dark-surface-color);
+    border-color: var(--md-dark-border-color);
+    box-shadow: var(--md-dark-shadow-1);
+}
+body.dark-mode details:hover { box-shadow: var(--md-dark-shadow-2); }
+body.dark-mode details[open] { box-shadow: var(--md-dark-shadow-2); }
+
+body.dark-mode summary {
+    color: var(--md-dark-text-primary);
+}
+body.dark-mode summary:hover {
+    background-color: rgba(255, 255, 255, 0.04); /* Lighter hover for dark */
+}
+body.dark-mode details[open] > summary {
+    border-bottom-color: var(--md-dark-border-color);
+    background-color: var(--md-dark-surface-color);
+}
+body.dark-mode .details-content {
+    border-top-color: var(--md-dark-border-color);
+}
+
+/* Text elements */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode p,
+body.dark-mode span:not(.material-symbols-outlined):not(.material-icons), /* Avoid overriding icon styles */
+body.dark-mode div:not(#screenPreview):not(.code-output):not(.info-content) /* Avoid broad div styling */
+{
+    color: var(--md-dark-text-primary);
+}
+body.dark-mode label,
+body.dark-mode .slider-value,
+body.dark-mode .code-note,
+body.dark-mode p[style*="color: var(--md-text-secondary-on-background)"] /* Target specific secondary text paragraphs */
+{
+    color: var(--md-dark-text-secondary);
+}
+body.dark-mode a {
+    color: var(--md-dark-primary-color); /* Link color */
+}
+body.dark-mode a:hover {
+    color: var(--md-dark-accent-color);
+}
+
+/* Input elements */
+body.dark-mode input[type="text"],
+body.dark-mode input[type="number"],
+body.dark-mode select,
+body.dark-mode textarea {
+    background-color: var(--md-dark-background-color); /* Slightly darker than surface */
+    border-color: var(--md-dark-border-color);
+    color: var(--md-dark-text-primary);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+body.dark-mode input:focus,
+body.dark-mode select:focus,
+body.dark-mode textarea:focus {
+    border-color: var(--md-dark-primary-color);
+    box-shadow: 0 0 0 3px rgba(121, 134, 203, 0.2); /* Use dark primary with alpha */
+}
+body.dark-mode input[type="color"] {
+    background-color: var(--md-dark-surface-color);
+    border-color: var(--md-dark-border-color);
+}
+body.dark-mode input[type="range"] {
+    accent-color: var(--md-dark-primary-color);
+}
+body.dark-mode .checkbox-control input[type="checkbox"] {
+    accent-color: var(--md-dark-primary-color);
+}
+
+/* Buttons */
+body.dark-mode button {
+    /* Keep primary button colors or adjust if needed */
+    /* Example: Use lighter primary for better contrast */
+    /* background-color: var(--md-dark-primary-color); */
+    /* color: var(--md-dark-text-primary); */
+}
+body.dark-mode button:hover {
+    /* background-color: var(--md-dark-primary-dark); */
+}
+body.dark-mode .add-elements-container button,
+body.dark-mode .code-actions-container button {
+    background-color: var(--md-dark-surface-color);
+    color: var(--md-dark-text-primary);
+    border-color: var(--md-dark-border-color);
+    box-shadow: var(--md-dark-shadow-1);
+}
+body.dark-mode .add-elements-container button:hover,
+body.dark-mode .code-actions-container button:hover {
+    background-color: var(--md-dark-primary-color);
+    color: var(--md-dark-background-color); /* Dark text on light button */
+    border-color: var(--md-dark-primary-color);
+}
+body.dark-mode #copyCodeBtn,
+body.dark-mode #copyFontCodeBtn {
+    background-color: var(--md-dark-surface-color);
+    color: var(--md-dark-text-secondary);
+}
+body.dark-mode #copyCodeBtn:hover,
+body.dark-mode #copyFontCodeBtn:hover {
+    background-color: var(--md-dark-text-secondary);
+    color: var(--md-dark-background-color);
+}
+body.dark-mode #copyCodeBtn.success,
+body.dark-mode #copyFontCodeBtn.success {
+    background-color: var(--md-success-color); /* Keep success color */
+    color: white;
+    border-color: var(--md-success-color);
+}
+
+/* Element List */
+body.dark-mode #elementList li {
+    border-bottom-color: var(--md-dark-border-color);
+    color: var(--md-dark-text-primary);
+}
+body.dark-mode #elementList li:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+}
+body.dark-mode #elementList li.selected {
+    background-color: var(--md-dark-selected-item-bg);
+}
+body.dark-mode #elementList li.selected .element-label .material-symbols-outlined {
+    color: var(--md-dark-primary-color);
+}
+body.dark-mode #elementList li .element-label .material-symbols-outlined {
+    color: var(--md-dark-text-secondary);
+}
+body.dark-mode #elementList li .drag-handle {
+    color: var(--md-dark-text-hint);
+}
+body.dark-mode .element-controls button {
+    color: var(--md-dark-text-secondary);
+}
+body.dark-mode .element-controls button:hover {
+    color: var(--md-error-color); /* Keep error color */
+    background-color: rgba(244, 67, 54, 0.15); /* Slightly stronger alpha */
+}
+
+/* Icon Suggestions */
+body.dark-mode #iconSuggestions {
+    background-color: var(--md-dark-surface-color);
+    border-color: var(--md-dark-border-color);
+    box-shadow: var(--md-dark-shadow-2);
+}
+body.dark-mode #iconSuggestions div {
+    color: var(--md-dark-text-primary);
+}
+body.dark-mode #iconSuggestions div:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+body.dark-mode #iconSuggestions .material-symbols-outlined {
+    color: var(--md-dark-text-secondary);
+}
+body.dark-mode #iconSuggestions div.selected,
+body.dark-mode #iconSuggestions div:active {
+    background-color: var(--md-dark-selected-item-bg);
+}
+body.dark-mode #iconSuggestions::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+body.dark-mode #iconSuggestions::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Code Output */
+body.dark-mode .code-output {
+    background-color: #282c34; /* Keep code editor dark */
+    border-color: var(--md-dark-border-color);
+}
+body.dark-mode .code-output textarea {
+    background: transparent;
+    color: #abb2bf; /* Keep code editor text color */
+}
+
+/* Preview Area */
+body.dark-mode #previewContainer {
+    background-color: var(--md-dark-surface-color);
+    border-color: var(--md-dark-border-color);
+}
+body.dark-mode #screenPreview {
+    border-color: #555; /* Darker border for preview */
+    /* Canvas background is set via JS, no change needed here */
+}
+
+/* Info Overlay */
+body.dark-mode .info-overlay {
+    background-color: rgba(0, 0, 0, 0.7); /* Darker overlay */
+}
+body.dark-mode .info-content {
+    background-color: var(--md-dark-surface-color);
+    color: var(--md-dark-text-primary);
+    box-shadow: var(--md-dark-shadow-3);
+}
+body.dark-mode .info-content h2 {
+    color: var(--md-dark-primary-color);
+}
+body.dark-mode .info-actions button.secondary {
+    background-color: var(--md-dark-surface-color);
+    color: var(--md-dark-text-secondary);
+    border: 1px solid var(--md-dark-border-color);
+}
+body.dark-mode .info-actions button.secondary:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+    background-color: var(--md-dark-background-color);
+    color: var(--md-dark-text-primary);
+}
+
+body.dark-mode .top-nav {
+    background-color: var(--md-dark-surface-color);
+    border-color: var(--md-dark-border-color);
+}
+
+body.dark-mode .panel {
+    background-color: var(--md-dark-surface-color);
+}
+
+body.dark-mode details {
+    background-color: var(--md-dark-surface-color);
+    border-color: var(--md-dark-border-color);
+}
+
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+    background-color: var(--md-dark-surface-color);
+    border-color: var(--md-dark-border-color);
+    color: var(--md-dark-text-primary);
+}
+
+body.dark-mode .left-panel,
+body.dark-mode .center-panel {
+    border-color: var(--md-dark-border-color);
+}
+
+/* --- Hamburger Menu & Collapsible Panel --- */
+
+.hamburger-menu {
+    background: none;
+    border: none;
+    padding: 8px;
+    margin-right: 12px; /* Space between hamburger and title icon */
+    cursor: pointer;
+    color: var(--md-text-secondary-on-background);
+    display: inline-flex; /* Use flex to center icon */
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; /* Make it circular */
+    width: 40px; /* Explicit size */
+    height: 40px; /* Explicit size */
+    transition: background-color 0.2s ease, color 0.2s ease;
+    box-shadow: none; /* Override default button shadow if any */
+}
+
+.hamburger-menu:hover {
+    background-color: rgba(0, 0, 0, 0.04); /* Subtle hover */
+    color: var(--md-text-primary-on-background);
+    transform: none; /* Override default button transform */
+}
+
+.hamburger-menu .material-symbols-outlined {
+    font-size: 24px; /* Adjust icon size */
+    display: block;
+}
+
+/* Adjust body grid for transition */
+body {
+    /* ... keep existing body styles ... */
+    transition: grid-template-columns 0.3s ease-in-out; /* Add transition for grid */
+}
+
+/* Adjust left panel for transition */
+.left-panel {
+    /* ... keep existing left-panel styles ... */
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, padding 0.3s ease-in-out, border-right-width 0.3s ease-in-out, width 0.3s ease-in-out; /* Add width transition */
+    overflow: hidden; /* Hide content when collapsing */
+    transform: translateX(0);
+    opacity: 1;
+    border-right-width: 1px; /* Ensure border width is transitionable */
+}
+
+/* Styles for when the left panel is collapsed */
+body.left-panel-collapsed {
+    /* Set the first column (left panel) width to 0 */
+    grid-template-columns: 0px var(--center-panel-width) 1fr;
+}
+
+body.left-panel-collapsed .left-panel {
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    border-right-width: 0; /* Collapse border */
+    opacity: 0;
+    transform: translateX(-100%); /* Slide out effect */
+    width: 0; /* Ensure width collapses */
+    overflow: hidden; /* Hide content */
+}
+
+/* --- Dark Mode Adjustments for Hamburger --- */
+body.dark-mode .hamburger-menu {
+    color: var(--md-dark-text-secondary);
+}
+
+body.dark-mode .hamburger-menu:hover {
+    background-color: rgba(255, 255, 255, 0.06); /* Subtle hover for dark */
+    color: var(--md-dark-text-primary);
+}
+
+/* --- Dark Mode Adjustments for Collapsed Panel --- */
+body.dark-mode.left-panel-collapsed .left-panel {
+     /* Ensure border color doesn't linger */
+    border-right-color: transparent;
+}
+
+/* --- Floating Action Button (FAB) --- */
+.fab {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--md-primary-color);
+    color: white;
+    border: none;
+    box-shadow: var(--md-shadow-3);
+    cursor: pointer;
+    display: none; /* Hidden by default */
+    align-items: center;
+    justify-content: center;
+    z-index: 99;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease;
+    padding: 0; /* Remove default button padding */
+    margin: 0; /* Remove default button margin */
+}
+
+.fab:hover {
+    background-color: var(--md-primary-dark);
+    box-shadow: var(--md-shadow-4); /* Optional: Define --md-shadow-4 for stronger hover */
+    transform: translateY(-2px);
+}
+
+.fab .material-symbols-outlined {
+    font-size: 28px;
+}
+
+/* Show FAB only when left panel is collapsed */
+body.left-panel-collapsed .elements-fab {
+    display: inline-flex; /* Or flex */
+}
+
+/* --- Elements Popup --- */
+.elements-popup {
+    position: fixed;
+    bottom: 90px; /* Position above the FAB */
+    left: 24px;
+    width: 300px; /* Adjust width as needed */
+    max-height: 400px; /* Limit height */
+    background-color: var(--md-surface-color);
+    border-radius: var(--md-radius-md);
+    box-shadow: var(--md-shadow-3);
+    z-index: 100;
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--md-border-color);
+}
+
+.elements-popup.visible {
+    display: flex;
+}
+
+.elements-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--md-border-color);
+    background-color: #f8f9fc; /* Slightly different bg for header */
+}
+
+.elements-popup-header h3 {
+    margin: 0;
+    font-size: 1.1em;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--md-text-primary-on-surface);
+}
+
+.elements-popup-header .close-popup-btn {
+    background: none;
+    border: none;
+    color: var(--md-text-secondary-on-background);
+    cursor: pointer;
+    padding: 4px;
+    margin: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.elements-popup-header .close-popup-btn:hover {
+    background-color: rgba(0, 0, 0, 0.06);
+    color: var(--md-text-primary-on-background);
+}
+
+.elements-popup-content {
+    padding: 16px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+/* Style buttons inside popup */
+.popup-add-elements {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.popup-add-elements button {
+    flex: 1;
+    min-width: calc(50% - 4px);
+    padding: 8px 12px;
+    font-size: 0.85em;
+    background-color: white;
+    color: var(--md-text-primary-on-background);
+    border: 1px solid var(--md-border-color);
+    box-shadow: var(--md-shadow-1);
+    margin: 0; /* Override default button margin */
+    text-transform: none; /* Override default uppercase */
+}
+
+.popup-add-elements button:hover {
+    background-color: var(--md-primary-color);
+    color: white;
+    border-color: var(--md-primary-color);
+}
+
+.popup-add-elements button .material-symbols-outlined {
+    font-size: 16px;
+}
+
+/* Style element list inside popup */
+.popup-element-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border: 1px solid var(--md-border-color);
+    border-radius: var(--md-radius-sm);
+    font-size: 0.9em;
+}
+
+/* Reuse existing #elementList li styles if possible, or duplicate/adapt */
+.popup-element-list li {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--md-border-color);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+    min-height: 32px;
+    user-select: none;
+}
+.popup-element-list li:last-child { border-bottom: none; }
+.popup-element-list li:hover { background-color: rgba(0, 0, 0, 0.02); }
+.popup-element-list li.selected { background-color: var(--md-selected-item-bg); font-weight: 500; }
+/* Add styles for drag handle, label, controls within popup list items */
+.popup-element-list li .drag-handle { /* ... copy from #elementList li .drag-handle ... */ cursor: move; color: var(--md-text-hint-on-background); margin-right: 4px; opacity: 0.5; transition: opacity 0.2s ease; }
+.popup-element-list li:hover .drag-handle { opacity: 1; }
+.popup-element-list li .element-label { /* ... copy from .element-label ... */ display: flex; align-items: center; gap: 8px; line-height: 1; flex: 1; min-width: 0; }
+.popup-element-list li .element-label span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.popup-element-list li .element-label .material-symbols-outlined { /* ... copy from .element-label .material-symbols-outlined ... */ font-size: 20px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; color: var(--md-text-secondary-on-background); }
+.popup-element-list li.selected .element-label .material-symbols-outlined { color: var(--md-primary-color); }
+.popup-element-list li .element-controls { /* ... copy from .element-controls ... */ display: flex; align-items: center; }
+.popup-element-list li .element-controls button { /* ... copy from .element-controls button ... */ background: none; border: none; color: var(--md-text-secondary-on-background); cursor: pointer; padding: 4px; margin: 0; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: var(--md-radius-sm); transition: all 0.2s ease; }
+.popup-element-list li .element-controls button .material-symbols-outlined { font-size: 18px; }
+.popup-element-list li .element-controls button:hover { color: var(--md-error-color); background-color: rgba(244, 67, 54, 0.08); }
+
+/* --- Dark Mode for FAB and Popup --- */
+body.dark-mode .fab {
+    background-color: var(--md-dark-primary-color);
+    color: var(--md-dark-text-primary); /* Or white if contrast is better */
+    box-shadow: var(--md-dark-shadow-3);
+}
+body.dark-mode .fab:hover {
+    background-color: var(--md-dark-primary-dark);
+    box-shadow: var(--md-dark-shadow-4); /* Define if needed */
+}
+
+body.dark-mode .elements-popup {
+    background-color: var(--md-dark-surface-color);
+    border-color: var(--md-dark-border-color);
+    box-shadow: var(--md-dark-shadow-3);
+}
+body.dark-mode .elements-popup-header {
+    background-color: var(--md-dark-background-color); /* Slightly different dark bg */
+    border-bottom-color: var(--md-dark-border-color);
+}
+body.dark-mode .elements-popup-header h3 {
+    color: var(--md-dark-text-primary);
+}
+body.dark-mode .elements-popup-header .close-popup-btn {
+    color: var(--md-dark-text-secondary);
+}
+body.dark-mode .elements-popup-header .close-popup-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--md-dark-text-primary);
+}
+
+body.dark-mode .popup-add-elements button {
+    background-color: var(--md-dark-surface-color);
+    color: var(--md-dark-text-primary);
+    border-color: var(--md-dark-border-color);
+    box-shadow: var(--md-dark-shadow-1);
+}
+body.dark-mode .popup-add-elements button:hover {
+    background-color: var(--md-dark-primary-color);
+    color: var(--md-dark-background-color); /* Dark text on light button */
+    border-color: var(--md-dark-primary-color);
+}
+
+body.dark-mode .popup-element-list {
+    border-color: var(--md-dark-border-color);
+}
+body.dark-mode .popup-element-list li {
+    border-bottom-color: var(--md-dark-border-color);
+    color: var(--md-dark-text-primary);
+}
+body.dark-mode .popup-element-list li:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+}
+body.dark-mode .popup-element-list li.selected {
+    background-color: var(--md-dark-selected-item-bg);
+}
+
+/* Adapt other popup list item styles for dark mode if needed */
+body.dark-mode .popup-element-list li .drag-handle { color: var(--md-dark-text-hint); }
+body.dark-mode .popup-element-list li .element-label .material-symbols-outlined { color: var(--md-dark-text-secondary); }
+body.dark-mode .popup-element-list li.selected .element-label .material-symbols-outlined { color: var(--md-dark-primary-color); }
+body.dark-mode .popup-element-list li .element-controls button { color: var(--md-dark-text-secondary); }
+body.dark-mode .popup-element-list li .element-controls button:hover { color: var(--md-error-color); background-color: rgba(244, 67, 54, 0.15); }

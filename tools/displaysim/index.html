@@ -481,80 +481,105 @@
     }
 }
 }); }
-        function renderElementList() {
-            elementList.innerHTML = ''; 
-            elements.forEach((el, index) => { 
-                const li = document.createElement('li'); 
-                li.dataset.id = el.id;
-                li.draggable = true;
-
-                // Add drag event listeners
-                li.addEventListener('dragstart', handleDragStart);
-                li.addEventListener('dragend', handleDragEnd);
-                li.addEventListener('dragover', handleDragOver);
-                li.addEventListener('drop', handleDrop);
-                li.addEventListener('dragenter', handleDragEnter);
-                li.addEventListener('dragleave', handleDragLeave);
-
-                const labelDiv = document.createElement('div'); 
-                labelDiv.classList.add('element-label');
-
-                // Add drag handle
-                const dragHandle = document.createElement('span');
-                dragHandle.classList.add('material-symbols-outlined', 'drag-handle');
-                dragHandle.textContent = 'drag_indicator';
-                labelDiv.appendChild(dragHandle);
-
-                let iconType = 'edit_note'; 
-                let labelText = 'Unknown';
-                if (el.type === 'text') { 
-                    iconType = 'title'; 
-                    labelText = el.content ? `"${el.content.substring(0, 20)}${el.content.length>20 ? '...' : ''}"` : 'Text'; 
-                } else if (el.type === 'icon') { 
-                    iconType = el.iconLigature || 'mood'; 
-                    labelText = el.iconLigature || 'Icon'; 
-                } else if (el.type === 'bar') { 
-                    iconType = 'horizontal_rule'; 
-                    labelText = `Bar (${el.width ?? '?'}x${el.height ?? '?'})`; 
-                } else if (el.type === 'rectangle') { 
-                    iconType = el.fill ? 'check_box' : 'check_box_outline_blank'; 
-                    labelText = `Rect (${el.width ?? '?'}x${el.height ?? '?'})`; 
+        // --- Modify renderElementList function ---
+        function renderElementList(forcePopupRender = false) { // Add optional parameter
+            const listToUpdate = [elementList]; // Always update main list
+        
+            // If the popup is visible OR we force it (e.g., when opening), update it too
+            if (elementsPopup.classList.contains('visible') || forcePopupRender) {
+                if (popupElementList) { // Check if popup list element exists
+                    listToUpdate.push(popupElementList);
                 }
-
-                const typeIcon = document.createElement('span');
-                typeIcon.classList.add('material-symbols-outlined');
-                typeIcon.textContent = iconType;
-                labelDiv.appendChild(typeIcon);
-
-                const label = document.createElement('span');
-                label.textContent = labelText;
-                labelDiv.appendChild(label);
-
-                li.appendChild(labelDiv);
-
-                if (el.id === selectedElementId) { 
-                    li.classList.add('selected'); 
-                }
-
-                const controls = document.createElement('span'); 
-                controls.classList.add('element-controls'); 
-                const delBtn = document.createElement('button'); 
-                delBtn.innerHTML = `<span class="material-symbols-outlined">delete</span>`; 
-                delBtn.classList.add('danger'); 
-                delBtn.title = "Remove Element"; 
-                delBtn.onclick = (e) => { 
-                    e.stopPropagation(); 
-                    removeElement(el.id); 
-                }; 
-                controls.appendChild(delBtn); 
-                li.appendChild(controls); 
-                li.onclick = () => { 
-                    selectElement(el.id); 
-                }; 
-                elementList.appendChild(li); 
-            }); 
-            drawPreview(); 
+            }
+        
+            listToUpdate.forEach(currentList => {
+                if (!currentList) return; // Skip if a list doesn't exist
+                currentList.innerHTML = ''; // Clear the specific list
+        
+                elements.forEach((el, index) => {
+                    const li = document.createElement('li');
+                    li.dataset.id = el.id;
+                    li.draggable = true; // Keep draggable for main list, might disable for popup later if needed
+        
+                    // Add drag event listeners (Apply only to main list for now)
+                    if (currentList === elementList) {
+                        li.addEventListener('dragstart', handleDragStart);
+                        li.addEventListener('dragend', handleDragEnd);
+                        li.addEventListener('dragover', handleDragOver);
+                        li.addEventListener('drop', handleDrop);
+                        li.addEventListener('dragenter', handleDragEnter);
+                        li.addEventListener('dragleave', handleDragLeave);
+                    }
+        
+                    const labelDiv = document.createElement('div');
+                    labelDiv.classList.add('element-label');
+        
+                    // Add drag handle (Apply only to main list for now)
+                    if (currentList === elementList) {
+                        const dragHandle = document.createElement('span');
+                        dragHandle.classList.add('material-symbols-outlined', 'drag-handle');
+                        dragHandle.textContent = 'drag_indicator';
+                        labelDiv.appendChild(dragHandle);
+                    }
+        
+                    let iconType = 'edit_note';
+                    let labelText = 'Unknown';
+                    if (el.type === 'text') { /* ... existing logic ... */ iconType = 'title'; labelText = el.content ? `"${el.content.substring(0, 20)}${el.content.length>20 ? '...' : ''}"` : 'Text'; }
+                    else if (el.type === 'icon') { /* ... existing logic ... */ iconType = el.iconLigature || 'mood'; labelText = el.iconLigature || 'Icon'; }
+                    else if (el.type === 'bar') { /* ... existing logic ... */ iconType = 'horizontal_rule'; labelText = `Bar (${el.width ?? '?'}x${el.height ?? '?'})`; }
+                    else if (el.type === 'rectangle') { /* ... existing logic ... */ iconType = el.fill ? 'check_box' : 'check_box_outline_blank'; labelText = `Rect (${el.width ?? '?'}x${el.height ?? '?'})`; }
+                    // Add label for Circle if missing in original
+                    else if (el.type === 'circle') {
+                        iconType = el.fill ? 'radio_button_checked' : 'radio_button_unchecked';
+                        labelText = `Circle (r=${el.radius ?? '?'})`;
+                    }
+        
+        
+                    const typeIcon = document.createElement('span');
+                    typeIcon.classList.add('material-symbols-outlined');
+                    typeIcon.textContent = iconType;
+                    labelDiv.appendChild(typeIcon);
+        
+                    const label = document.createElement('span');
+                    label.textContent = labelText;
+                    labelDiv.appendChild(label);
+        
+                    li.appendChild(labelDiv);
+        
+                    if (el.id === selectedElementId) {
+                        li.classList.add('selected');
+                    }
+        
+                    const controls = document.createElement('span');
+                    controls.classList.add('element-controls');
+                    const delBtn = document.createElement('button');
+                    delBtn.innerHTML = `<span class="material-symbols-outlined">delete</span>`;
+                    delBtn.classList.add('danger');
+                    delBtn.title = "Remove Element";
+                    delBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        removeElement(el.id);
+                    };
+                    controls.appendChild(delBtn);
+                    li.appendChild(controls);
+        
+                    // Add click listener to select element
+                    li.onclick = () => {
+                        selectElement(el.id);
+                        // Close popup when an item is selected from it
+                        if (currentList === popupElementList) {
+                            elementsPopup.classList.remove('visible');
+                        }
+                    };
+                    currentList.appendChild(li); // Append to the current list being processed
+                });
+            });
+        
+            // Only draw preview once after updating lists
+            drawPreview();
         }
+ 
+        
         function updateEditorForm() { /* Unchanged */
              const el = elements.find(e => e.id === selectedElementId);
              if (!el) { editorPlaceholder.style.display = 'block'; editorContent.style.display = 'none'; editorDetails.open = false; return; }
@@ -721,6 +746,7 @@
             initializeConfig();
             saveToCache();
         });
+        
         // REMOVED common font selector listener
         addTextBtn.addEventListener('click', () => {
             addElement('text');
@@ -779,20 +805,93 @@
             } 
         });
 
-        // Reverted general editor listeners
+        // --- Replace these existing listeners ---
+        /*
         editorContent.addEventListener('input', (event) => {
             if (![editXInput, editXSlider, editYInput, editYSlider, editColorPicker, editIconLigatureInput, editRectRadiusSlider].includes(event.target)) {
                  updateElementFromEditor();
                  saveToCache();
              }
-             // Removed preview slider handler
         });
         editorContent.addEventListener('change', (event) => {
-             // Handle selects (now including font ID) and checkboxes
              if (event.target.tagName === 'SELECT' || event.target.type === 'checkbox' ) {
                  updateElementFromEditor();
                  saveToCache();
              }
+        });
+        */
+        // --- End of listeners to replace ---
+
+        // --- Add these NEW specific listeners ---
+
+        // Specific listener for Color ID Select
+        editColorIdSelect.addEventListener('change', () => {
+            // console.log('Color ID Select changed:', editColorIdSelect.value); // For debugging
+            // If a color ID is selected, you might want to visually reset the color picker,
+            // though updateElementFromEditor handles the actual data update.
+            // editColorPicker.value = mapColorPreview(editColorIdSelect.value) || '#FFFFFF'; // Optional visual sync
+            updateElementFromEditor();
+            saveToCache();
+        });
+
+        // Specific listener for Color Picker input (use 'input' for live updates)
+        editColorPicker.addEventListener('input', () => {
+            // console.log('Color Picker changed:', editColorPicker.value); // For debugging
+            editColorIdSelect.value = ""; // Deselect any ID when picker is used
+            updateElementFromEditor();
+            saveToCache();
+        });
+
+        // Specific listener for Font ID Select
+        editFontIdSelect.addEventListener('change', () => {
+            // console.log('Font ID Select changed:', editFontIdSelect.value); // For debugging
+            updateElementFromEditor();
+            saveToCache();
+        });
+
+        // Specific listener for Alignment Select
+        editAlignSelect.addEventListener('change', () => {
+            // console.log('Align Select changed:', editAlignSelect.value); // For debugging
+            updateElementFromEditor();
+            saveToCache();
+        });
+
+        // Specific listener for Rectangle Fill Checkbox
+        editRectFillCheckbox.addEventListener('change', () => {
+            // console.log('Rect Fill Checkbox changed:', editRectFillCheckbox.checked); // For debugging
+            updateElementFromEditor();
+            saveToCache();
+        });
+
+        // Specific listener for Circle Fill Checkbox
+        editCircleFillCheckbox.addEventListener('change', () => {
+            // console.log('Circle Fill Checkbox changed:', editCircleFillCheckbox.checked); // For debugging
+            updateElementFromEditor();
+            saveToCache();
+        });
+
+        // Listener for text/number inputs that AREN'T handled by specific listeners above
+        editorContent.addEventListener('input', (event) => {
+            const target = event.target;
+            // Check if it's a text/number input and NOT one of the special cases
+            if (target.tagName === 'INPUT' && (target.type === 'text' || target.type === 'number') &&
+                ![editXInput, editYInput, editColorPicker, editIconLigatureInput, editRectThicknessInput, editRectWidthInput, editRectHeightInput, editWidthInput, editHeightInput, editCircleRadiusInput].includes(target))
+            {
+                 // console.log('General editor text/number input:', target.id, target.value); // For debugging
+                 updateElementFromEditor();
+                 saveToCache();
+            }
+            // Handle specific number inputs if needed (like thickness, width, height, radius)
+            if ([editRectThicknessInput, editRectWidthInput, editRectHeightInput, editWidthInput, editHeightInput, editCircleRadiusInput].includes(target)) {
+                 updateElementFromEditor();
+                 saveToCache();
+            }
+            // Handle radius slider separately to update the value span
+            if (target === editRectRadiusSlider) {
+                 editRectRadiusValueSpan.textContent = target.value;
+                 updateElementFromEditor();
+                 saveToCache();
+            }
         });
 
         editCircleRadiusInput.addEventListener('input', updateElementFromEditor);
@@ -1535,7 +1634,7 @@ function applyImportedData(data) {
             }
         });
         
-        
+
 
     </script>
 
