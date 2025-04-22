@@ -93,6 +93,8 @@
             transition: all 0.2s ease;
             color: var(--md-primary-color) !important;
             background: transparent;
+            box-sizing: border-box;
+            align-self: center;
         }
 
         .export-button:hover {
@@ -102,6 +104,9 @@
 
         .export-button .material-symbols-outlined {
             color: inherit !important;
+            font-size: 20px;
+            line-height: 1;
+            display: block;
         }
 
         .panel {

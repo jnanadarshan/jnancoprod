@@ -4,28 +4,71 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESPHome Display Designer (v4.3 UI Update)</title> 
+    <title>Display Designer by JDNx Tools</title> 
+    <link rel="icon" type="image/x-icon" href="favicon.png">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <!-- https://material.io/resources/icons/?style=baseline -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Icons"rel="stylesheet">
-    
     <!-- https://material.io/resources/icons/?style=outline -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Outlined"rel="stylesheet">
-    
     <!-- https://material.io/resources/icons/?style=round -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Round"rel="stylesheet">
-    
     <!-- https://fonts.googleapis.com/css2?family=Material+Icons+Sharp"rel="stylesheet"-->
-    
     <!-- https://material.io/resources/icons/?style=twotone -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Two+Tone"rel="stylesheet">
-
     <!-- Add html2pdf library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            // ...existing code...
+            /* Add Dark Mode Variables */
+            --md-dark-primary-color: #7986cb;
+            --md-dark-primary-dark: #5c6bc0;
+            --md-dark-accent-color: #ff80ab;
+            --md-dark-background-color: #121212;
+            --md-dark-surface-color: #1e1e1e;
+            --md-dark-text-primary: rgba(255, 255, 255, 0.87);
+            --md-dark-text-secondary: rgba(255, 255, 255, 0.6);
+            --md-dark-text-hint: rgba(255, 255, 255, 0.38);
+            --md-dark-border-color: rgba(255, 255, 255, 0.12);
+        }
 
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background-color: var(--md-dark-background-color);
+            color: var(--md-dark-text-primary);
+        }
+
+        body.dark-mode .top-nav {
+            background-color: var(--md-dark-surface-color);
+            border-color: var(--md-dark-border-color);
+        }
+
+        body.dark-mode .panel {
+            background-color: var(--md-dark-surface-color);
+        }
+
+        body.dark-mode details {
+            background-color: var(--md-dark-surface-color);
+            border-color: var(--md-dark-border-color);
+        }
+
+        body.dark-mode input,
+        body.dark-mode select,
+        body.dark-mode textarea {
+            background-color: var(--md-dark-surface-color);
+            border-color: var(--md-dark-border-color);
+            color: var(--md-dark-text-primary);
+        }
+
+        body.dark-mode .left-panel,
+        body.dark-mode .center-panel {
+            border-color: var(--md-dark-border-color);
+        }
+    </style>
 </head>
 <body>
 
@@ -40,6 +83,7 @@
             <span class="material-symbols-outlined" id="export-text-btn" title="Export Lambda and Font Codes (TXT)" style="cursor: pointer; margin-left: 10px; vertical-align: middle;">download</span>
             <span class="material-symbols-outlined" id="import-text-btn" title="Import Lambda and Font Codes (TXT)" style="cursor: pointer; margin-left: 10px; vertical-align: middle;">upload</span>
             <input type="file" id="import-file-input" accept=".txt" style="display: none;">
+            <span class="material-symbols-outlined" id="darkModeBtn" title="Toggle Dark Mode">dark_mode</span>
             <span class="material-symbols-outlined" id="showInfoBtn" title="About">help</span>
         </div>
     </header>
@@ -1410,6 +1454,26 @@ function applyImportedData(data) {
         isScaledToFit = localStorage.getItem('previewScaleToFit') === 'true';
         screenPreviewDiv.classList.toggle('scale-to-fit', isScaledToFit);
         scaleToFitBtn.title = isScaledToFit ? "Restore Original Size" : "Scale to Fit";
+
+        // Add near the top of your script section
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            
+            // Update button icon
+            const darkModeBtn = document.getElementById('darkModeBtn');
+            darkModeBtn.textContent = isDarkMode ? 'light_mode' : 'dark_mode';
+        }
+
+        // Add to your initialization code
+        document.getElementById('darkModeBtn').addEventListener('click', toggleDarkMode);
+
+        // Restore dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('darkModeBtn').textContent = 'light_mode';
+        }
     </script>
         <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-7P5YFV6K4E"></script>
