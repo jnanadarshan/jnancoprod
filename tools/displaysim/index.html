@@ -753,16 +753,55 @@
             const width = parseInt(customWidthInput.value);
             const height = parseInt(customHeightInput.value);
 
-            if (width > 0 && height > 0) {
-                const resolution = `${width}x${height}`;
-                if (!customResolutions.includes(resolution)) {
-                    customResolutions.push(resolution);
-                    populateResolutionSelect();
-                    saveToCache();
-                }
+            if (!width || !height || width <= 0 || height <= 0) {
+                alert('Please enter valid width and height values.');
+                return;
+            }
+
+            const resolution = `${width}x${height}`;
+            
+            // Check if resolution already exists in dropdown
+            const existingOption = Array.from(configResolutionSelect.options)
+                .find(option => option.value === resolution);
+                
+            if (existingOption) {
+                alert('This resolution already exists!');
+                return;
+            }
+
+            // Add to custom resolutions array
+            customResolutions.push(resolution);
+            
+            // Add new option to select
+            const option = document.createElement('option');
+            option.value = resolution;
+            option.textContent = resolution.replace('x', ' x ');
+            configResolutionSelect.appendChild(option);
+            
+            // Select the new resolution
+            configResolutionSelect.value = resolution;
+            
+            // Clear inputs
+            customWidthInput.value = '';
+            customHeightInput.value = '';
+            
+            // Update screen size
+            updateScreenSize();
+            saveToCache();
+        }
+
+        // Add keyboard event listener for Enter key
+        function handleCustomResolutionKeyPress(event) {
+            if (event.key === 'Enter') {
+                addCustomResolution();
             }
         }
 
+        // Update event listeners
+        document.getElementById('addCustomResolution').addEventListener('click', addCustomResolution);
+        customWidthInput.addEventListener('keypress', handleCustomResolutionKeyPress);
+        customHeightInput.addEventListener('keypress', handleCustomResolutionKeyPress);
+        
         configResolutionSelect.addEventListener('change', () => {
             updateScreenSize();
             saveToCache();
@@ -774,6 +813,10 @@
         configColorsInput.addEventListener('input', () => {
             initializeConfig();
             saveToCache();
+        });
+        addCustomResolutionBtn.addEventListener('click', () => {
+            addCustomResolution();
+            saveToCache(); 
         });
         
         // REMOVED common font selector listener
@@ -1233,59 +1276,83 @@
             // Try matching printf (Text/Icon)
             match = line.match(printfRegex);
             if (match) {
-            const isIcon = match[3].includes('material_symbols'); // Simple check for icon font
-            parsedElements.push({
-                type: isIcon ? 'icon' : 'text', // Distinguish between text and icon
-                x: parseInt(match[1]),
-                y: parseInt(match[2]),
-                fontId: match[3],
-                color: match[4], // Might need mapping if color is an id()
-                text: isIcon ? (match[6] || match[5]) : match[5], // Use ligature if available, else raw char for icon
-                // Add other text properties if applicable (e.g., alignment - needs parsing)
-            });
-            return; // Move to next line
+                const isIcon = match[3].includes('material_symbols'); // Simple check for icon font
+                parsedElements.push({
+                    type: isIcon ? 'icon' : 'text', // Distinguish between text and icon
+                    x: parseInt(match[1]),
+                    y: parseInt(match[2]),
+                    fontId: match[3],
+                    color: match[4], // Might need mapping if color is an id()
+                    text: isIcon ? (match[6] || match[5]) : match[5], // Use ligature if available, else raw char for icon
+                    // Add other text properties if applicable (e.g., alignment - needs parsing)
+                });
+                return; // Move to next line
             }
 
             // Try matching rectangle
             match = line.match(rectRegex);
             if (match) {
-            parsedElements.push({
-                type: 'rect',
-                x: parseInt(match[1]),
-                y: parseInt(match[2]),
-                width: parseInt(match[3]),
-                height: parseInt(match[4]),
-                color: match[5], // Might need mapping
-                // Add other rect properties (fill: false, thickness)
-                fill: false, // Assuming it.rectangle is outline only
-                thickness: 1, // Default thickness
-            });
-            return;
+                parsedElements.push({
+                    type: 'rect',
+                    x: parseInt(match[1]),
+                    y: parseInt(match[2]),
+                    width: parseInt(match[3]),
+                    height: parseInt(match[4]),
+                    color: match[5], // Might need mapping
+                    // Add other rect properties (fill: false, thickness)
+                    fill: false, // Assuming it.rectangle is outline only
+                    thickness: 1, // Default thickness
+                });
+                return;
             }
 
             // Try matching filled_rectangle
             match = line.match(filledRectRegex);
             if (match) {
-            parsedElements.push({
-                type: 'rect', // Treat filled_rectangle as a rect type with fill=true
-                x: parseInt(match[1]),
-                y: parseInt(match[2]),
-                width: parseInt(match[3]),
-                height: parseInt(match[4]),
-                color: match[5], // Might need mapping
-                fill: true, // Set fill to true
-                thickness: 0, // Filled usually implies no outline thickness shown separately
-            });
-            return;
+                parsedElements.push({
+                    type: 'rect', // Treat filled_rectangle as a rect type with fill=true
+                    x: parseInt(match[1]),
+                    y: parseInt(match[2]),
+                    width: parseInt(match[3]),
+                    height: parseInt(match[4]),
+                    color: match[5], // Might need mapping
+                    fill: true, // Set fill to true
+                    thickness: 0, // Filled usually implies no outline thickness shown separately
+                });
+                return;
             }
 
-            // ... Add similar blocks for it.circle, it.filled_circle, it.line etc.
+            // Try matching circle
+            match = line.match(circleRegex);
+            if (match) {
+                parsedElements.push({
+                    type: 'circle',
+                    x: parseInt(match[1]),
+                    y: parseInt(match[2]),
+                    radius: parseInt(match[3]),
+                    color: match[4],
+                    fill: false
+                });
+                return;
+            }
 
+            // Try matching filled circle
+            match = line.match(filledCircleRegex);
+            if (match) {
+                parsedElements.push({
+                    type: 'circle',
+                    x: parseInt(match[1]),
+                    y: parseInt(match[2]),
+                    radius: parseInt(match[3]),
+                    color: match[4],
+                    fill: true
+                });
+                return;
+            }
 
             console.warn("Could not parse lambda line:", line);
         });
 
-        console.log("Parsed Elements:", parsedElements);
         return parsedElements;
         }
 
@@ -1333,7 +1400,7 @@ function parseImportedText(text) {
 
     if (lambdaIndex === -1 || fontIndex === -1) {
         console.error('Markers not found in file');
-        return null;
+        return null; // Markers not found
     }
 
     const lambdaCodeBlock = text.substring(lambdaIndex + lambdaMarker.length, fontIndex).trim();
@@ -1343,7 +1410,7 @@ function parseImportedText(text) {
     const elements = parseLambdaCode(lambdaCodeBlock);
 
     if (!fonts || !elements) {
-        return null;
+        return null; // Parsing failed
     }
 
     return { fonts, elements };
@@ -1507,8 +1574,6 @@ function applyImportedData(data) {
 }
 
 // --- End of added JavaScript code for IMPORT ---
-
-        // --- End of added JavaScript code ---
 
         // Info Overlay functionality
         const infoOverlay = document.getElementById('infoOverlay');
