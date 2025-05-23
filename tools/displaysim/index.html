@@ -47,7 +47,8 @@
     <div class="left-panel panel"> <details open> <summary><span class="material-symbols-outlined">tune</span> Configuration</summary>
              <div class="details-content">
                  <div class="flex-row"> <div class="flex-grow"> <label for="configResolution">Resolution:</label> <select id="configResolution"> <option value="128x64">128 x 64</option> <option value="128x160" selected>128 x 160</option> <option value="135x240">135 x 240</option> <option value="160x128">160 x 128</option> <option value="240x135">240 x 135</option> <option value="240x240">240 x 240</option> <option value="240x320">240 x 320</option> <option value="320x240">320 x 240</option> <option value="480x320">480 x 320</option><option value="960x540">960 x 540</option>  </select> </div> </div>
-                 <label for="configCustomFonts">Available Font IDs (comma-separated):</label> <textarea id="configCustomFonts" placeholder="id(roboto_12), id(material_symbols_24)">id(roboto_12), id(roboto_bold_16), id(material_symbols_18), id(material_symbols_24)</textarea>
+                 <div class="flex-row"> <div class="flex-grow">  <label for="customWidth">Custom Width:</label>  <input type="number" id="customWidth" placeholder="e.g., 480" min="1"> </div> <div class="flex-grow"> <label for="customHeight">Custom Height:</label> <input type="number" id="customHeight" placeholder="e.g., 320" min="1"> </div> <button id="addCustomResolution">Add</button> </div>
+                 <label for="configCustomFonts">Available Font IDs (comma-separated):</label> <textarea id="configCustomFonts" placeholder="id(roboto_12), id(material_symbols_24)" >id(roboto_12), id(roboto_bold_16), id(material_symbols_18), id(material_symbols_24)</textarea>
                  <label for="configColors">Available Color IDs (comma-separated):</label> <textarea id="configColors">id(primary_color), id(accent_color), white, black, red, green, blue</textarea>
              </div>
         </details>
@@ -55,7 +56,8 @@
             <summary><span class="material-symbols-outlined">widgets</span> Elements</summary>
             <div class="details-content">
                 <div class="add-elements-container"> 
-                    <button id="addTextBtn"><span class="material-symbols-outlined">title</span>Text</button> 
+
+                    <button id="addTextBtn"><span class="material-symbols-outlined">title</span>Text</button>
                     <button id="addIconBtn"><span class="material-symbols-outlined">mood</span>Icon</button> 
                     <button id="addBarBtn"><span class="material-symbols-outlined">horizontal_rule</span>Bar</button> 
                     <button id="addRectBtn"><span class="material-symbols-outlined">check_box_outline_blank</span>Rect</button> 
@@ -291,6 +293,8 @@
         let elements = [];
         let selectedElementId = null;
         let nextId = 0;
+        let customResolutions = [];
+        let isScaleToFit = false;
 
         // Get ALL element references
         const configResolutionSelect = document.getElementById('configResolution');
@@ -299,6 +303,9 @@
         const configColorsInput = document.getElementById('configColors');
         const addTextBtn = document.getElementById('addTextBtn'); const addIconBtn = document.getElementById('addIconBtn'); const addBarBtn = document.getElementById('addBarBtn'); const addRectBtn = document.getElementById('addRectBtn');
         const elementList = document.getElementById('elementList');
+        const customWidthInput = document.getElementById('customWidth');
+        const customHeightInput = document.getElementById('customHeight');
+        const addCustomResolutionBtn = document.getElementById('addCustomResolution');
         const editorDetails = document.getElementById('editorDetails'); const editorPlaceholder = document.getElementById('editor-placeholder'); const editorContent = document.getElementById('editor-content');
         const editIdInput = document.getElementById('editId'); const editXInput = document.getElementById('editX'); const editYInput = document.getElementById('editY'); const editXSlider = document.getElementById('editXSlider'); const editYSlider = document.getElementById('editYSlider'); const editXValueSpan = document.getElementById('editXValue'); const editYValueSpan = document.getElementById('editYValue');
         const colorSelectContainer = document.getElementById('colorSelectContainer'); const editColorIdSelect = document.getElementById('editColorId'); const editColorPicker = document.getElementById('editColorPicker');
@@ -318,6 +325,10 @@
         function getAvailableFonts() { return configCustomFontsTextarea.value.split(',').map(s => s.trim()).filter(s => s); }
         function getAvailableColors() { return configColorsInput.value.split(',').map(s => s.trim()).filter(s => s); }
         function populateSelect(selectElement, options, defaultText = "-- Select --") { selectElement.innerHTML = ''; const defaultOption = document.createElement('option'); defaultOption.value = ""; defaultOption.textContent = defaultText; selectElement.appendChild(defaultOption); options.forEach(optionValue => { const option = document.createElement('option'); option.value = optionValue; option.textContent = optionValue; selectElement.appendChild(option); }); }
+        function populateResolutionSelect() {
+            const selectElement = document.getElementById('configResolution');
+            customResolutions.forEach(res => { if (!selectElement.querySelector(`option[value="${res}"]`)) { const option = document.createElement('option'); option.value = res; option.textContent = res.replace('x', ' x '); selectElement.appendChild(option); } });
+        }
         function mapFontPreview(fontId) { if (!fontId) return '10px sans-serif'; let sizeMatch = fontId.match(/_(\d+)$/); if (!sizeMatch) sizeMatch = fontId.match(/(\d+)\)$/); if (!sizeMatch) sizeMatch = fontId.match(/_(\d+)_/); let baseSize = 12; if (sizeMatch && sizeMatch[1]) { baseSize = parseInt(sizeMatch[1], 10); } const finalSize = Math.max(5, baseSize); const family = (fontId.includes('material') || fontId.includes('symbol') || fontId.includes('icon')) ? "'Material Symbols Outlined', 'Roboto', sans-serif" : "'Roboto', sans-serif"; const weight = (fontId.includes('bold') || fontId.includes('black')) ? 'bold' : 'normal'; return `${weight} ${finalSize}px ${family}`; }
 
         // --- Cache Functions ---
@@ -326,7 +337,8 @@
                 resolution: configResolutionSelect.value,
                 customFonts: configCustomFontsTextarea.value,
                 colors: configColorsInput.value,
-                elements: elements,
+                elements: elements, customResolutions: customResolutions,
+                isScaleToFit: isScaleToFit,
                 nextId: nextId
             };
             localStorage.setItem('esphomeDisplayDesignerCache', JSON.stringify(cacheData));
@@ -344,6 +356,10 @@
                 if (data.resolution) configResolutionSelect.value = data.resolution;
                 if (data.customFonts) configCustomFontsTextarea.value = data.customFonts;
                 if (data.colors) configColorsInput.value = data.colors;
+                if (data.customResolutions) { customResolutions = data.customResolutions; populateResolutionSelect(); }
+                if (data.isScaleToFit !== undefined) {
+                    isScaleToFit = data.isScaleToFit;
+                    screenPreviewDiv.classList.toggle('scale-to-fit', isScaleToFit);}
                 
                 // Restore elements
                 if (Array.isArray(data.elements) && data.elements.length > 0) {
@@ -732,6 +748,19 @@
              populateSelect(editFontIdSelect, fonts, "-- Font ID --");
              const colors = getAvailableColors(); 
              populateSelect(editColorIdSelect, colors, "-- Color ID --"); 
+        }
+        function addCustomResolution() {
+            const width = parseInt(customWidthInput.value);
+            const height = parseInt(customHeightInput.value);
+
+            if (width > 0 && height > 0) {
+                const resolution = `${width}x${height}`;
+                if (!customResolutions.includes(resolution)) {
+                    customResolutions.push(resolution);
+                    populateResolutionSelect();
+                    saveToCache();
+                }
+            }
         }
 
         configResolutionSelect.addEventListener('change', () => {
