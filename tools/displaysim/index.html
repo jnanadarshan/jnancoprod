@@ -1728,7 +1728,33 @@ function applyImportedData(data) {
             }
         });
         
+        // Event listener for buttons inside the popup's add elements container
+        if (popupAddElementsContainer) {
+            popupAddElementsContainer.addEventListener('click', (event) => {
+                const targetButton = event.target.closest('button'); // Get the button element, even if a span inside is clicked
+                if (!targetButton) return; // Click was not on a button or its child
 
+                let elementType = null;
+                if (targetButton.classList.contains('popup-add-text')) {
+                    elementType = 'text';
+                } else if (targetButton.classList.contains('popup-add-icon')) {
+                    elementType = 'icon';
+                } else if (targetButton.classList.contains('popup-add-bar')) {
+                    elementType = 'bar';
+                } else if (targetButton.classList.contains('popup-add-rect')) {
+                    elementType = 'rectangle';
+                } else if (targetButton.classList.contains('popup-add-circle')) {
+                    elementType = 'circle';
+                }
+
+                if (elementType) {
+                    addElement(elementType);
+                    saveToCache(); // Persist the new element
+                    // Optionally, close the popup after adding an element:
+                    // elementsPopup.classList.remove('visible');
+                }
+            });
+        }
 
     </script>
 
