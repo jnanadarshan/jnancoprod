@@ -1,24 +1,24 @@
 :root {
     --md-primary-color: #3f51b5; 
     --md-primary-dark: #303f9f; 
-    --md-accent-color: #303f9f;
+    --md-accent-color: #303f9f; 
     --md-background-color: #f8f9fa; 
-    --md-surface-color: #ffffff;
+    --md-surface-color: #ffffff; 
     --md-text-primary-on-background: rgba(0, 0, 0, 0.87); 
-    --md-text-secondary-on-background: rgba(0, 0, 0, 0.6);
+    --md-text-secondary-on-background: rgba(0, 0, 0, 0.6); 
     --md-text-hint-on-background: rgba(0, 0, 0, 0.38); 
-    --md-text-primary-on-surface: rgba(0, 0, 0, 0.87);
+    --md-text-primary-on-surface: rgba(0, 0, 0, 0.87); 
     --md-border-color: rgba(0, 0, 0, 0.08); 
     --md-canvas-background: #000000; 
-    --md-selected-item-bg: #e8eaf6;
+    --md-selected-item-bg: #e8eaf6; 
     --md-error-color: #483ae0; 
-    --md-success-color: #4caf50;
-    --md-shadow-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
-    --md-shadow-2: 0 3px 6px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.12);
-    --md-shadow-3: 0 10px 20px rgba(0,0,0,0.15), 0 3px 6px rgba(0,0,0,0.10);
-    --md-radius-sm: 6px;
-    --md-radius-md: 8px;
-    --md-radius-lg: 12px;
+    --md-success-color: #4caf50; 
+    --md-shadow-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14); 
+    --md-shadow-2: 0 3px 6px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.12); 
+    --md-shadow-3: 0 10px 20px rgba(0,0,0,0.15), 0 3px 6px rgba(0,0,0,0.10); 
+    --md-radius-sm: 6px; 
+    --md-radius-md: 8px; 
+    --md-radius-lg: 12px; 
     --left-panel-width: 320px;  /* Reduced from 380px */
     --center-panel-width: 360px; /* Reduced from 420px */
     --canvas-scale-factor: 1.5;
@@ -26,7 +26,7 @@
 
     /* Dark Mode */
     --md-dark-primary-color: #7986cb; /* Lighter primary for dark */
-    --md-dark-primary-dark: #5c6bc0;
+    --md-dark-primary-dark: #5c6bc0; /* Lighter accent */
     --md-dark-accent-color: #303f9f; /* Lighter accent */
     --md-dark-background-color: #121212; /* Standard dark bg */
     --md-dark-surface-color: #1e1e1e; /* Slightly lighter surface */
@@ -124,58 +124,46 @@ body {
 }
 
 .panel {
-    padding: 16px; /* Reduced from 24px */
+    padding: 16px;
     overflow-y: auto;
     height: calc(100vh - var(--top-nav-height));
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 12px; /* Reduced from 20px */
+    gap: 12px;
 }
 
-.left-panel {
-    grid-row: 2; 
-    grid-column: 1;
-    background-color: #f8f9fc;
-    border-right: 1px solid var(--md-border-color);
-}
-
+/* Specific styles for the center panel */
 .center-panel {
     grid-row: 2; 
     grid-column: 2;
     background-color: var(--md-surface-color);
     border-right: 1px solid var(--md-border-color);
+    overflow-y: auto;
+    height: calc(100vh - var(--top-nav-height));
+    z-index: 0; /* Add lower z-index */
+    display: flex;
+    flex-direction: column;
+    position: relative; /* Ensure stacking context for children */
 }
 
-.right-panel {
-    grid-row: 2; 
-    grid-column: 3;
-    align-items: center;
-    background-color: var(--md-background-color);
-    padding: 16px 32px 32px; /* Top: 16px, Sides: 32px, Bottom: 32px */
-}
-
-h1, h2, h3 { 
-    margin-top: 0; 
-    margin-bottom: 20px; 
-    color: var(--md-text-primary-on-surface); 
-    font-weight: 500; 
-}
-
-h2 { 
-    font-size: 1.3em; 
-    border-bottom: 1px solid var(--md-border-color); 
-    padding-bottom: 12px; 
-    width: 100%; 
-    display: flex; 
-    align-items: center; 
-    gap: 10px;
-}
-
-h3 { 
-    font-size: 1.1em; 
-    font-weight: 500; 
-    margin-bottom: 16px;
+/* Adjust details content for better scrolling */
+.details-content {
+    /* Horizontal padding remains constant */
+    padding-left: 12px;
+    padding-right: 12px;
+    /* Vertical padding, max-height, and opacity will be animated */
+    padding-top: 0;
+    padding-bottom: 0;
+    max-height: none; /* Remove max-height limit */
+    opacity: 0;
+    overflow-y: visible; /* Change from hidden to auto */
+    box-sizing: border-box; /* Ensures padding is included within max-height */
+    transition: max-height 0.35s ease-in-out,
+                opacity 0.2s ease-in-out 0.1s, /* Fade in/out with slight delay */
+                padding-top 0.35s ease-in-out,
+                padding-bottom 0.35s ease-in-out;
+    /* border-top removed as summary provides a border when open */
 }
 
 details {
@@ -215,24 +203,6 @@ summary:hover {
 details[open] > summary { 
     border-bottom: 1px solid var(--md-border-color); 
     background-color: var(--md-surface-color);
-}
-
-.details-content {
-    /* Horizontal padding remains constant */
-    padding-left: 12px;
-    padding-right: 12px;
-    /* Vertical padding, max-height, and opacity will be animated */
-    padding-top: 0;
-    padding-bottom: 0;
-    max-height: 0;
-    opacity: 0;
-    overflow: hidden;
-    box-sizing: border-box; /* Ensures padding is included within max-height */
-    transition: max-height 0.35s ease-in-out,
-                opacity 0.2s ease-in-out 0.1s, /* Fade in/out with slight delay */
-                padding-top 0.35s ease-in-out,
-                padding-bottom 0.35s ease-in-out;
-    /* border-top removed as summary provides a border when open */
 }
 
 label { 
@@ -365,7 +335,7 @@ button:active {
 details[open] > .details-content {
     padding-top: 12px;
     padding-bottom: 12px;
-    max-height: 40rem; /* Adjust if content can be taller. 40rem ~ 560px */
+    max-height: none; /* Remove max-height limit */
     opacity: 1;
 }
 .element-label { 
@@ -491,10 +461,7 @@ details[open] > .details-content {
     position: relative; 
     margin-bottom: 4px; /* Reduced from 8px */
     max-width: 300px;
-}
-
-#iconSearchContainer input[type="text"] {
-    padding-right: 32px;
+    z-index: 2000; /* Increase stacking context above all panels */
 }
 
 #iconSuggestions { 
@@ -504,7 +471,7 @@ details[open] > .details-content {
     border-radius: var(--md-radius-sm);
     max-height: 180px; 
     overflow-y: auto; 
-    z-index: 10; 
+    z-index: 3000; /* Ensure dropdown is always on top */
     width: 100%;
     max-width: 300px;
     box-shadow: var(--md-shadow-2);
@@ -987,7 +954,7 @@ body.dark-mode input[type="color"] {
 body.dark-mode input[type="range"] {
     accent-color: var(--md-dark-primary-color);
 }
-body.dark-mode .checkbox-control input[type="checkbox"] {
+body.dark.mode .checkbox-control input[type="checkbox"] {
     accent-color: var(--md-dark-primary-color);
 }
 
@@ -1014,18 +981,18 @@ body.dark-mode .code-actions-container button:hover {
     color: var(--md-dark-background-color); /* Dark text on light button */
     border-color: var(--md-dark-primary-color);
 }
-body.dark-mode #copyCodeBtn,
-body.dark-mode #copyFontCodeBtn {
+body.dark.mode #copyCodeBtn,
+body.dark.mode #copyFontCodeBtn {
     background-color: var(--md-dark-surface-color);
     color: var(--md-dark-text-secondary);
 }
-body.dark-mode #copyCodeBtn:hover,
-body.dark-mode #copyFontCodeBtn:hover {
+body.dark.mode #copyCodeBtn:hover,
+body.dark.mode #copyFontCodeBtn:hover {
     background-color: var(--md-dark-text-secondary);
     color: var(--md-dark-background-color);
 }
-body.dark-mode #copyCodeBtn.success,
-body.dark-mode #copyFontCodeBtn.success {
+body.dark.mode #copyCodeBtn.success,
+body.dark.mode #copyFontCodeBtn.success {
     background-color: var(--md-success-color); /* Keep success color */
     color: white;
     border-color: var(--md-success-color);
@@ -1045,16 +1012,16 @@ body.dark-mode #elementList li.selected {
 body.dark-mode #elementList li.selected .element-label .material-symbols-outlined {
     color: var(--md-dark-primary-color);
 }
-body.dark-mode #elementList li .element-label .material-symbols-outlined {
+body.dark.mode #elementList li .element-label .material-symbols-outlined {
     color: var(--md-dark-text-secondary);
 }
-body.dark-mode #elementList li .drag-handle {
+body.dark.mode #elementList li .drag-handle {
     color: var(--md-dark-text-hint);
 }
-body.dark-mode .element-controls button {
+body.dark.mode .element-controls button {
     color: var(--md-dark-text-secondary);
 }
-body.dark-mode .element-controls button:hover {
+body.dark.mode .element-controls button:hover {
     color: var(--md-error-color); /* Keep error color */
     background-color: rgba(244, 67, 54, 0.15); /* Slightly stronger alpha */
 }
@@ -1063,7 +1030,7 @@ body.dark-mode .element-controls button:hover {
 body.dark-mode #iconSuggestions {
     background-color: var(--md-dark-surface-color);
     border-color: var(--md-dark-border-color);
-    box-shadow: var(--md-dark-shadow-2);
+    z-index: 3000; /* Ensure dark mode also has high z-index */
 }
 body.dark-mode #iconSuggestions div {
     color: var(--md-dark-text-primary);
@@ -1075,14 +1042,8 @@ body.dark-mode #iconSuggestions .material-symbols-outlined {
     color: var(--md-dark-text-secondary);
 }
 body.dark-mode #iconSuggestions div.selected,
-body.dark-mode #iconSuggestions div:active {
+body.dark.mode #iconSuggestions div:active {
     background-color: var(--md-dark-selected-item-bg);
-}
-body.dark-mode #iconSuggestions::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.2);
-}
-body.dark-mode #iconSuggestions::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255, 255, 255, 0.3);
 }
 
 /* Code Output */
@@ -1124,39 +1085,6 @@ body.dark-mode .info-actions button.secondary {
 }
 body.dark-mode .info-actions button.secondary:hover {
     background-color: rgba(255, 255, 255, 0.05);
-}
-
-/* Dark Mode Styles */
-body.dark-mode {
-    background-color: var(--md-dark-background-color);
-    color: var(--md-dark-text-primary);
-}
-
-body.dark-mode .top-nav {
-    background-color: var(--md-dark-surface-color);
-    border-color: var(--md-dark-border-color);
-}
-
-body.dark-mode .panel {
-    background-color: var(--md-dark-surface-color);
-}
-
-body.dark-mode details {
-    background-color: var(--md-dark-surface-color);
-    border-color: var(--md-dark-border-color);
-}
-
-body.dark-mode input,
-body.dark-mode select,
-body.dark-mode textarea {
-    background-color: var(--md-dark-surface-color);
-    border-color: var(--md-dark-border-color);
-    color: var(--md-dark-text-primary);
-}
-
-body.dark-mode .left-panel,
-body.dark-mode .center-panel {
-    border-color: var(--md-dark-border-color);
 }
 
 /* --- Hamburger Menu & Collapsible Panel --- */
@@ -1461,16 +1389,16 @@ body.dark-mode .popup-element-list li {
     border-bottom-color: var(--md-dark-border-color);
     color: var(--md-dark-text-primary);
 }
-body.dark-mode .popup-element-list li:hover {
+body.dark.mode .popup-element-list li:hover {
     background-color: rgba(255, 255, 255, 0.04);
 }
-body.dark-mode .popup-element-list li.selected {
+body.dark.mode .popup-element-list li.selected {
     background-color: var(--md-dark-selected-item-bg);
 }
 
 /* Adapt other popup list item styles for dark mode if needed */
-body.dark-mode .popup-element-list li .drag-handle { color: var(--md-dark-text-hint); }
-body.dark-mode .popup-element-list li .element-label .material-symbols-outlined { color: var(--md-dark-text-secondary); }
-body.dark-mode .popup-element-list li.selected .element-label .material-symbols-outlined { color: var(--md-dark-primary-color); }
-body.dark-mode .popup-element-list li .element-controls button { color: var(--md-dark-text-secondary); }
-body.dark-mode .popup-element-list li .element-controls button:hover { color: var(--md-error-color); background-color: rgba(244, 67, 54, 0.15); }
+body.dark.mode .popup-element-list li .drag-handle { color: var(--md-dark-text-hint); }
+body.dark.mode .popup-element-list li .element-label .material-symbols-outlined { color: var(--md-dark-text-secondary); }
+body.dark.mode .popup-element-list li.selected .element-label .material-symbols-outlined { color: var(--md-dark-primary-color); }
+body.dark.mode .popup-element-list li .element-controls button { color: var(--md-dark-text-secondary); }
+body.dark.mode .popup-element-list li .element-controls button:hover { color: var(--md-error-color); background-color: rgba(244, 67, 54, 0.15); }
