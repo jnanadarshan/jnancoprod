@@ -194,6 +194,8 @@ summary {
     gap: 6px; /* Reduced from 10px */
     border-bottom: 1px solid transparent; 
     transition: all 0.2s ease;
+    height: 40px; /* Ensure consistent height for all summary elements */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
 summary:hover { 
