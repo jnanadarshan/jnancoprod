@@ -55,16 +55,122 @@
         .summary-toggle-btn:hover { background-color: rgba(0, 0, 0, 0.08); color: var(--md-text-primary-on-background, rgba(0, 0, 0, 0.87)); }
         body.dark-mode .summary-toggle-btn:hover { background-color: rgba(255, 255, 255, 0.1); }
         .summary-toggle-btn .material-symbols-outlined { font-size: 20px; }
+
+        /* Styles for top navigation alignment */
+        .top-nav {
+            /* Assuming style.css has: display: flex; align-items: center; justify-content: space-between; */
+            /* No changes needed here if the above is true, as space-between will work with the new structure. */
+        }
+        .nav-left-section {
+            display: flex;
+            align-items: center;
+            gap: 16px; /* Adjust gap as needed, similar to what might be in style.css for .top-nav .title */
+        }
+
+        /* Override floating effect on left panel */
+        .left-panel details {
+            box-shadow: none;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .left-panel details > summary {
+            border-radius: 7px;
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        /* Remove depth effects from panels */
+.panel {
+    box-shadow: none;
+    background: var(--md-surface-color, #ffffff);
+    /* Remove the border that was creating separators */
+    border: none;
+}
+
+/* Keep border only for popup elements */
+.elements-popup {
+    box-shadow: none;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+/* Maintain border for details elements inside panels */
+details {
+    box-shadow: none;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    background: var(--md-surface-color, #ffffff);
+}
+
+details > summary {
+    border-radius: 7px;
+    background: rgba(0, 0, 0, 0.02);
+}
+
+/* Editor and preview sections */
+.center-panel details,
+.right-panel details {
+    background: var(--md-surface-color, #ffffff);
+}
+
+/* Dark mode adjustments */
+body.dark-mode .panel {
+    border-color: rgba(255, 255, 255, 0.12);
+    background: var(--md-surface-dark-color, #1e1e1e);
+}
+
+body.dark-mode details {
+    border-color: rgba(255, 255, 255, 0.12);
+    background: var(--md-surface-dark-color, #1e1e1e);
+}
+
+body.dark-mode details > summary {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Remove depth from popup */
+.elements-popup {
+    box-shadow: none;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+body.dark-mode .elements-popup {
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Panel collapsed state styling */
+details:not([open]) {
+    background: var(--md-accent-color, #483ae0);
+    border-color: var(--md-accent-color, #483ae0);
+}
+
+details:not([open]) > summary {
+    color: white;
+    background: transparent;
+}
+
+details:not([open]) .material-symbols-outlined {
+    color: white;
+}
+
+/* Dark mode adjustments */
+body.dark-mode details:not([open]) {
+    background: var(--md-accent-dark-color, #483ae0);
+    border-color: var(--md-accent-dark-color, #483ae0);
+}
     </style>
 </head>
 <body>
 
     <header class="top-nav">
-        <button class="hamburger-menu" id="hamburgerBtn" title="Toggle Menu">
-            <span class="material-symbols-outlined">menu</span>
-        </button>
-        <div class="title">
-            <span class="material-symbols-outlined">developer_board</span> ESPHome Display Designer
+        <div class="nav-left-section">
+            <button class="hamburger-menu" id="hamburgerBtn" title="Toggle Menu">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <div class="title">
+                <span class="material-symbols-outlined">developer_board</span> ESPHome Display Designer
+            </div>
         </div>
         <div class="nav-icons">
             <span class="material-symbols-outlined local_cafe" id="buycoffee" title="Buy me a Coffee"><a href="https://buymeacoffee.com/jdnayak" target="_blank" rel="noopener">local_cafe</a></span>
@@ -777,7 +883,7 @@
             codeSectionDetails.open = true;
         }
         function generateFontYaml() { /* Unchanged */
-             const fontIds = getAvailableFonts(); if (fontIds.length === 0) { generatedFontCodeOutput.value = "# No font IDs listed in configuration."; fontCodeSectionDetails.open = true; return; } let yaml = "font:\n"; const addedFiles = new Set(); fontIds.forEach(fontId => { let idName = fontId; let baseName = 'unknown'; let size = 12; let type = ''; const match = fontId.match(/id\(([a-zA-Z0-9_]+?)_?(\d+)?\)/); if (match && match[1]) { idName = `id(${match[1]}${match[2] ? '_' + match[2] : ''})`; baseName = match[1].replace(/_$/, ''); size = match[2] ? parseInt(match[2]) : size; } let filePath = `fonts/${baseName.charAt(0).toUpperCase() + baseName.slice(1)}.ttf`; if (baseName.includes('material') || baseName.includes('symbol') || baseName.includes('icon')) { type = '    type: ICON\n'; if (baseName.includes('material')) filePath = 'fonts/materialdesignicons-webfont.ttf'; if (baseName.includes('symbols')) filePath = 'fonts/MaterialSymbols-Regular.ttf'; } if (baseName.includes('roboto')) filePath = `fonts/Roboto-${baseName.includes('bold') ? 'Bold' : 'Regular'}.ttf`; if (baseName.includes('open_sans')) filePath = `fonts/OpenSans-${baseName.includes('bold') ? 'Bold' : 'Regular'}.ttf`; yaml += `  - file: ${filePath} # VERIFY PATH!\n`; yaml += `    id: ${idName}\n`; yaml += `    size: ${size}\n`; if (type) yaml += type; }); generatedFontCodeOutput.value = yaml; fontCodeSectionDetails.open = true; }
+             const fontIds = getAvailableFonts(); if (fontIds.length === 0) { generatedFontCodeOutput.value = "# No font IDs listed in configuration."; fontCodeSectionDetails.open = true; return; } let yaml = "font:\n"; const addedFiles = new Set(); fontIds.forEach(fontId => { let idName = fontId; let baseName = 'unknown'; let size = 12; let type = ''; const match = fontId.match(/id\(([a-zA-Z0-9_]+?)_?(\d+)?\)/); if (match && match[1]) { idName = `id(${match[1]}${match[2] ? '_' + match[2] : ''})`; baseName = match[1].replace(/_$/, ''); size = match[2] ? parseInt(match[2], 10) : size; } let filePath = `fonts/${baseName.charAt(0).toUpperCase() + baseName.slice(1)}.ttf`; if (baseName.includes('material') || baseName.includes('symbol') || baseName.includes('icon')) { type = '    type: ICON\n'; if (baseName.includes('material')) filePath = 'fonts/materialdesignicons-webfont.ttf'; if (baseName.includes('symbols')) filePath = 'fonts/MaterialSymbols-Regular.ttf'; } if (baseName.includes('roboto')) filePath = `fonts/Roboto-${baseName.includes('bold') ? 'Bold' : 'Regular'}.ttf`; if (baseName.includes('open_sans')) filePath = `fonts/OpenSans-${baseName.includes('bold') ? 'Bold' : 'Regular'}.ttf`; yaml += `  - file: ${filePath} # VERIFY PATH!\n`; yaml += `    id: ${idName}\n`; yaml += `    size: ${size}\n`; if (type) yaml += type; }); generatedFontCodeOutput.value = yaml; fontCodeSectionDetails.open = true; }
 
         function selectIcon(name) {
             editIconLigatureInput.value = name;
@@ -1024,7 +1130,7 @@
             }
             navigator.clipboard.writeText(generatedFontCodeOutput.value).then(() => {
                 const originalText = copyFontCodeBtn.innerHTML;
-                copyFontCodeBtn.innerHTML = `<span class="material-symbols-outlined">done</span> Copied!`;
+                copyFontCodeBtn.innerHTML = `<span class="material-symbollined">done</span> Copied!`;
                 copyFontCodeBtn.classList.add('success');
                 setTimeout(() => {
                     copyFontCodeBtn.innerHTML = originalText;
@@ -1046,6 +1152,8 @@
                 location.reload();
             }
         });
+        
+        
         
         const hasLoadedCache = loadFromCache();
         if (hasLoadedCache) {
@@ -1305,68 +1413,71 @@
         const parsedElements = [];
         const lines = lambdaCode.split('\n');
 
-        // Regex examples (need to be robust and cover all element types and variations)
-        const printfRegex = /it\.printf\(\s*(\S+)\s*,\s*(\S+)\s*,\s*id\((.*?)\)\s*,\s*(\S+)\s*,\s*"(.*?)"(?:.*?\/\/\s*Ligature:\s*(.*))?\s*\);?/;
-        const rectRegex = /it\.rectangle\(\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*\);?/;
-        const filledRectRegex = /it\.filled_rectangle\(\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*\);?/;
-        // ... add regex for circle, filled_circle, line, etc.
+        // Regex patterns for different element types
+        const printfRegex = /it\.printf\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(?:id\((.*?)\)|(\w+))\s*,\s*(\S+?)(?:\s*,\s*(?:TextAlign::(\w+)\s*,\s*)?)?(?:\s*,\s*)?"(.*?)"(?:.*?\/\/\s*Ligature:\s*(.*?))?\s*\);/;
+        const rectRegex = /it\.rectangle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
+        const filledRectRegex = /it\.filled_rectangle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
+        const circleRegex = /it\.circle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
+        const filledCircleRegex = /it\.filled_circle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
 
         lines.forEach(line => {
             line = line.trim();
-            if (!line.startsWith('it.')) return; // Skip empty lines or comments
+            if (!line.startsWith('it.')) return;
 
             let match;
 
-            // Try matching printf (Text/Icon)
+            // Match printf for text or icon
             match = line.match(printfRegex);
             if (match) {
-                const isIcon = match[3].includes('material_symbols'); // Simple check for icon font
+                const [_, x, y, fontId, defaultFont, colorId, align, content, ligature] = match;
+                const isIcon = !!ligature;
+                const actualFontId = fontId || defaultFont;
+                
                 parsedElements.push({
-                    type: isIcon ? 'icon' : 'text', // Distinguish between text and icon
-                    x: parseInt(match[1]),
-                    y: parseInt(match[2]),
-                    fontId: match[3],
-                    color: match[4], // Might need mapping if color is an id()
-                    text: isIcon ? (match[6] || match[5]) : match[5], // Use ligature if available, else raw char for icon
-                    // Add other text properties if applicable (e.g., alignment - needs parsing)
+                    type: isIcon ? 'icon' : 'text',
+                    x: parseInt(x),
+                    y: parseInt(y),
+                    fontId: actualFontId,
+                    colorId: colorId,
+                    content: isIcon ? undefined : content,
+                    args: '', // Default empty for now
+                    align: align || 'LEFT',
+                    iconLigature: ligature,
                 });
-                return; // Move to next line
+                return;
             }
 
-            // Try matching rectangle
+            // Match regular rectangle
             match = line.match(rectRegex);
             if (match) {
                 parsedElements.push({
-                    type: 'rect',
+                    type: 'rectangle',
                     x: parseInt(match[1]),
                     y: parseInt(match[2]),
                     width: parseInt(match[3]),
                     height: parseInt(match[4]),
-                    color: match[5], // Might need mapping
-                    // Add other rect properties (fill: false, thickness)
-                    fill: false, // Assuming it.rectangle is outline only
-                    thickness: 1, // Default thickness
+                    colorId: match[5],
+                    fill: false,
+                    thickness: 1,
                 });
                 return;
             }
 
-            // Try matching filled_rectangle
+            // Match filled rectangle
             match = line.match(filledRectRegex);
             if (match) {
                 parsedElements.push({
-                    type: 'rect', // Treat filled_rectangle as a rect type with fill=true
+                    type: 'bar', // Use correct type based on height
                     x: parseInt(match[1]),
                     y: parseInt(match[2]),
                     width: parseInt(match[3]),
                     height: parseInt(match[4]),
-                    color: match[5], // Might need mapping
-                    fill: true, // Set fill to true
-                    thickness: 0, // Filled usually implies no outline thickness shown separately
+                    colorId: match[5],
                 });
                 return;
             }
 
-            // Try matching circle
+            // Match circle
             match = line.match(circleRegex);
             if (match) {
                 parsedElements.push({
@@ -1374,13 +1485,13 @@
                     x: parseInt(match[1]),
                     y: parseInt(match[2]),
                     radius: parseInt(match[3]),
-                    color: match[4],
+                    colorId: match[4],
                     fill: false
                 });
                 return;
             }
 
-            // Try matching filled circle
+            // Match filled circle
             match = line.match(filledCircleRegex);
             if (match) {
                 parsedElements.push({
@@ -1388,7 +1499,7 @@
                     x: parseInt(match[1]),
                     y: parseInt(match[2]),
                     radius: parseInt(match[3]),
-                    color: match[4],
+                    colorId: match[4],
                     fill: true
                 });
                 return;
@@ -1617,85 +1728,83 @@ function applyImportedData(data) {
     generateFontYaml();
 }
 
-// --- End of added JavaScript code for IMPORT ---
+// Info Overlay functionality
+const infoOverlay = document.getElementById('infoOverlay');
+const showInfoBtn = document.getElementById('showInfoBtn');
+const closeInfoBtn = document.getElementById('closeInfoBtn');
+const readMoreBtn = document.getElementById('readMoreBtn');
 
-        // Info Overlay functionality
-        const infoOverlay = document.getElementById('infoOverlay');
-        const showInfoBtn = document.getElementById('showInfoBtn');
-        const closeInfoBtn = document.getElementById('closeInfoBtn');
-        const readMoreBtn = document.getElementById('readMoreBtn');
+function showOverlay() {
+    infoOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
 
-        function showOverlay() {
-            infoOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
+function hideOverlay() {
+    infoOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+}
 
-        function hideOverlay() {
-            infoOverlay.classList.remove('active');
-            document.body.style.overflow = '';
-        }
+showInfoBtn.addEventListener('click', showOverlay);
+closeInfoBtn.addEventListener('click', hideOverlay);
+readMoreBtn.addEventListener('click', () => {
+    window.open('https://www.jnan.co/tools/displaysim', '_blank');
+});
 
-        showInfoBtn.addEventListener('click', showOverlay);
-        closeInfoBtn.addEventListener('click', hideOverlay);
-        readMoreBtn.addEventListener('click', () => {
-            window.open('https://www.jnan.co/tools/displaysim', '_blank');
-        });
+// Close overlay when clicking outside content
+infoOverlay.addEventListener('click', (e) => {
+    if (e.target === infoOverlay) {
+        hideOverlay();
+    }
+});
 
-        // Close overlay when clicking outside content
-        infoOverlay.addEventListener('click', (e) => {
-            if (e.target === infoOverlay) {
-                hideOverlay();
-            }
-        });
+// Close overlay with Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && infoOverlay.classList.contains('active')) {
+        hideOverlay();
+    }
+});
 
-        // Close overlay with Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && infoOverlay.classList.contains('active')) {
-                hideOverlay();
-            }
-        });
+// Add near the initialization code
+const scaleToFitBtn = document.getElementById('scaleToFitBtn');
+let isScaledToFit = false;
 
-        // Add near the initialization code
-        const scaleToFitBtn = document.getElementById('scaleToFitBtn');
-        let isScaledToFit = false;
+scaleToFitBtn.addEventListener('click', (e) => {
+    e.preventDefault(); // Prevent details from toggling
+    isScaledToFit = !isScaledToFit;
+    screenPreviewDiv.classList.toggle('scale-to-fit', isScaledToFit);
+    scaleToFitBtn.title = isScaledToFit ? "Restore Original Size" : "Scale to Fit";
+    
+    // Store preference
+    localStorage.setItem('previewScaleToFit', isScaledToFit);
+});
 
-        scaleToFitBtn.addEventListener('click', (e) => {
-            e.preventDefault(); // Prevent details from toggling
-            isScaledToFit = !isScaledToFit;
-            screenPreviewDiv.classList.toggle('scale-to-fit', isScaledToFit);
-            scaleToFitBtn.title = isScaledToFit ? "Restore Original Size" : "Scale to Fit";
-            
-            // Store preference
-            localStorage.setItem('previewScaleToFit', isScaledToFit);
-        });
+// Add to the initialization code
+// Restore scale preference
+isScaledToFit = localStorage.getItem('previewScaleToFit') === 'true';
+screenPreviewDiv.classList.toggle('scale-to-fit', isScaledToFit);
+scaleToFitBtn.title = isScaledToFit ? "Restore Original Size" : "Scale to Fit";
 
-        // Add to the initialization code
-        // Restore scale preference
-        isScaledToFit = localStorage.getItem('previewScaleToFit') === 'true';
-        screenPreviewDiv.classList.toggle('scale-to-fit', isScaledToFit);
-        scaleToFitBtn.title = isScaledToFit ? "Restore Original Size" : "Scale to Fit";
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    localStorage.setItem('darkMode', isDarkMode);
+    
+    // Update button icon
+    const darkModeBtn = document.getElementById('darkModeBtn');
+    darkModeBtn.textContent = isDarkMode ? 'light_mode' : 'dark_mode';
+}
 
-        // Add near the top of your script section
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            const isDarkMode = document.body.classList.contains('dark-mode');
-            localStorage.setItem('darkMode', isDarkMode);
-            
-            // Update button icon
-            const darkModeBtn = document.getElementById('darkModeBtn');
-            darkModeBtn.textContent = isDarkMode ? 'light_mode' : 'dark_mode';
-        }
+// Add to your initialization code
+document.getElementById('darkModeBtn').addEventListener('click', toggleDarkMode);
 
-        // Add to your initialization code
-        document.getElementById('darkModeBtn').addEventListener('click', toggleDarkMode);
-
-        // Restore dark mode preference
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.body.classList.add('dark-mode');
-            document.getElementById('darkModeBtn').textContent = 'light_mode';
-        }
+// Restore dark mode preference
+if (localStorage.getItem('darkMode') === 'true') {
+    document.body.classList.add('dark-mode');
+    document.getElementById('darkModeBtn').textContent = 'light_mode';
+}
     </script>
-        <!-- Google tag (gtag.js) -->
+
+    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-7P5YFV6K4E"></script>
     <script>
       window.dataLayer = window.dataLayer || [];

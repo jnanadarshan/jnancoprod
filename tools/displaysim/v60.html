@@ -21,16 +21,63 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Two+Tone"rel="stylesheet">
     <!-- Add html2pdf library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        /* Styles for Configuration section toggle button */
+        details#configDetailsElement > summary {
+            display: flex; /* Ensures flex layout */
+            justify-content: space-between; /* Pushes button to the right */
+            align-items: center;
+            /* If your style.css already makes summary flex, this just reinforces/overrides justify-content */
+        }
 
+        details#configDetailsElement > summary .summary-main-content {
+            display: flex;
+            align-items: center;
+            gap: 8px; /* Adjust to match existing gap between icon and text if different */
+        }
+
+        .summary-toggle-btn {
+            background: none;
+            border: none;
+            color: var(--md-text-secondary-on-background, rgba(0, 0, 0, 0.6)); /* Fallback color */
+            cursor: pointer;
+            padding: 0;
+            margin: 0 0 0 8px; /* Left margin for spacing */
+            box-shadow: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .summary-toggle-btn:hover { background-color: rgba(0, 0, 0, 0.08); color: var(--md-text-primary-on-background, rgba(0, 0, 0, 0.87)); }
+        body.dark-mode .summary-toggle-btn:hover { background-color: rgba(255, 255, 255, 0.1); }
+        .summary-toggle-btn .material-symbols-outlined { font-size: 20px; }
+
+        /* Styles for top navigation alignment */
+        .top-nav {
+            /* Assuming style.css has: display: flex; align-items: center; justify-content: space-between; */
+            /* No changes needed here if the above is true, as space-between will work with the new structure. */
+        }
+        .nav-left-section {
+            display: flex;
+            align-items: center;
+            gap: 16px; /* Adjust gap as needed, similar to what might be in style.css for .top-nav .title */
+        }
+    </style>
 </head>
 <body>
 
     <header class="top-nav">
-        <button class="hamburger-menu" id="hamburgerBtn" title="Toggle Menu">
-            <span class="material-symbols-outlined">menu</span>
-        </button>
-        <div class="title">
-            <span class="material-symbols-outlined">developer_board</span> ESPHome Display Designer
+        <div class="nav-left-section">
+            <button class="hamburger-menu" id="hamburgerBtn" title="Toggle Menu">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <div class="title">
+                <span class="material-symbols-outlined">developer_board</span> ESPHome Display Designer
+            </div>
         </div>
         <div class="nav-icons">
             <span class="material-symbols-outlined local_cafe" id="buycoffee" title="Buy me a Coffee"><a href="https://buymeacoffee.com/jdnayak" target="_blank" rel="noopener">local_cafe</a></span>
@@ -44,7 +91,17 @@
         </div>
     </header>
 
-    <div class="left-panel panel"> <details open> <summary><span class="material-symbols-outlined">tune</span> Configuration</summary>
+    <div class="left-panel panel">
+        <details open id="configDetailsElement">
+            <summary>
+                <span class="summary-main-content">
+                    <span class="material-symbols-outlined">tune</span>
+                    <span>Configuration</span>
+                </span>
+                <button type="button" id="toggleConfigBtn" class="summary-toggle-btn" title="Collapse Section">
+                    <span class="material-symbols-outlined">unfold_less</span>
+                </button>
+            </summary>
              <div class="details-content">
                  <div class="flex-row"> <div class="flex-grow"> <label for="configResolution">Resolution:</label> <select id="configResolution"> <option value="128x64">128 x 64</option> <option value="128x160" selected>128 x 160</option> <option value="135x240">135 x 240</option> <option value="160x128">160 x 128</option> <option value="240x135">240 x 135</option> <option value="240x240">240 x 240</option> <option value="240x320">240 x 320</option> <option value="320x240">320 x 240</option> <option value="480x320">480 x 320</option><option value="960x540">960 x 540</option>  </select> </div> </div>
                  <div class="flex-row"> <div class="flex-grow">  <label for="customWidth">Custom Width:</label>  <input type="number" id="customWidth" placeholder="e.g., 480" min="1"> </div> <div class="flex-grow"> <label for="customHeight">Custom Height:</label> <input type="number" id="customHeight" placeholder="e.g., 320" min="1"> </div> <button id="addCustomResolution">Add</button> </div>
@@ -66,7 +123,7 @@
                 </div>
                 <ul id="elementList"></ul>
                 <p style="font-size: 0.8em; color: var(--md-text-secondary-on-background); text-align: center; margin-top: auto; padding-top: 20px;">
-                    This Software is Free and Open Source Software licensed under the <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPL 3.0</a>
+                    Release v6.2.Sindoor. This Software is Free and Open Source Software licensed under the <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPL 3.0</a>
     
                 </p>
             </div>
@@ -754,7 +811,7 @@
             const height = parseInt(customHeightInput.value);
 
             if (!width || !height || width <= 0 || height <= 0) {
-                alert('Please enter valid width and height values.');
+                alert('Ensure Valid Width and Height are provided! Adter adding your custom resolutio, it should appear at the end of the dropdown.');
                 return;
             }
 
@@ -765,7 +822,7 @@
                 .find(option => option.value === resolution);
                 
             if (existingOption) {
-                alert('This resolution already exists!');
+                alert('This resolution already exists! Select it from the dropdown.');
                 return;
             }
 
@@ -1756,6 +1813,35 @@ function applyImportedData(data) {
             });
         }
 
+        // --- Configuration Section Toggle Button ---
+        const configDetailsElement = document.getElementById('configDetailsElement');
+        const toggleConfigBtn = document.getElementById('toggleConfigBtn');
+
+        if (configDetailsElement && toggleConfigBtn) {
+            const toggleConfigBtnIcon = toggleConfigBtn.querySelector('.material-symbols-outlined');
+
+            function updateConfigToggleButtonState() {
+                if (configDetailsElement.open) {
+                    toggleConfigBtnIcon.textContent = 'unfold_less';
+                    toggleConfigBtn.title = 'Collapse Section';
+                } else {
+                    toggleConfigBtnIcon.textContent = 'unfold_more';
+                    toggleConfigBtn.title = 'Expand Section';
+                }
+            }
+
+            toggleConfigBtn.addEventListener('click', (event) => {
+                event.preventDefault(); // Prevent summary's default toggle
+                event.stopPropagation(); // Stop bubbling to summary
+                configDetailsElement.open = !configDetailsElement.open;
+            });
+
+            configDetailsElement.addEventListener('toggle', updateConfigToggleButtonState);
+
+            // Initial state setup
+            updateConfigToggleButtonState();
+        }
+        // --- End Configuration Section Toggle Button ---
     </script>
 
 </body>

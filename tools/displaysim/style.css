@@ -1,7 +1,7 @@
 :root {
     --md-primary-color: #3f51b5; 
     --md-primary-dark: #303f9f; 
-    --md-accent-color: #ff4081;
+    --md-accent-color: #303f9f;
     --md-background-color: #f8f9fa; 
     --md-surface-color: #ffffff;
     --md-text-primary-on-background: rgba(0, 0, 0, 0.87); 
@@ -11,7 +11,7 @@
     --md-border-color: rgba(0, 0, 0, 0.08); 
     --md-canvas-background: #000000; 
     --md-selected-item-bg: #e8eaf6;
-    --md-error-color: #f44336; 
+    --md-error-color: #483ae0; 
     --md-success-color: #4caf50;
     --md-shadow-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
     --md-shadow-2: 0 3px 6px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.12);
@@ -27,7 +27,7 @@
     /* Dark Mode */
     --md-dark-primary-color: #7986cb; /* Lighter primary for dark */
     --md-dark-primary-dark: #5c6bc0;
-    --md-dark-accent-color: #ff80ab; /* Lighter accent */
+    --md-dark-accent-color: #303f9f; /* Lighter accent */
     --md-dark-background-color: #121212; /* Standard dark bg */
     --md-dark-surface-color: #1e1e1e; /* Slightly lighter surface */
     --md-dark-text-primary: rgba(255, 255, 255, 0.87); /* White primary text */
@@ -152,7 +152,7 @@ body {
     grid-column: 3;
     align-items: center;
     background-color: var(--md-background-color);
-    padding: 32px;
+    padding: 16px 32px 32px; /* Top: 16px, Sides: 32px, Bottom: 32px */
 }
 
 h1, h2, h3 { 
@@ -217,9 +217,22 @@ details[open] > summary {
     background-color: var(--md-surface-color);
 }
 
-.details-content { 
-    padding: 12px; /* Reduced from 20px */
-    border-top: 1px solid var(--md-border-color);
+.details-content {
+    /* Horizontal padding remains constant */
+    padding-left: 12px;
+    padding-right: 12px;
+    /* Vertical padding, max-height, and opacity will be animated */
+    padding-top: 0;
+    padding-bottom: 0;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    box-sizing: border-box; /* Ensures padding is included within max-height */
+    transition: max-height 0.35s ease-in-out,
+                opacity 0.2s ease-in-out 0.1s, /* Fade in/out with slight delay */
+                padding-top 0.35s ease-in-out,
+                padding-bottom 0.35s ease-in-out;
+    /* border-top removed as summary provides a border when open */
 }
 
 label { 
@@ -348,6 +361,13 @@ button:active {
     border-bottom: none;
 }
 
+/* Styles for when the details section is open */
+details[open] > .details-content {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    max-height: 40rem; /* Adjust if content can be taller. 40rem ~ 560px */
+    opacity: 1;
+}
 .element-label { 
     display: flex; 
     align-items: center; 
@@ -638,6 +658,17 @@ button:active {
     border-color: var (--md-success-color);
 }
 
+/* Dark Mode for toggleConfigBtn */
+body.dark-mode #toggleConfigBtn {
+    background-color: var(--md-dark-primary-color);
+    color: var(--md-dark-background-color); /* Ensuring good contrast with the lighter primary dark mode color */
+}
+
+body.dark-mode #toggleConfigBtn:hover {
+    background-color: var(--md-dark-primary-dark);
+    /* color will be inherited from body.dark-mode #toggleConfigBtn */
+}
+
 .code-output {
     border: 1px solid var(--md-border-color);
     border-radius: var(--md-radius-sm);
@@ -815,6 +846,30 @@ button:active {
     height: 100%;
     object-fit: contain;
 }
+/* Style for toggleConfigBtn */
+#toggleConfigBtn {
+    background-color: var(--md-primary-color);
+    color: white;
+    padding: 6px 12px; /* Consistent with other buttons */
+    border: none; /* Assuming no border like other primary buttons */
+    border-radius: var(--md-radius-sm); /* Consistent */
+    cursor: pointer;
+    display: inline-flex; /* Good for potential icons inside */
+    align-items: center;
+    text-decoration: none; /* If it's an <a> tag styled as a button */
+    font-size: 0.9em; /* Match generic button styles */
+    font-weight: 500; /* Match generic button styles */
+    transition: background-color 0.2s ease;
+    /* text-transform: uppercase; /* Optional: if you want it like other generic buttons */
+    /* box-shadow: var(--md-shadow-1); /* Optional: if you want shadow like other generic buttons */
+}
+
+#toggleConfigBtn:hover {
+    background-color: var(--md-primary-dark);
+    /* transform: translateY(-1px); /* Optional: hover effect like other generic buttons */
+    /* box-shadow: var(--md-shadow-2); /* Optional: hover effect like other generic buttons */
+}
+
 /* --- Dark Mode Styles --- */
 body.dark-mode {
     background-color: var(--md-dark-background-color);
