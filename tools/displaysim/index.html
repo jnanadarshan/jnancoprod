@@ -303,11 +303,10 @@ body.dark-mode details:not([open]) {
             <div class="info-body">
                 <h3>Key Features</h3>
                 <ul>
-                    <li>Design ESPHome display layouts visually</li>
-                    <li>Support for text, icons, shapes, and bars</li>
+                    <li>Support for text, icons, shapes, and bars. Triangles - coming soon</li>
                     <li>Live preview with Material Icons</li>
                     <li>Export to ESPHome-compatible code</li>
-                    <li>Save/load designs</li>
+                    <li>Export and import designs</li>
                 </ul>
                 
                 <h3>Known Limitations</h3>
@@ -315,15 +314,15 @@ body.dark-mode details:not([open]) {
                     <li>Font previews are approximate</li>
                     <li>All Material Icons will not appear in search window. </li>
                     <li>Need search to Icon Names from <a href="https://fonts.google.com/icons">https://fonts.google.com/icons</a> manually </li>
-                    <li>Corner radius is preview-only</li>
+                    <li>Corner radius is preview-only {ESPHome limitation}</li>
                     <li>Some Material Icons may not render correctly</li>
                     <li>UI does not render properly on a Mobile Device></li>
                 </ul>
                 <h3>Known Bugs</h3>
                 <ul>
-                    <li>Import YAML feature is broken</li>
-                    <li>On page reload need to click on elements name for Icons to display</li>
-                    <li>Screen Resolution beyond 480px overflows in UI</li>
+                    <li>Import TXT file feature has issues</li>
+                    <li>On page reload need to click on elements name for Icons to display correctly</li>
+                    <li>Screen Resolution beyond 480px overflows in UI and scaling button has to be used.</li>
                 </ul>
             </div>
             <div class="info-actions">
@@ -1292,21 +1291,40 @@ body.dark-mode details:not([open]) {
 
         // Add click event listener to the button
         exportTextButton.addEventListener('click', () => {
-        // Assume 'generatedCodeOutput' and 'generatedFontCodeOutput' are the IDs
-        // of the textareas holding the generated code.
-        // If they have different IDs, update the querySelector accordingly.
-        // If they are JS variables holding the string directly, use those variables instead.
-        const lambdaCodeElement = document.getElementById('generatedCodeOutput'); // Or appropriate selector/variable
-        const fontCodeElement = document.getElementById('generatedFontCodeOutput'); // Or appropriate selector/variable
+        // Generate codes first to ensure they are up-to-date
+        generateLambdaCode();
+        generateFontYaml();
 
-        const lambdaCode = lambdaCodeElement ? lambdaCodeElement.value : 'Lambda code area not found.';
-        const fontCode = fontCodeElement ? fontCodeElement.value : 'Font code area not found.';
+        const lambdaCodeElement = document.getElementById('generatedCodeOutput');
+        const fontCodeElement = document.getElementById('generatedFontCodeOutput');
+
+        const lambdaCode = lambdaCodeElement ? lambdaCodeElement.value : '// Lambda code could not be generated.';
+        const fontCode = fontCodeElement ? fontCodeElement.value : '// Font code could not be generated.';
+
+        // --- Gather Configuration Data ---
+        const currentResolution = configResolutionSelect.value;
+        const customFontsValue = configCustomFontsTextarea.value;
+        const colorsValue = configColorsInput.value;
+        const customResolutionsValue = customResolutions.join(','); // customResolutions is the global array
+        const scaleToFitValue = isScaleToFit; // isScaleToFit is the global boolean for actual state
+        const darkModeValue = document.body.classList.contains('dark-mode');
+
+        let configSection = "// --- Configuration ---\n";
+        configSection += `Resolution: ${currentResolution}\n`;
+        configSection += `CustomFonts: ${customFontsValue}\n`;
+        configSection += `Colors: ${colorsValue}\n`;
+        if (customResolutionsValue) {
+            configSection += `CustomResolutions: ${customResolutionsValue}\n`;
+        }
+        configSection += `ScaleToFit: ${scaleToFitValue}\n`;
+        configSection += `DarkMode: ${darkModeValue}\n`;
+        configSection += "// --- End Configuration ---\n\n";
 
         // Combine the codes into one string with headers
-        const combinedCode = `// --- Generated Lambda Code --- \n\n${lambdaCode}\n\n\n// --- Generated Font Code --- \n\n${fontCode}`;
+        const combinedCode = `${configSection}// --- Generated Lambda Code ---\n\n${lambdaCode}\n\n\n// --- Generated Font Code ---\n\n${fontCode}`;
 
         // Trigger the download
-        downloadTextFile('esphome-display-codes.txt', combinedCode);
+        downloadTextFile('esphome-display-config.txt', combinedCode);
         });
 
         // --- Add this JavaScript code for IMPORT functionality ---
@@ -1363,29 +1381,77 @@ body.dark-mode details:not([open]) {
         });
 
         // 3. Parsing Logic (NEEDS CAREFUL IMPLEMENTATION)
+        function parseConfigBlock(configBlock) {
+            const config = {};
+            const lines = configBlock.split('\n');
+            lines.forEach(line => {
+                const parts = line.split(':');
+                if (parts.length >= 2) {
+                    const key = parts[0].trim();
+                    const value = parts.slice(1).join(':').trim(); // Handle colons in value
+                    if (key === "ScaleToFit" || key === "DarkMode") {
+                        config[key] = value === 'true';
+                    } else {
+                        config[key] = value;
+                    }
+                }
+            });
+            return config;
+        }
+
         function parseImportedText(text) {
-        const lambdaMarker = '// --- Generated Lambda Code ---';
-        const fontMarker = '// --- Generated Font Code ---';
+            const configMarkerStart = '// --- Configuration ---';
+            const configMarkerEnd = '// --- End Configuration ---';
+            const lambdaMarkerStart = '// --- Generated Lambda Code ---';
+            const fontMarkerStart = '// --- Generated Font Code ---';
 
-        const lambdaIndex = text.indexOf(lambdaMarker);
-        const fontIndex = text.indexOf(fontMarker);
+            let configData = {};
+            let lambdaCodeBlock = '';
+            let fontCodeBlock = '';
 
-        if (lambdaIndex === -1 || fontIndex === -1) {
-            console.error('Markers not found in file');
-            return null; // Markers not found
-        }
+            let currentIndex = 0;
 
-        const lambdaCodeBlock = text.substring(lambdaIndex + lambdaMarker.length, fontIndex).trim();
-        const fontCodeBlock = text.substring(fontIndex + fontMarker.length).trim();
+            // Try to parse Configuration
+            const configStartIndex = text.indexOf(configMarkerStart, currentIndex);
+            if (configStartIndex !== -1) {
+                const configEndActualIndex = text.indexOf(configMarkerEnd, configStartIndex + configMarkerStart.length);
+                if (configEndActualIndex !== -1) {
+                    const parsedConfigBlock = text.substring(configStartIndex + configMarkerStart.length, configEndActualIndex).trim();
+                    configData = parseConfigBlock(parsedConfigBlock);
+                    currentIndex = configEndActualIndex + configMarkerEnd.length;
+                } else {
+                    console.warn("Configuration start marker found, but no end marker.");
+                    currentIndex = configStartIndex + configMarkerStart.length;
+                }
+            }
 
-        const fonts = parseFontCode(fontCodeBlock);
-        const elements = parseLambdaCode(lambdaCodeBlock);
+            // Try to parse Lambda Code
+            const lambdaStartIndex = text.indexOf(lambdaMarkerStart, currentIndex);
+            if (lambdaStartIndex !== -1) {
+                const fontSearchStartIndex = lambdaStartIndex + lambdaMarkerStart.length;
+                const fontActualIndex = text.indexOf(fontMarkerStart, fontSearchStartIndex);
 
-        if (!fonts || !elements) {
-            return null; // Parsing failed
-        }
+                if (fontActualIndex !== -1) { // Font marker found after lambda
+                    lambdaCodeBlock = text.substring(lambdaStartIndex + lambdaMarkerStart.length, fontActualIndex).trim();
+                    currentIndex = fontActualIndex;
+                } else { // No font marker, lambda code goes to the end
+                    lambdaCodeBlock = text.substring(lambdaStartIndex + lambdaMarkerStart.length).trim();
+                    currentIndex = text.length;
+                }
+            }
 
-        return { fonts, elements };
+            // Try to parse Font Code
+            const fontStartIndex = text.indexOf(fontMarkerStart, currentIndex);
+             if (fontStartIndex !== -1 && fontStartIndex >= (lambdaStartIndex !== -1 ? lambdaStartIndex : 0) ) {
+                fontCodeBlock = text.substring(fontStartIndex + fontMarkerStart.length).trim();
+            }
+
+            const fonts = parseFontCode(fontCodeBlock); // Existing function (the first definition)
+            const elements = parseLambdaCode(lambdaCodeBlock); // Existing function (the first definition)
+
+            if (!elements && lambdaCodeBlock) console.warn("Elements could not be parsed from lambda code block.");
+
+            return { config: configData, fonts, elements };
         }
 
         // 3a. Parse Font Code (Example Skeleton - NEEDS REFINEMENT)
@@ -1410,105 +1476,127 @@ body.dark-mode details:not([open]) {
 
         // 3b. Parse Lambda Code (Example Skeleton - VERY COMPLEX - NEEDS MAJOR REFINEMENT)
         function parseLambdaCode(lambdaCode) {
-        const parsedElements = [];
-        const lines = lambdaCode.split('\n');
+            const parsedElements = [];
+            const lines = lambdaCode.split('\n');
 
-        // Regex patterns for different element types
-        const printfRegex = /it\.printf\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(?:id\((.*?)\)|(\w+))\s*,\s*(\S+?)(?:\s*,\s*(?:TextAlign::(\w+)\s*,\s*)?)?(?:\s*,\s*)?"(.*?)"(?:.*?\/\/\s*Ligature:\s*(.*?))?\s*\);/;
-        const rectRegex = /it\.rectangle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
-        const filledRectRegex = /it\.filled_rectangle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
-        const circleRegex = /it\.circle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
-        const filledCircleRegex = /it\.filled_circle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
+            // Improved regex for printf (matches optional align, quoted format string, and any trailing args)
+            const printfRegex = /it\.printf\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(id\([^)]+\)|\w+)\s*,\s*([^\s,]+)(?:\s*,\s*TextAlign::(\w+))?\s*,\s*("[^"]*")(.*?)(?:\/\/\s*Ligature:\s*(.*?))?\s*\);/;
 
-        lines.forEach(line => {
-            line = line.trim();
-            if (!line.startsWith('it.')) return;
+            const rectRegex = /it\.rectangle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
+            const filledRectRegex = /it\.filled_rectangle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
+            const circleRegex = /it\.circle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
+            const filledCircleRegex = /it\.filled_circle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
 
-            let match;
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line.startsWith('it.')) return;
 
-            // Match printf for text or icon
-            match = line.match(printfRegex);
-            if (match) {
-                const [_, x, y, fontId, defaultFont, colorId, align, content, ligature] = match;
-                const isIcon = !!ligature;
-                const actualFontId = fontId || defaultFont;
-                
-                parsedElements.push({
-                    type: isIcon ? 'icon' : 'text',
-                    x: parseInt(x),
-                    y: parseInt(y),
-                    fontId: actualFontId,
-                    colorId: colorId,
-                    content: isIcon ? undefined : content,
-                    args: '', // Default empty for now
-                    align: align || 'LEFT',
-                    iconLigature: ligature,
-                });
-                return;
-            }
+                let match;
 
-            // Match regular rectangle
-            match = line.match(rectRegex);
-            if (match) {
-                parsedElements.push({
-                    type: 'rectangle',
-                    x: parseInt(match[1]),
-                    y: parseInt(match[2]),
-                    width: parseInt(match[3]),
-                    height: parseInt(match[4]),
-                    colorId: match[5],
-                    fill: false,
-                    thickness: 1,
-                });
-                return;
-            }
+                // Match printf for text or icon (with extra args)
+                match = line.match(printfRegex);
+                if (match) {
+                    const [
+                        _full, xStr, yStr, fontId, colorIdStr, alignStr, formatStr, extraArgs, ligatureStr
+                    ] = match;
+                    const isIcon = !!ligatureStr;
+                    let args = '';
+                    if (extraArgs) {
+                        // Remove leading comma and whitespace
+                        args = extraArgs.replace(/^,/, '').trim();
+                    }
+                    parsedElements.push({
+                        type: isIcon ? 'icon' : 'text',
+                        x: parseInt(xStr),
+                        y: parseInt(yStr),
+                        fontId: fontId,
+                        colorId: colorIdStr,
+                        content: isIcon ? undefined : JSON.parse(formatStr),
+                        args: isIcon ? '' : args,
+                        align: alignStr || 'LEFT',
+                        iconLigature: ligatureStr,
+                    });
+                    return;
+                }
 
-            // Match filled rectangle
-            match = line.match(filledRectRegex);
-            if (match) {
-                parsedElements.push({
-                    type: 'bar', // Use correct type based on height
-                    x: parseInt(match[1]),
-                    y: parseInt(match[2]),
-                    width: parseInt(match[3]),
-                    height: parseInt(match[4]),
-                    colorId: match[5],
-                });
-                return;
-            }
+                // --- Fix: Handle filled_rectangle as bar or rectangle ---
+                match = filledRectRegex.exec(line);
+                if (match) {
+                    const x = parseInt(match[1]);
+                    const y = parseInt(match[2]);
+                    const width = parseInt(match[3]);
+                    const height = parseInt(match[4]);
+                    const colorId = match[5];
 
-            // Match circle
-            match = line.match(circleRegex);
-            if (match) {
-                parsedElements.push({
-                    type: 'circle',
-                    x: parseInt(match[1]),
-                    y: parseInt(match[2]),
-                    radius: parseInt(match[3]),
-                    colorId: match[4],
-                    fill: false
-                });
-                return;
-            }
+                    // If height is 1 or 2, treat as bar (common for horizontal bars)
+                    if (height === 1 || height === 2) {
+                        parsedElements.push({
+                            type: 'bar',
+                            x,
+                            y,
+                            width,
+                            height,
+                            colorId
+                        });
+                    } else {
+                        parsedElements.push({
+                            type: 'rectangle',
+                            x,
+                            y,
+                            width,
+                            height,
+                            colorId,
+                            fill: true
+                        });
+                    }
+                    return;
+                }
+                // --- End fix ---
 
-            // Match filled circle
-            match = line.match(filledCircleRegex);
-            if (match) {
-                parsedElements.push({
-                    type: 'circle',
-                    x: parseInt(match[1]),
-                    y: parseInt(match[2]),
-                    radius: parseInt(match[3]),
-                    colorId: match[4],
-                    fill: true
-                });
-                return;
-            }
+                // --- Fix: Handle rectangle as non-filled rectangle ---
+                match = rectRegex.exec(line);
+                if (match) {
+                    parsedElements.push({
+                        type: 'rectangle',
+                        x: parseInt(match[1]),
+                        y: parseInt(match[2]),
+                        width: parseInt(match[3]),
+                        height: parseInt(match[4]),
+                        colorId: match[5],
+                        fill: false,
+                        thickness: 1
+                    });
+                    return;
+                }
+                match = filledCircleRegex.exec(line);
+                if (match) {
+                    parsedElements.push({
+                        type: 'circle',
+                        x: parseInt(match[1]),
+                        y: parseInt(match[2]),
+                        radius: parseInt(match[3]),
+                        colorId: match[4],
+                        fill: true
+                    });
+                    return;
+                }
+                match = circleRegex.exec(line);
+                if (match) {
+                    parsedElements.push({
+                        type: 'circle',
+                        x: parseInt(match[1]),
+                        y: parseInt(match[2]),
+                        radius: parseInt(match[3]),
+                        colorId: match[4],
+                        fill: false
+                    });
+                    return;
+                }
+                // Optionally log unparsed lines
+                // console.warn("Could not parse lambda line:", line);
+            });
 
-            console.warn("Could not parse lambda line:", line);
-        });
-
-        return parsedElements;
+            return parsedElements;
         }
 
 
@@ -1516,214 +1604,96 @@ body.dark-mode details:not([open]) {
         function applyImportedData(data) {
     console.log("Applying imported data:", data);
 
-    // Clear existing elements and fonts
-    elements = []; // Clear the elements array
-    selectedElementId = null; // Reset selected element
-    nextId = 0; // Reset ID counter
+    // Clear existing elements and state
+    elements = [];
+    selectedElementId = null;
+    nextId = 0;
+    customResolutions = []; // Clear existing custom resolutions
 
-    // Apply fonts
-    if (data.fonts) {
+    // Apply Configuration
+    if (data.config) {
+        const config = data.config;
+        if (config.Resolution) {
+            let resOption = configResolutionSelect.querySelector(`option[value="${config.Resolution}"]`);
+            if (!resOption && config.Resolution.includes('x')) { // If not a standard one, try to add as custom
+                const [w, h] = config.Resolution.split('x').map(Number);
+                if (w && h) { // Basic validation
+                    if (!customResolutions.includes(config.Resolution)) {
+                         customResolutions.push(config.Resolution); // Add to our array
+                    }
+                    // Add to dropdown if not already there by populateResolutionSelect
+                    const option = document.createElement('option');
+                    option.value = config.Resolution;
+                    option.textContent = config.Resolution.replace('x', ' x ');
+                    configResolutionSelect.appendChild(option);
+                }
+            }
+            configResolutionSelect.value = config.Resolution; // Set it
+            updateScreenSize(); // Apply it
+        }
+
+        if (config.CustomFonts) configCustomFontsTextarea.value = config.CustomFonts;
+        if (config.Colors) configColorsInput.value = config.Colors;
+
+        if (config.CustomResolutions && typeof config.CustomResolutions === 'string') {
+            const importedCustomRes = config.CustomResolutions.split(',').map(r => r.trim()).filter(r => r);
+            importedCustomRes.forEach(res => {
+                if (!customResolutions.includes(res) && res !== configResolutionSelect.value) { // Avoid duplicates
+                    customResolutions.push(res);
+                }
+            });
+            populateResolutionSelect(); // Re-populate to add these to dropdown
+        }
+        if (config.ScaleToFit !== undefined) {
+            isScaleToFit = config.ScaleToFit; // Update global state
+            screenPreviewDiv.classList.toggle('scale-to-fit', isScaleToFit);
+            if (scaleToFitBtn) scaleToFitBtn.title = isScaleToFit ? "Restore Original Size" : "Scale to Fit";
+            localStorage.setItem('previewScaleToFit', isScaleToFit.toString());
+        }
+        if (config.DarkMode !== undefined) {
+            const body = document.body;
+            const darkModeBtn = document.getElementById('darkModeBtn');
+            if (config.DarkMode) {
+                body.classList.add('dark-mode');
+                if (darkModeBtn) darkModeBtn.textContent = 'light_mode';
+            } else {
+                body.classList.remove('dark-mode');
+                if (darkModeBtn) darkModeBtn.textContent = 'dark_mode';
+            }
+            localStorage.setItem('darkMode', config.DarkMode.toString());
+        }
+    }
+
+    initializeConfig(); // Reinitialize font/color dropdowns after textareas are set
+
+    // Apply fonts (if not set by config.CustomFonts)
+    if (data.fonts && data.fonts.length > 0 && !(data.config && data.config.CustomFonts)) {
         configCustomFontsTextarea.value = data.fonts.map(font => `id(${font.id})`).join(', ');
         initializeConfig(); // Reinitialize font dropdowns
     }
 
-    // Apply elements
+    // Apply elements - reverse them as lambda code is generated in reverse draw order
     if (data.elements) {
-        data.elements.forEach(elementData => {
-            const newElement = { ...elementData, id: nextId++ }; // Assign a new unique ID
+        data.elements.reverse().forEach(elementData => { // Reverse order
+            const newElement = { ...elementData, id: nextId++ };
+            // Ensure defaults for critical properties if missing from older exports
+            newElement.colorId = elementData.colorId || 'white';
+            if (elementData.type === 'text' || elementData.type === 'icon') {
+                newElement.fontId = elementData.fontId || (elementData.type === 'icon' ? 'id(material_symbols_24)' : 'id(roboto_12)');
+            }
             elements.push(newElement);
         });
     }
 
-    // Update UI and redraw
     renderElementList();
-    updateEditorForm();
+    if (elements.length > 0) {
+        selectElement(elements[0].id); // Select first element to populate editor
+    } else {
+        updateEditorForm(); // Clear editor if no elements
+    }
     drawPreview();
     saveToCache();
     
-    // Generate fresh code
-    generateLambdaCode();
-    generateFontYaml();
-}
-
-function parseImportedText(text) {
-    const lambdaMarker = '// --- Generated Lambda Code ---';
-    const fontMarker = '// --- Generated Font Code ---';
-
-    const lambdaIndex = text.indexOf(lambdaMarker);
-    const fontIndex = text.indexOf(fontMarker);
-
-    if (lambdaIndex === -1 || fontIndex === -1) {
-        console.error('Markers not found in file');
-        return null; // Markers not found
-    }
-
-    const lambdaCodeBlock = text.substring(lambdaIndex + lambdaMarker.length, fontIndex).trim();
-    const fontCodeBlock = text.substring(fontIndex + fontMarker.length).trim();
-
-    const fonts = parseFontCode(fontCodeBlock);
-    const elements = parseLambdaCode(lambdaCodeBlock);
-
-    if (!fonts || !elements) {
-        return null; // Parsing failed
-    }
-
-    return { fonts, elements };
-}
-
-function parseFontCode(fontCode) {
-    const parsedFonts = [];
-    const fontRegex = /id:\s*id\((.*?)\)\s*size:\s*(\d+)(?:\s*type:\s*(ICON))?/g;
-    let match;
-    while ((match = fontRegex.exec(fontCode)) !== null) {
-        parsedFonts.push({
-            id: match[1],
-            size: parseInt(match[2], 10),
-            type: match[3] || null, // Optional ICON type
-        });
-    }
-    return parsedFonts;
-}
-
-function parseLambdaCode(lambdaCode) {
-    const parsedElements = [];
-    const lines = lambdaCode.split('\n');
-
-    // Regex patterns for different element types
-    const printfRegex = /it\.printf\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(?:id\((.*?)\)|(\w+))\s*,\s*(\S+?)(?:\s*,\s*(?:TextAlign::(\w+)\s*,\s*)?)?(?:\s*,\s*)?"(.*?)"(?:.*?\/\/\s*Ligature:\s*(.*?))?\s*\);/;
-    const rectRegex = /it\.rectangle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
-    const filledRectRegex = /it\.filled_rectangle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
-    const circleRegex = /it\.circle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
-    const filledCircleRegex = /it\.filled_circle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
-
-    lines.forEach(line => {
-        line = line.trim();
-        if (!line.startsWith('it.')) return;
-
-        let match;
-
-        // Match printf for text or icon
-        match = line.match(printfRegex);
-        if (match) {
-            const [_, x, y, fontId, defaultFont, colorId, align, content, ligature] = match;
-            const isIcon = !!ligature;
-            const actualFontId = fontId || defaultFont;
-            
-            parsedElements.push({
-                type: isIcon ? 'icon' : 'text',
-                x: parseInt(x),
-                y: parseInt(y),
-                fontId: actualFontId,
-                colorId: colorId,
-                content: isIcon ? undefined : content,
-                args: '', // Default empty for now
-                align: align || 'LEFT',
-                iconLigature: ligature,
-            });
-            return;
-        }
-
-        // Match regular rectangle
-        match = line.match(rectRegex);
-        if (match) {
-            parsedElements.push({
-                type: 'rectangle',
-                x: parseInt(match[1]),
-                y: parseInt(match[2]),
-                width: parseInt(match[3]),
-                height: parseInt(match[4]),
-                colorId: match[5],
-                fill: false,
-                thickness: 1,
-            });
-            return;
-        }
-
-        // Match filled rectangle
-        match = line.match(filledRectRegex);
-        if (match) {
-            parsedElements.push({
-                type: 'bar', // Use correct type based on height
-                x: parseInt(match[1]),
-                y: parseInt(match[2]),
-                width: parseInt(match[3]),
-                height: parseInt(match[4]),
-                colorId: match[5],
-            });
-            return;
-        }
-
-        // Match circle
-        match = line.match(circleRegex);
-        if (match) {
-            parsedElements.push({
-                type: 'circle',
-                x: parseInt(match[1]),
-                y: parseInt(match[2]),
-                radius: parseInt(match[3]),
-                colorId: match[4],
-                fill: false
-            });
-            return;
-        }
-
-        // Match filled circle
-        match = line.match(filledCircleRegex);
-        if (match) {
-            parsedElements.push({
-                type: 'circle',
-                x: parseInt(match[1]),
-                y: parseInt(match[2]),
-                radius: parseInt(match[3]),
-                colorId: match[4],
-                fill: true
-            });
-            return;
-        }
-
-        console.warn("Could not parse lambda line:", line);
-    });
-
-    return parsedElements;
-}
-
-function applyImportedData(data) {
-    console.log("Applying imported data:", data);
-
-    // Clear existing elements
-    elements = [];
-    selectedElementId = null;
-    nextId = 0;
-
-    // Apply fonts first
-    if (data.fonts && data.fonts.length > 0) {
-        configCustomFontsTextarea.value = data.fonts
-            .map(font => `id(${font.id})`)
-            .join(', ');
-        initializeConfig();
-    }
-
-    // Apply elements with proper type mapping
-    if (data.elements && data.elements.length > 0) {
-        data.elements.forEach(el => {
-            // Create new element with fresh ID
-            const newElement = {
-                ...el,
-                id: nextId++,
-                // Ensure required properties exist
-                colorId: el.colorId || 'white',
-                fontId: el.fontId || (el.type === 'icon' ? 'id(material_symbols_24)' : 'id(roboto_12)')
-            };
-            elements.push(newElement);
-        });
-    }
-
-    // Update UI
-    renderElementList();
-    drawPreview();
-    saveToCache();
-    
-    // Generate fresh code
     generateLambdaCode();
     generateFontYaml();
 }
