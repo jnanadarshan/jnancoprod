@@ -37,7 +37,13 @@
         .canvas-widget.selected { border: 2px solid #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); z-index: 50; }
         #modal-code-output, #yaml-input-area, #prop-options { background-color: #1e293b; color: #cbd5e1; font-family: 'Monospace', monospace; padding: 0.75rem 1rem; border-radius: 0.375rem; white-space: pre-wrap; word-wrap: break-word; min-height: 100px; max-height: 60vh; overflow: auto; font-size: 0.8rem; border: 1px solid #334155; }
         #yaml-input-area, #prop-options { width: 100%; resize: vertical; min-height: 80px; }
-        #properties-content { overflow: visible; font-size: 0.875rem; }
+        #properties-content { overflow: visible; font-size: 0.875rem; 
+        /* overflow: visible; */ /* Replaced by overflow-y */
+            overflow-y: auto; /* Allow vertical scrolling */
+            max-height: 300px; /* Set a max height before scrolling starts */
+            font-size: 0.875rem;
+            /* min-height: 100px; is applied via Tailwind class min-h-[100px] on the element */
+        }
         #elements-list-items { max-height: 30vh; overflow: auto; font-size: 0.875rem; }
         #toolbox { max-height: calc(100vh - 200px); overflow-y: auto; padding-right: 4px; }
         .panel-header { font-size: 0.875rem; font-weight: 600; color: #475569; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0; }
@@ -118,6 +124,26 @@
         box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     
+    #properties-wrapper {
+    transition: max-height 0.3s ease-in-out, opacity 0.2s ease-in-out;
+}
+
+#properties-wrapper.hidden {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+}
+
+#toggle-properties .material-icons-outlined {
+    transition: transform 0.2s ease-in-out;
+}
+
+#properties-wrapper:not(.hidden) + #toggle-properties .material-icons-outlined {
+    transform: rotate(180deg);
+}
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -223,12 +249,19 @@
                         </div>
                     </div>
                     <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                        <h2 class="panel-header">Properties</h2>
-                        <div id="properties-content" class="text-sm text-gray-600 min-h-[100px]">
-                            <p id="properties-placeholder">Select an element on the canvas to see its properties.</p>
-                            <div id="properties-fields"></div>
-                        </div>
-                    </div>
+    <div id="properties-header" class="flex justify-between items-center cursor-pointer">
+        <h2 class="panel-header !mb-0 !pb-0 !border-0">Properties</h2>
+        <button id="toggle-properties" type="button" class="text-gray-500 hover:text-gray-700">
+            <i class="material-icons-outlined">expand_more</i>
+        </button>
+    </div>
+    <div id="properties-wrapper" class="mt-3 pt-3 border-t border-gray-200">
+        <div id="properties-content" class="text-sm text-gray-600 min-h-[100px]">
+            <p id="properties-placeholder">Select an element on the canvas to see its properties.</p>
+            <div id="properties-fields"></div>
+        </div>
+    </div>
+</div>
                 </div> </div>
         </div>
     </div>
@@ -312,6 +345,9 @@
         const yamlInputArea = document.getElementById('yaml-input-area');
         const processYamlButton = document.getElementById('process-yaml-button');
         const yamlParseError = document.getElementById('yaml-parse-error');
+        const propertiesHeader = document.getElementById('properties-header');
+        const togglePropertiesButton = document.getElementById('toggle-properties');
+        const propertiesWrapper = document.getElementById('properties-wrapper');
 
         // --- State Variables ---
         let draggedWidgetType = null;
@@ -836,7 +872,7 @@ function updateWidgetSpecificProperties(widgetData, element) {
                         e.stopPropagation();
                         if (widgetData.checkable) {
                             widgetData.checked = !widgetData.checked;
-                            widgetElement.classList.toggle('bg-green-500', widgetData.checked);
+                                                       widgetElement.classList.toggle('bg-green-500', widgetData.checked);
                             widgetElement.classList.toggle('bg-blue-500', !widgetData.checked);
                             updateCodeOutput();
                         }
@@ -1170,7 +1206,8 @@ function updateWidgetSpecificProperties(widgetData, element) {
                 customResolutionText: customText,
                 scale: currentScale,
                 nextWidgetId: nextWidgetId,
-                isToolboxVisible: isToolboxVisible
+                isToolboxVisible: isToolboxVisible,
+                isPropertiesPanelVisible: !propertiesWrapper.classList.contains('hidden'),
             };
             localStorage.setItem(LVGL_DESIGNER_STATE_KEY, JSON.stringify(state));
         }
@@ -1240,6 +1277,12 @@ function updateWidgetSpecificProperties(widgetData, element) {
                     nextWidgetId = Math.max(nextWidgetId || 0, maxIdNum + 1);
                     updateElementsList(); updateZIndices(); updateCodeOutput(); selectWidget(null);
                 }
+
+                if (savedState.isPropertiesPanelVisible !== undefined) {
+                    propertiesWrapper.classList.toggle('hidden', !savedState.isPropertiesPanelVisible);
+                    togglePropertiesButton.querySelector('.material-icons-outlined').textContent = 
+                        savedState.isPropertiesPanelVisible ? 'expand_more' : 'expand_less';
+                }
             } catch (error) {
                 console.error("Error loading state from localStorage:", error);
                 localStorage.removeItem(LVGL_DESIGNER_STATE_KEY); // Clear corrupted state
@@ -1250,6 +1293,14 @@ function updateWidgetSpecificProperties(widgetData, element) {
         // --- Initial Setup ---
         loadStateFromLocalStorage(); // Load state or apply defaults
 
+        function toggleProperties() {
+            propertiesWrapper.classList.toggle('hidden');
+            const icon = togglePropertiesButton.querySelector('.material-icons-outlined');
+            icon.textContent = propertiesWrapper.classList.contains('hidden') ? 'expand_less' : 'expand_more';
+            saveStateToLocalStorage();
+        }
+
+        propertiesHeader.addEventListener('click', toggleProperties);
     </script>
 
 </body>
