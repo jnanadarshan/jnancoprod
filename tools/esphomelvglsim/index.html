@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"="width=device-width, initial-scale=1.0">
+    <title>LVGL ESPHome Visual Designer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    <style>
+        /* Custom styles */
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        #canvas {
+            border: 1px solid #cbd5e1; position: relative;
+            background-image: linear-gradient(to right, #eef2f6 1px, transparent 1px), linear-gradient(to bottom, #eef2f6 1px, transparent 1px);
+            background-size: 10px 10px; overflow: hidden; border-radius: 0.25rem;
+             /* Removed margin-left/right auto - centering handled by parent flex now */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transform-origin: center center; /* Scale from center now looks better */
+            transition: width 0.2s ease, height 0.2s ease, transform 0.2s ease;
+            flex-shrink: 0; /* Prevent canvas from shrinking in flex container */
+        }
+        #toolbox-panel {
+            transition: transform 0.3s ease-in-out; width: 260px; z-index: 40;
+        }
+        #toolbox-panel.hidden-toolbox { transform: translateX(-100%); }
+        #main-content { transition: margin-left 0.3s ease-in-out; }
+
+        .widget-item { display: flex; align-items: center; cursor: grab; border: 1px solid transparent; padding: 8px 12px; margin-bottom: 4px; background-color: transparent; color: #334155; border-radius: 0.375rem; text-align: left; transition: background-color 0.2s ease, border-color 0.2s ease; font-size: 0.875rem; }
+        .widget-item:hover { background-color: #f1f5f9; color: #0f172a; }
+        .widget-item:active { cursor: grabbing; background-color: #e2e8f0; }
+        .widget-item .material-icons-outlined { margin-right: 0.75rem; font-size: 1.25rem; color: #64748b; flex-shrink: 0; vertical-align: middle; }
+        .widget-item:hover .material-icons-outlined { color: #334155; }
+        .canvas-widget { position: absolute; border: 1px solid #94a3b8; background-color: rgba(255, 255, 255, 0.9); cursor: move; border-radius: 0.375rem; user-select: none; min-width: 20px; min-height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; box-shadow: 0 1px 3px rgba(0,0,0,0.07); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .canvas-widget[data-widget-type="line"] { padding: 0; background-color: rgba(230, 230, 250, 0.3); border-style: dashed; overflow: visible; }
+        .canvas-widget[data-widget-type="line"] svg { display: block; overflow: visible; }
+        .canvas-widget.selected { border: 2px solid #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); z-index: 50; }
+        #modal-code-output, #yaml-input-area, #prop-options { background-color: #1e293b; color: #cbd5e1; font-family: 'Monospace', monospace; padding: 0.75rem 1rem; border-radius: 0.375rem; white-space: pre-wrap; word-wrap: break-word; min-height: 100px; max-height: 60vh; overflow: auto; font-size: 0.8rem; border: 1px solid #334155; }
+        #yaml-input-area, #prop-options { width: 100%; resize: vertical; min-height: 80px; }
+        #properties-content { overflow: visible; font-size: 0.875rem; }
+        #elements-list-items { max-height: 30vh; overflow: auto; font-size: 0.875rem; }
+        #toolbox { max-height: calc(100vh - 200px); overflow-y: auto; padding-right: 4px; }
+        .panel-header { font-size: 0.875rem; font-weight: 600; color: #475569; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0; }
+        #prop-points { font-family: 'Monospace', monospace; font-size: 0.75rem; min-height: 80px; resize: vertical; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        #yaml-modal.hidden, #import-modal.hidden { display: none; }
+        .scale-button { padding: 4px 8px; font-size: 0.75rem; border: 1px solid #d1d5db; background-color: white; color: #4b5563; border-radius: 0.375rem; transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease; }
+        .scale-button:hover { background-color: #f3f4f6; border-color: #9ca3af; }
+        .scale-button.active-scale { background-color: #4f46e5; border-color: #4f46e5; color: white; font-weight: 500; }
+        .scale-button:focus { outline: none; box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5); }
+        #delete-widget-button { padding: 2px 4px; }
+        #delete-widget-button svg { width: 1em; height: 1em; }
+        .elements-list-item { padding: 6px 8px; font-size: 0.8rem; border-radius: 0.25rem; cursor: pointer; transition: background-color 0.15s ease; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; justify-content: space-between; }
+        .elements-list-item .widget-info { display: flex; align-items: center; overflow: hidden; }
+        .elements-list-item .widget-info .material-icons-outlined { font-size: 1rem; margin-right: 6px; color: #94a3b8; flex-shrink: 0; }
+        .elements-list-item .widget-info span { overflow: hidden; text-overflow: ellipsis; }
+        .elements-list-item:hover { background-color: #f1f5f9; }
+        .elements-list-item.selected-element { background-color: #e0e7ff; color: #3730a3; font-weight: 500; }
+        .elements-list-item.selected-element .widget-info .material-icons-outlined { color: #4f46e5; }
+        .elements-list-item .actions { display: flex; align-items: center; gap: 2px; margin-left: 8px; }
+        .elements-list-item .action-btn { padding: 2px; border-radius: 50%; background: transparent; border: none; cursor: pointer; color: #9ca3af; }
+        .elements-list-item .action-btn:hover { background-color: #e5e7eb; color: #374151; }
+        .elements-list-item .action-btn:disabled { color: #d1d5db; cursor: not-allowed; background-color: transparent; }
+        .elements-list-item .action-btn.delete:hover { background-color: #fee2e2; color: #b91c1c; }
+        .elements-list-item .action-btn .material-icons-outlined { font-size: 1rem; display: block; }
+        #toggle-elements-list .material-icons-outlined { transition: transform 0.2s ease-in-out; }
+        #yaml-parse-error { color: #dc2626; font-size: 0.8rem; margin-top: 8px; }
+    /* In your <style> tag */
+    .widget-property-input {
+        /* ... existing styles ... */
+        transition: border-color 0.2s ease, box-shadow 0.2s ease; /* Add transition for focus */
+    }
+    
+    .widget-property-input:focus {
+        /* Tailwind's focus:ring-blue-500 focus:border-blue-500 is good */
+        /* You can enhance it if needed, e.g., a slightly stronger ring */
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); /* Example focus ring */
+    }
+    
+    /* For a slightly more modern range input track (basic example) */
+    input[type="range"].widget-property-input.flex-1 {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 8px; /* Or your desired height */
+        background: #e5e7eb; /* Tailwind gray-200 */
+        border-radius: 9999px; /* pill shape */
+        outline: none;
+        opacity: 0.9;
+        transition: opacity .15s ease-in-out;
+    }
+    input[type="range"].widget-property-input.flex-1:hover {
+        opacity: 1;
+    }
+    
+    input[type="range"].widget-property-input.flex-1::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px; /* Or your desired size */
+        height: 16px;
+        background: #4f46e5; /* Tailwind indigo-600 */
+        cursor: pointer;
+        border-radius: 50%;
+        border: 2px solid white; /* Optional: adds a nice touch */
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    input[type="range"].widget-property-input.flex-1::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        background: #4f46e5;
+        cursor: pointer;
+        border-radius: 50%;
+        border: 2px solid white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Monospace&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <header class="bg-white border-b border-gray-200/75 shadow-sm sticky top-0 z-50">
+        <nav class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <div class="flex items-center">
+                    <button id="toggle-toolbox-button" type="button" class="p-2 mr-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                        <i class="material-icons-outlined">menu</i>
+                    </button>
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="font-bold text-lg text-gray-800">LVGL Designer</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                     <button id="import-yaml-button" type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <i class="material-icons-outlined text-base mr-1 -ml-1">file_upload</i> Import YAML
+                    </button>
+                    <button id="generate-yaml-button" type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <i class="material-icons-outlined text-base mr-1 -ml-1">code</i> Generate YAML
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="flex">
+        <div id="toolbox-panel" class="fixed top-14 left-0 h-[calc(100vh-3.5rem)] bg-white p-4 shadow-md border-r border-gray-200 overflow-y-auto">
+            <h2 class="panel-header">Toolbox</h2>
+            <div id="toolbox">
+                <div class="widget-item" draggable="true" data-widget-type="arc"><i class="material-icons-outlined">donut_large</i><span>Arc</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="bar"><i class="material-icons-outlined">linear_scale</i><span>Bar</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="button"><i class="material-icons-outlined">smart_button</i><span>Button</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="buttonmatrix"><i class="material-icons-outlined">view_module</i><span>Button Matrix</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="calendar"><i class="material-icons-outlined">calendar_today</i><span>Calendar</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="canvas"><i class="material-icons-outlined">draw</i><span>Canvas</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="chart"><i class="material-icons-outlined">show_chart</i><span>Chart</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="checkbox"><i class="material-icons-outlined">check_box</i><span>Checkbox</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="container"><i class="material-icons-outlined">check_box_outline_blank</i><span>Container</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="dropdown"><i class="material-icons-outlined">arrow_drop_down_circle</i><span>Dropdown</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="image"><i class="material-icons-outlined">image</i><span>Image</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="imagebutton"><i class="material-icons-outlined">add_photo_alternate</i><span>Image Button</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="keyboard"><i class="material-icons-outlined">keyboard</i><span>Keyboard</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="label"><i class="material-icons-outlined">segment</i><span>Label</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="led"><i class="material-icons-outlined">lightbulb</i><span>LED</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="line"><i class="material-icons-outlined">horizontal_rule</i><span>Line</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="list"><i class="material-icons-outlined">list</i><span>Menu</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="meter"><i class="material-icons-outlined">speed</i><span>Meter</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="msgbox"><i class="material-icons-outlined">chat_bubble_outline</i><span>Message Box</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="roller"><i class="material-icons-outlined">unfold_more</i><span>Roller</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="slider"><i class="material-icons-outlined">tune</i><span>Slider</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="spinbox"><i class="material-icons-outlined">iso</i><span>Spinbox</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="spinner"><i class="material-icons-outlined">autorenew</i><span>Spinner</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="switch"><i class="material-icons-outlined">toggle_on</i><span>Switch</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="table"><i class="material-icons-outlined">table_chart</i><span>Table</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="tabview"><i class="material-icons-outlined">tab</i><span>Tab View</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="textarea"><i class="material-icons-outlined">edit_note</i><span>Text Area</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="tileview"><i class="material-icons-outlined">view_quilt</i><span>Tile View</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="window"><i class="material-icons-outlined">web_asset</i><span>Window</span></div>
+            </div>
+        </div>
+
+        <div id="main-content" class="flex-1 p-4 md:p-6 lg:p-8 lg:ml-[260px] min-h-[calc(100vh-3.5rem)]">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full">
+
+                <div class="lg:col-span-3 bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex flex-col h-full">
+                    <div class="flex flex-col sm:flex-row flex-wrap justify-between items-center gap-y-3 mb-4 pb-2 border-b border-gray-200 flex-shrink-0">
+                        <h2 class="panel-header !mb-0 !pb-0 !border-0 flex-shrink-0 mr-4">Canvas</h2>
+                        <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                            <div class="flex items-center space-x-2">
+                                <label for="screen-resolution-select" class="text-sm font-medium text-gray-600 flex-shrink-0">Size:</label>
+                                <select id="screen-resolution-select" name="resolution" class="block w-auto pl-3 pr-8 py-1.5 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md shadow-sm">
+                                    <option value="128x64">128x64</option> <option value="128x128">128x128</option> <option value="128x160" selected>128x160</option> <option value="176x220">176x220</option> <option value="240x240">240x240</option> <option value="240x320">240x320</option> <option value="320x240">320x240</option> <option value="320x480">320x480</option> <option value="480x272">480x272</option> <option value="480x320">480x320</option> <option value="800x480">800x480</option>
+                                    <option value="custom">Custom Size...</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center space-x-1" id="scale-controls">
+                                <span class="text-sm font-medium text-gray-600">Scale:</span>
+                                <button type="button" class="scale-button" data-scale="0.5">0.5x</button> <button type="button" class="scale-button active-scale" data-scale="1">1x</button> <button type="button" class="scale-button" data-scale="2">2x</button> <button type="button" class="scale-button" data-scale="3">3x</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-full flex-1 overflow-auto flex items-center justify-center p-2 bg-gray-50 rounded">
+                         <div id="canvas">
+                             </div>
+                     </div>
+                </div>
+
+                <div class="lg:col-span-1 h-fit flex flex-col gap-6">
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                        <div id="elements-list-header" class="flex justify-between items-center cursor-pointer">
+                            <h2 class="panel-header !mb-0 !pb-0 !border-0">Elements (<span id="element-count">0</span>)</h2>
+                            <button id="toggle-elements-list" type="button" class="text-gray-500 hover:text-gray-700">
+                                <i class="material-icons-outlined">expand_more</i>
+                            </button>
+                        </div>
+                        <div id="elements-list-items" class="mt-3 pt-3 border-t border-gray-200 hidden max-h-48 overflow-y-auto">
+                            <p class="text-xs text-gray-500 italic px-2">No elements added yet.</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                        <h2 class="panel-header">Properties</h2>
+                        <div id="properties-content" class="text-sm text-gray-600 min-h-[100px]">
+                            <p id="properties-placeholder">Select an element on the canvas to see its properties.</p>
+                            <div id="properties-fields"></div>
+                        </div>
+                    </div>
+                </div> </div>
+        </div>
+    </div>
+
+    <div id="yaml-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-[60] hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col">
+             <div class="flex justify-between items-center p-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Generated YAML</h3>
+                <div class="flex items-center gap-2">
+                    <button type="button" id="copy-yaml-button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-3 py-2 hover:text-gray-900 focus:z-10 inline-flex items-center">
+                        <i class="material-icons-outlined text-base mr-1">content_copy</i> Copy
+                    </button>
+                    <button type="button" class="modal-close text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+             </div>
+             <div class="p-4 overflow-y-auto"><pre id="modal-code-output"># YAML code will appear here...</pre></div>
+             <div class="flex items-center justify-end p-3 border-t border-gray-200 rounded-b">
+                <button type="button" class="modal-close text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2 hover:text-gray-900 focus:z-10">Close</button>
+             </div>
+        </div>
+    </div>
+
+    <div id="import-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-[60] hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b border-gray-200"><h3 class="text-lg font-medium text-gray-900">Import YAML</h3><button type="button" class="modal-close text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></button></div>
+            <div class="p-4 space-y-4"><label for="yaml-input-area" class="block text-sm font-medium text-gray-700">Paste your LVGL YAML configuration here:</label><textarea id="yaml-input-area" rows="10" class="block" placeholder="lvgl:\n  pages:\n    - id: main_page\n      widgets:\n        - label:\n            id: my_label\n            x: 10\n            y: 10\n            text: Hello!"></textarea><div id="yaml-parse-error" class="text-red-600 text-sm mt-1"></div> </div>
+            <div class="flex items-center justify-end p-3 border-t border-gray-200 rounded-b space-x-2"><button type="button" id="process-yaml-button" class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2 text-center">Import and Generate Preview</button><button type="button" class="modal-close text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2 hover:text-gray-900 focus:z-10">Cancel</button></div>
+        </div>
+    </div>
+
+    <div id="custom-size-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-[60] hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="flex justify-between items-center p-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Custom Screen Size</h3>
+                <button type="button" class="modal-close text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                </button>
+            </div>
+            <div class="p-4 space-y-4">
+                <div>
+                    <label for="custom-width" class="block text-sm font-medium text-gray-700">Width (px)</label>
+                    <input type="number" id="custom-width" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" min="1" max="2048">
+                </div>
+                <div>
+                    <label for="custom-height" class="block text-sm font-medium text-gray-700">Height (px)</label>
+                    <input type="number" id="custom-height" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" min="1" max="2048">
+                </div>
+            </div>
+            <div class="flex items-center justify-end p-4 border-t border-gray-200 gap-2">
+                <button type="button" class="modal-close px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Cancel</button>
+                <button type="button" id="save-custom-size" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Element References ---
+        const toolboxPanel = document.getElementById('toolbox-panel');
+        const mainContent = document.getElementById('main-content');
+        const toggleToolboxButton = document.getElementById('toggle-toolbox-button');
+        const toolbox = document.getElementById('toolbox');
+        const canvas = document.getElementById('canvas');
+        const screenResolutionSelect = document.getElementById('screen-resolution-select');
+        const scaleControls = document.getElementById('scale-controls');
+        const propertiesContent = document.getElementById('properties-content');
+        const propertiesPlaceholder = document.getElementById('properties-placeholder');
+        const propertiesFields = document.getElementById('properties-fields');
+        const modalCodeOutput = document.getElementById('modal-code-output');
+        const generateYamlButton = document.getElementById('generate-yaml-button');
+        const copyYamlButton = document.getElementById('copy-yaml-button');
+        const yamlModal = document.getElementById('yaml-modal');
+        const modalCloseButtons = document.querySelectorAll('.modal-close');
+        const elementsListHeader = document.getElementById('elements-list-header');
+        const toggleElementsListButton = document.getElementById('toggle-elements-list');
+        const elementsListItemsContainer = document.getElementById('elements-list-items');
+        const elementCountSpan = document.getElementById('element-count');
+        const importYamlButton = document.getElementById('import-yaml-button');
+        const importModal = document.getElementById('import-modal');
+        const yamlInputArea = document.getElementById('yaml-input-area');
+        const processYamlButton = document.getElementById('process-yaml-button');
+        const yamlParseError = document.getElementById('yaml-parse-error');
+
+        // --- State Variables ---
+        let draggedWidgetType = null;
+        let selectedWidget = null;
+        let widgetsOnCanvas = [];
+        let nextWidgetId = 0;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+        let isDraggingWidgetOnCanvas = false;
+        let currentScale = 1;
+        const LOCAL_STORAGE_KEY = 'lvglDesignerState_v1';
+        let isToolboxVisible = true;
+
+        let lastSelectedResolutionBeforeCustomModal = null; // To store selection before opening custom modal
+        // --- Icon Mapping ---
+        const widgetIconMap = { arc: 'donut_large', bar: 'linear_scale', button: 'smart_button', buttonmatrix: 'view_module', calendar: 'calendar_today', canvas: 'draw', chart: 'show_chart', checkbox: 'check_box', container: 'check_box_outline_blank', dropdown: 'arrow_drop_down_circle', image: 'image', imagebutton: 'add_photo_alternate', keyboard: 'keyboard', label: 'segment', led: 'lightbulb', line: 'horizontal_rule', list: 'list', menu: 'menu', meter: 'speed', msgbox: 'chat_bubble_outline', roller: 'unfold_more', slider: 'tune', spinbox: 'iso', spinner: 'autorenew', switch: 'toggle_on', table: 'table_chart', tabview: 'tab', textarea: 'edit_note', tileview: 'view_quilt', window: 'web_asset', default: 'widgets' };
+
+
+        // --- Helper Functions ---
+        // (All JS functions remain unchanged)
+        function generateUniqueId(type) { return `${type.replace(/[^a-zA-Z0-9_]/g, '_')}_${nextWidgetId++}`; }
+        function updatePropertiesPanel() { 
+  propertiesFields.innerHTML = ''; 
+  if (selectedWidget) {
+    const widgetData = widgetsOnCanvas.find(w => w.id === selectedWidget.dataset.widgetId);
+    propertiesPlaceholder.classList.add('hidden');
+    if (widgetData) {
+      const headerHtml = `<div class="flex justify-between items-start mb-3">
+        <div>
+          <div class="mb-1">
+            <label class="block text-xs font-medium text-gray-500">ID</label>
+            <input type="text" value="${widgetData.id}" data-property="id" 
+              class="widget-property-input font-mono text-xs px-1.5 py-0.5 rounded border border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-500">Type</label>
+            <span class="text-sm font-medium text-gray-700">${widgetData.type}</span>
+          </div>
+        </div>
+        <button id="delete-widget-button" type="button" class="ml-2 p-1 text-red-600 hover:text-red-800 hover:bg-red-100 rounded focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500" title="Delete Element">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+        </button>
+      </div>
+      <hr class="mb-3 border-gray-200">
+      <div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">X</label>
+        <div class="flex gap-2 items-center">
+          <input type="range" min="0" max="${canvas.clientWidth}" value="${widgetData.x}" 
+            data-property="x" class="widget-property-input flex-1 h-2 rounded-lg appearance-none cursor-pointer bg-gray-200">
+          <input type="number" value="${widgetData.x}" data-property="x" 
+            class="widget-property-input w-16 px-2 py-1 text-sm border border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+        </div>
+      </div>
+      <div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Y</label>
+        <div class="flex gap-2 items-center">
+          <input type="range" min="0" max="${canvas.clientHeight}" value="${widgetData.y}" 
+            data-property="y" class="widget-property-input flex-1 h-2 rounded-lg appearance-none cursor-pointer bg-gray-200">
+          <input type="number" value="${widgetData.y}" data-property="y" 
+            class="widget-property-input w-16 px-2 py-1 text-sm border border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+        </div>
+      </div>
+      <div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Width</label>
+        <input type="number" value="${widgetData.width !== undefined ? widgetData.width : ''}" data-property="width" placeholder="auto"
+            class="widget-property-input w-full px-2 py-1 text-sm border border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+      </div>
+      <div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Height</label>
+        <input type="number" value="${widgetData.height !== undefined ? widgetData.height : ''}" data-property="height" placeholder="auto"
+            class="widget-property-input w-full px-2 py-1 text-sm border border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+      </div>${generateTypeSpecificProperties(widgetData)}`;
+
+      propertiesFields.innerHTML = headerHtml;
+      
+      // Add event listeners for synchronized X and Y inputs (range + number)
+      const syncInputs = (property) => {
+        const inputs = propertiesFields.querySelectorAll(`[data-property="${property}"]`);
+        inputs.forEach(input => {
+          input.addEventListener('input', (e) => {
+            inputs.forEach(otherInput => {
+              if (otherInput !== e.target) {
+                otherInput.value = e.target.value;
+              }
+            });
+            handlePropertyChange(e); // This calls the main handler
+          });
+        });
+      };
+      syncInputs('x');
+      syncInputs('y');
+
+      // Add event listeners for all other individual property inputs
+      // This includes width, height, text, align, checkable, colors, options, etc.
+      const allPropertyInputs = propertiesFields.querySelectorAll(
+          'input[data-property], select[data-property], textarea[data-property]'
+      );
+
+      allPropertyInputs.forEach(input => {
+          const propertyName = input.dataset.property;
+          // Skip 'x' and 'y' as they are handled by syncInputs
+          // Skip 'id' as it has a custom 'change' handler with validation below
+          if (propertyName === 'x' || propertyName === 'y' || propertyName === 'id') {
+              return;
+          }
+          // Use 'input' for immediate feedback on text/number fields, 'change' for others
+          const eventType = (input.type === 'checkbox' || input.tagName === 'SELECT' || input.type === 'color' || input.tagName === 'TEXTAREA' || input.type === 'text') 
+                          ? 'change' 
+                          : 'input';
+          input.addEventListener(eventType, handlePropertyChange);
+      });
+
+      // Add ID change handler
+      const idInput = propertiesFields.querySelector('[data-property="id"]');
+      idInput.addEventListener('change', (e) => {
+        const newId = e.target.value.trim().replace(/[^a-zA-Z0-9_]/g, '_');
+        if (newId !== widgetData.id) {
+          const exists = widgetsOnCanvas.some(w => w.id === newId);
+          if (!exists) {
+            widgetData.id = newId;
+            selectedWidget.dataset.widgetId = newId;
+            updateElementsList();
+            updateCodeOutput();
+            saveStateToLocalStorage();
+          } else {
+            e.target.value = widgetData.id;
+            alert('ID already exists. Please choose a different ID.');
+          }
+        }
+      });
+
+      const deleteButton = document.getElementById('delete-widget-button');
+      if (deleteButton) {
+        deleteButton.addEventListener('click', () => deleteWidgetById(widgetData.id));
+      }
+    } else {
+      propertiesFields.innerHTML = '<p class="text-red-600">Error: Could not find widget data.</p>';
+    }
+  } else {
+    propertiesPlaceholder.classList.remove('hidden');
+  }
+}
+
+        function generateLabelProperties(widgetData) {
+    return `<div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Text</label>
+        <input type="text" value="${widgetData.text || ''}" data-property="text" 
+            class="widget-property-input w-full px-2 py-1 text-sm border border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+    </div>`;
+}
+
+function generateBarSliderProperties(widgetData) {
+    return `<div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Value</label>
+        <input type="number" value="${widgetData.value || 0}" data-property="value" 
+            class="widget-property-input w-full px-2 py-1 text-sm border border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+    </div>
+    <div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Min Value</label>
+        <input type="number" value="${widgetData.min_value || 0}" data-property="min_value" 
+            class="widget-property-input w-full px-2 py-1 text-sm border border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+    </div>
+    <div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Max Value</label>
+        <input type="number" value="${widgetData.max_value || 100}" data-property="max_value" 
+            class="widget-property-input w-full px-2 py-1 text-sm border border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+    </div>`;
+}
+function generateButtonProperties(widgetData) {
+    return `<div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Button Text</label>
+        <input type="text" value="${widgetData.text || ''}" data-property="text"
+            class="widget-property-input w-full px-2 py-1 text-sm border border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">    
+    </div>
+    <div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Text Alignment</label>
+        <select data-property="align" class="widget-property-input block w-full px-2 py-1 text-sm border border-gray-300 rounded">
+            <option value="center" ${(widgetData.align || 'center') === 'center' ? 'selected' : ''}>Center</option>
+            <option value="left" ${widgetData.align === 'left' ? 'selected' : ''}>Left</option>
+            <option value="right" ${widgetData.align === 'right' ? 'selected' : ''}>Right</option>
+        </select>
+    </div>
+    <div class="mb-2 flex items-center mt-3">
+        <input type="checkbox" id="prop-checkable-${widgetData.id}" ${widgetData.checkable ? 'checked' : ''}
+            data-property="checkable" class="widget-property-input h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+        <label for="prop-checkable-${widgetData.id}" class="ml-2 block text-sm text-gray-700">Checkable Button</label>
+    </div>`;
+}
+
+function generateToggleProperties(widgetData) {
+    return `<div class="mb-2 flex items-center mt-3">
+        <input type="checkbox" id="prop-value-${widgetData.id}" ${widgetData.value ? 'checked' : ''} 
+            data-property="value" class="widget-property-input h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+        <label for="prop-value-${widgetData.id}" class="ml-2 block text-sm text-gray-700">Checked / On</label>
+    </div>`;
+}
+
+function generateImageProperties(widgetData) {
+    return `<div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Image URL</label>
+        <input type="text" value="${widgetData.url || ''}" placeholder="path/to/image.png" 
+            data-property="url" class="widget-property-input w-full px-2 py-1 text-sm border border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+    </div>`;
+}
+
+function generateLineProperties(widgetData) {
+    return `<div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Points (JSON Array)</label>
+        <textarea id="prop-points" data-property="points" 
+            class="widget-property-input w-full px-2 py-1 text-sm border border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">${JSON.stringify(widgetData.points || [], null, 2)}</textarea>
+        <p class="text-xs text-gray-500 mt-1">e.g., [{"x":10, "y":10}, {"x":90, "y":90}]</p>
+    </div>
+    <div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Line Width (px)</label>
+        <input type="number" value="${widgetData.line_width || 2}" min="1" data-property="line_width" 
+            class="widget-property-input w-full px-2 py-1 text-sm border border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+    </div>
+    <div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Line Color</label>
+        <input type="color" value="${widgetData.line_color || '#333333'}" data-property="line_color" 
+            class="widget-property-input w-full h-8 px-1 py-1 border border-gray-300 rounded shadow-sm">
+    </div>
+    <div class="mb-2 flex items-center mt-3">
+        <input type="checkbox" id="prop-line_rounded-${widgetData.id}" ${widgetData.line_rounded ? 'checked' : ''} 
+            data-property="line_rounded" class="widget-property-input h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+        <label for="prop-line_rounded-${widgetData.id}" class="ml-2 block text-sm text-gray-700">Rounded Ends</label>
+    </div>
+    <div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Dash Width (px)</label>
+        <input type="number" value="${widgetData.line_dash_width || ''}" placeholder="none" min="1" 
+            data-property="line_dash_width" class="widget-property-input w-full px-2 py-1 text-sm border border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+    </div>
+    <div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Dash Gap (px)</label>
+        <input type="number" value="${widgetData.line_dash_gap || ''}" placeholder="none" min="1" 
+            data-property="line_dash_gap" class="widget-property-input w-full px-2 py-1 text-sm border border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+    </div>`;
+}
+
+function generateDropdownProperties(widgetData) {
+    const optionsString = (widgetData.options || []).join('\n');
+    return `<div class="mb-2">
+        <label for="prop-options-${widgetData.id}" class="block text-xs font-medium text-gray-500 mb-1">Options (one per line)</label>
+        <textarea id="prop-options-${widgetData.id}" data-property="options" rows="4" 
+            class="widget-property-input block w-full text-sm border border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">${optionsString}</textarea>
+    </div>
+    <div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Selected Index</label>
+        <input type="number" value="${widgetData.selected_index || 0}" min="0" data-property="selected_index" 
+            class="widget-property-input w-full px-2 py-1 text-sm border border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+    </div>
+    <div class="mb-2">
+        <label for="prop-dir-${widgetData.id}" class="block text-xs font-medium text-gray-500 mb-1">Direction</label>
+        <select id="prop-dir-${widgetData.id}" data-property="dir" 
+            class="widget-property-input block w-full pl-3 pr-8 py-1.5 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md shadow-sm">
+            <option value="BOTTOM" ${widgetData.dir === 'BOTTOM' ? 'selected' : ''}>Bottom</option>
+            <option value="TOP" ${widgetData.dir === 'TOP' ? 'selected' : ''}>Top</option>
+            <option value="LEFT" ${widgetData.dir === 'LEFT' ? 'selected' : ''}>Left</option>
+            <option value="RIGHT" ${widgetData.dir === 'RIGHT' ? 'selected' : ''}>Right</option>
+        </select>
+    </div>
+    <div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Symbol</label>
+        <input type="text" value="${widgetData.symbol || 'LV_SYMBOL_DOWN'}" placeholder="e.g., LV_SYMBOL_DOWN" 
+            data-property="symbol" class="widget-property-input w-full px-2 py-1 text-sm border border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+    </div>`;
+}
+
+function generateBarProperties(widgetData) {
+    return `<div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Value</label>
+        <div class="flex gap-2 items-center">
+            <input type="range" min="${widgetData.min_value || 0}" max="${widgetData.max_value || 100}" 
+                value="${widgetData.value || 0}" data-property="value" 
+                class="widget-property-input flex-1 h-2 rounded-lg appearance-none cursor-pointer bg-gray-200">
+            <input type="number" value="${widgetData.value || 0}" data-property="value" 
+                class="widget-property-input w-16 px-2 py-1 text-sm border border-gray-300 rounded">
+        </div>
+    </div>
+    <div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Min Value</label>
+        <input type="number" value="${widgetData.min_value || 0}" data-property="min_value" 
+            class="widget-property-input w-full px-2 py-1 text-sm border border-gray-300 rounded">
+    </div>
+    <div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Max Value</label>
+        <input type="number" value="${widgetData.max_value || 100}" data-property="max_value" 
+            class="widget-property-input w-full px-2 py-1 text-sm border border-gray-300 rounded">
+    </div>
+    <div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Mode</label>
+        <select data-property="mode" 
+            class="widget-property-input block w-full px-2 py-1 text-sm border border-gray-300 rounded">
+            <option value="NORMAL" ${widgetData.mode === 'NORMAL' ? 'selected' : ''}>Normal</option>
+            <option value="REVERSE" ${widgetData.mode === 'REVERSE' ? 'selected' : ''}>Reverse</option>
+            <option value="SYMMETRICAL" ${widgetData.mode === 'SYMMETRICAL' ? 'selected' : ''}>Symmetrical</option>
+        </select>
+    </div>
+    <div class="mb-2">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Animation Time (ms)</label>
+        <input type="number" value="${widgetData.anim_time || 500}" min="0" step="100" data-property="anim_time" 
+            class="widget-property-input w-full px-2 py-1 text-sm border border-gray-300 rounded">
+    </div>
+    <div class="mb-2 flex items-center">
+        <input type="checkbox" id="prop-animated-${widgetData.id}" 
+            ${widgetData.animated !== false ? 'checked' : ''} data-property="animated" 
+            class="widget-property-input h-4 w-4 text-indigo-600 border-gray-300 rounded">
+        <label for="prop-animated-${widgetData.id}" class="ml-2 text-sm text-gray-700">Animate Value Changes</label>
+    </div>`;
+}
+
+// Update the generateTypeSpecificProperties function
+function generateTypeSpecificProperties(widgetData) {
+    switch (widgetData.type) {
+        // ...existing code...
+        case 'bar':
+            return generateBarProperties(widgetData);
+        // ...existing code...
+        case 'button': // Add this case
+            return generateButtonProperties(widgetData);
+    }
+}
+
+        function handlePropertyChange(event) {
+    if (!selectedWidget) return;
+    const widgetData = widgetsOnCanvas.find(w => w.id === selectedWidget.dataset.widgetId);
+    if (!widgetData) return;
+
+    const propertyName = event.target.dataset.property;
+    let value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
+
+    // Handle specific property types
+    if (event.target.type === 'number') {
+        if (value === '') { // If the number input is cleared
+            if (propertyName === 'width' || propertyName === 'height') {
+                value = undefined; // 'auto' size
+            } else {
+                value = undefined; // Other numeric properties become undefined
+            }
+        } else {
+            const parsedValue = parseInt(value, 10);
+            if (isNaN(parsedValue)) {
+                value = undefined; // Invalid number input
+                // Optionally, revert the input field to the old value or show an error
+                // For now, undefined will prevent saving bad data.
+                // event.target.value = widgetData[propertyName] !== undefined ? widgetData[propertyName] : '';
+            } else {
+                value = parsedValue; // Store as a number
+            }
+        }
+    } else if (propertyName === 'points' && event.target.tagName === 'TEXTAREA') {
+        try {
+            const parsedPoints = JSON.parse(value);
+            // Add more robust validation for the structure of points if needed
+            if (!Array.isArray(parsedPoints) || !parsedPoints.every(p => typeof p === 'object' && 'x' in p && 'y' in p)) {
+                throw new Error("Points must be an array of {x, y} objects.");
+            }
+            value = parsedPoints; // Successfully parsed
+        } catch (e) {
+            alert(`Invalid JSON for points: ${e.message}\nReverting to previous valid points.`);
+            event.target.value = JSON.stringify(widgetData.points || [], null, 2); // Revert textarea
+            return; // Do not update widgetData or proceed further for this event
+        }
+    } else if (propertyName === 'options' && event.target.tagName === 'TEXTAREA') {
+        value = value.split('\n').map(s => s.trim()).filter(s => s); // Split by newline, trim, remove empty strings
+    }
+    // Store the value in widget data
+    widgetData[propertyName] = value;
+
+    // Update the visual representation based on property type
+    switch (propertyName) {
+        case 'x':
+            selectedWidget.style.left = `${widgetData.x || 0}px`;
+            break;
+        case 'y':
+            selectedWidget.style.top = `${widgetData.y || 0}px`;
+            break;
+        case 'width':
+            selectedWidget.style.width = widgetData.width !== undefined ? `${widgetData.width}px` : 'auto';
+            if (widgetData.type === 'line') updateLineSVG(widgetData, selectedWidget);
+            break;
+        case 'height':
+            selectedWidget.style.height = widgetData.height !== undefined ? `${widgetData.height}px` : 'auto';
+            if (widgetData.type === 'line') updateLineSVG(widgetData, selectedWidget);
+            break;
+        case 'text':
+            if (['button', 'label'].includes(widgetData.type)) {
+                selectedWidget.textContent = value || '';
+                if (widgetData.type === 'label') {
+                    selectedWidget.style.width = 'auto';
+                    selectedWidget.style.height = 'auto';
+                    // If width/height were explicitly set, changing text shouldn't clear them unless they are undefined in widgetData
+                    if (widgetData.width === undefined) selectedWidget.style.width = 'auto'; else selectedWidget.style.width = `${widgetData.width}px`;
+                    if (widgetData.height === undefined) selectedWidget.style.height = 'auto'; else selectedWidget.style.height = `${widgetData.height}px`;
+                }
+            }
+            break;
+        case 'align':
+            if (widgetData.type === 'button') {
+                selectedWidget.style.justifyContent = value === 'left' ? 'flex-start' : 
+                                                    value === 'right' ? 'flex-end' : 'center';
+            }
+            break;
+        case 'checkable':
+            if (widgetData.type === 'button') {
+                widgetData.checkable = value;
+                if (!value) {
+                    widgetData.checked = false;
+                    selectedWidget.classList.remove('bg-green-500');
+                    selectedWidget.classList.add('bg-blue-500');
+                }
+                selectedWidget.classList.toggle('cursor-pointer', value);
+            }
+            break;
+    }
+
+    // Update other widget-specific properties
+    updateWidgetSpecificProperties(widgetData, selectedWidget);
+    updateCodeOutput();
+    saveStateToLocalStorage();
+}
+
+function updateWidgetSpecificProperties(widgetData, element) {
+    switch (widgetData.type) {
+        case 'button':
+            // Width and height are now handled by the generic property change handler
+            // element.style.width = widgetData.width ? `${widgetData.width}px` : 'auto';
+            // element.style.height = widgetData.height ? `${widgetData.height}px` : 'auto';
+            element.style.justifyContent = widgetData.align === 'left' ? 'flex-start' : 
+                                         widgetData.align === 'right' ? 'flex-end' : 'center';
+            if (widgetData.checkable) {
+                element.classList.toggle('bg-green-500', widgetData.checked);
+                element.classList.toggle('bg-blue-500', !widgetData.checked);
+            }
+            break;
+            
+        // Add other widget type handling here
+    }
+}
+
+        function updateLineSVG(widgetData, widgetElement) { const svg = widgetElement.querySelector('svg'); const polyline = svg?.querySelector('polyline'); if (!svg || !polyline) return; const pointsString = (widgetData.points || []).map(p => `${p.x ?? 0},${p.y ?? 0}`).join(' '); polyline.setAttribute('points', pointsString); polyline.setAttribute('stroke', widgetData.line_color || '#333333'); polyline.setAttribute('stroke-width', widgetData.line_width || 2); if (widgetData.line_rounded) { polyline.setAttribute('stroke-linecap', 'round'); polyline.setAttribute('stroke-linejoin', 'round'); } else { polyline.setAttribute('stroke-linecap', 'butt'); polyline.setAttribute('stroke-linejoin', 'miter'); } const dashWidth = widgetData.line_dash_width; const dashGap = widgetData.line_dash_gap; if (dashWidth > 0 && dashGap > 0) { polyline.setAttribute('stroke-dasharray', `${dashWidth} ${dashGap}`); } else { polyline.removeAttribute('stroke-dasharray'); } svg.setAttribute('width', widgetElement.style.width || '100%'); svg.setAttribute('height', widgetElement.style.height || '100%'); const width = parseInt(widgetElement.style.width) || 100; const height = parseInt(widgetElement.style.height) || 50; svg.setAttribute('viewBox', `0 0 ${width} ${height}`); }
+        function updateDropdownPreview(widgetData, widgetElement) { const textSpan = widgetElement.querySelector('.dropdown-text'); if (textSpan) { const options = widgetData.options || []; const index = widgetData.selected_index || 0; textSpan.textContent = options[index] || 'Dropdown'; } }
+        function updateCodeOutput() { let yamlString = `lvgl:\n  pages:\n    - id: main_page # Default page\n      widgets:`; if (widgetsOnCanvas.length === 0) { yamlString += "\n        # No widgets placed yet"; } else { widgetsOnCanvas.forEach(widget => { yamlString += `\n        - ${widget.type}:\n            id: ${widget.id}\n            x: ${widget.x}\n            y: ${widget.y}`; if (widget.width !== undefined) yamlString += `\n            width: ${widget.width}`; if (widget.height !== undefined) yamlString += `\n            height: ${widget.height}`; if (widget.text !== undefined && widget.text !== '') yamlString += `\n            text: "${widget.text}"`; if (widget.value !== undefined) { if (typeof widget.value === 'boolean') yamlString += `\n            value: ${widget.value}`; else if (typeof widget.value === 'number') yamlString += `\n            value: ${widget.value}`; } if (widget.min_value !== undefined) yamlString += `\n            min_value: ${widget.min_value}`; if (widget.max_value !== undefined) yamlString += `\n            max_value: ${widget.max_value}`; if (widget.url !== undefined && widget.url !== '') yamlString += `\n            url: "${widget.url}"`; if (widget.type === 'line') { if (widget.points && widget.points.length > 0) { yamlString += `\n            points:`; widget.points.forEach(p => { yamlString += `\n              - x: ${p.x ?? 0}\n                y: ${p.y ?? 0}`; }); } if (widget.line_width !== undefined) yamlString += `\n            line_width: ${widget.line_width}`; if (widget.line_color !== undefined) yamlString += `\n            line_color: "${widget.line_color}"`; if (widget.line_rounded !== undefined) yamlString += `\n            line_rounded: ${widget.line_rounded}`; if (widget.line_dash_width !== undefined) yamlString += `\n            line_dash_width: ${widget.line_dash_width}`; if (widget.line_dash_gap !== undefined) yamlString += `\n            line_dash_gap: ${widget.line_dash_gap}`; } if (widget.type === 'dropdown') { if (widget.options && widget.options.length > 0) { yamlString += `\n            options:`; widget.options.forEach(opt => { yamlString += `\n              - "${opt}"`; }); } if (widget.selected_index !== undefined) yamlString += `\n            selected_index: ${widget.selected_index}`; if (widget.dir !== undefined && widget.dir !== 'BOTTOM') yamlString += `\n            dir: ${widget.dir}`; if (widget.symbol !== undefined && widget.symbol !== 'LV_SYMBOL_DOWN') yamlString += `\n            symbol: ${widget.symbol}`; yamlString += `\n            # dropdown_list: ...`; yamlString += `\n            # indicator: ...`; } if (widget.type === 'bar') {
+        if (widget.mode !== 'NORMAL') yamlString += `\n            mode: ${widget.mode}`;
+        if (widget.animated === false) yamlString += `\n            animated: false`;
+        if (widget.anim_time !== 500) yamlString += `\n            anim_time: ${widget.anim_time}`;
+    }
+    if (widget.type === 'button') {
+        if (widget.checkable) {
+            yamlString += `\n            checkable: ${widget.checkable}`;
+            if (widget.checked) yamlString += `\n            checked: ${widget.checked}`;
+        }
+        if (widget.align && widget.align !== 'center') yamlString += `\n            align: ${widget.align}`;
+        // Generic output handles text, width, height if they are defined.
+        // If specific button behavior for empty text (e.g. text: "") is needed, it would be added here.
+    }
+    switch (widget.type) { /* ... other type placeholders ... */ } yamlString += `\n            # on_... : # Add event handlers`; }); } modalCodeOutput.textContent = yamlString; }
+        function selectWidget(widgetElement) { const previouslySelectedId = selectedWidget?.dataset?.widgetId; if (selectedWidget === widgetElement) return; if (selectedWidget) { selectedWidget.classList.remove('selected'); } selectedWidget = widgetElement; if (selectedWidget) { selectedWidget.classList.add('selected'); selectedWidget.style.zIndex = '50'; widgetsOnCanvas.forEach(w => { if (w.element !== selectedWidget) { w.element.style.zIndex = w.zIndex || '1'; } }); } updatePropertiesPanel(); const currentSelectedId = selectedWidget?.dataset?.widgetId; const listItems = elementsListItemsContainer.querySelectorAll('.elements-list-item'); listItems.forEach(item => { const itemId = item.dataset.widgetId; item.classList.toggle('selected-element', itemId === currentSelectedId); }); }
+        function addWidgetToCanvas(id, type, x, y, loadedData = null) { const widgetElement = document.createElement('div'); widgetElement.classList.add('canvas-widget'); widgetElement.dataset.widgetType = type; widgetElement.dataset.widgetId = id; widgetElement.style.left = `${x}px`; widgetElement.style.top = `${y}px`; widgetElement.draggable = true; widgetElement.style.zIndex = loadedData?.zIndex || '1'; let widgetData = { id: id, type: type, x: x, y: y, element: widgetElement, zIndex: loadedData?.zIndex || 1 }; switch(type) { case 'slider': widgetData = {...widgetData, width: 150, height: 20, value: 50, min_value: 0, max_value: 100 }; break; 
+        case 'button':
+            widgetData = {
+                ...widgetData,
+                text: 'Button',
+                width: 70,
+                height: 30,
+                align: 'center',
+                checkable: false,
+                checked: false
+            };
+            widgetElement.textContent = widgetData.text;
+            widgetElement.classList.add('flex', 'items-center', 'justify-center', 
+                                       'bg-blue-500', 'text-white', 'hover:bg-blue-600');
+            
+            // Add click handler for checkable buttons
+            widgetElement.addEventListener('click', (e) => {
+                if (widgetData.checkable) {
+                    e.stopPropagation(); // Prevent selection when clicking
+                    widgetData.checked = !widgetData.checked;
+                    widgetElement.classList.toggle('bg-green-500', widgetData.checked);
+                    widgetElement.classList.toggle('bg-blue-500', !widgetData.checked);
+                    updateCodeOutput();
+                    saveStateToLocalStorage();
+                }
+            });
+            break;
+        case 'label': widgetData = {...widgetData, text: 'Label Text', width: undefined, height: undefined }; break; case 'switch': widgetData = {...widgetData, width: 50, height: 25, value: false }; break; case 'checkbox': widgetData = {...widgetData, width: 20, height: 20, value: false }; break; case 'container': widgetData = {...widgetData, width: 100, height: 50 }; break; case 'bar': widgetData = {
+                ...widgetData,
+                width: 150,
+                height: 20,
+                value: 60,
+                min_value: 0,
+                max_value: 100,
+                mode: 'NORMAL',
+                animated: true,
+                anim_time: 500
+            };
+            break; case 'line': widgetData = {...widgetData, width: 100, height: 50, points: [{x:10, y:10}, {x:90, y:40}], line_width: 2, line_color: '#333333', line_rounded: false }; break; 
+            case 'dropdown': widgetData = {...widgetData, width: 150, height: undefined, options: ["Option 1", "Option 2", "Option 3"], selected_index: 0, dir: 'BOTTOM', symbol: 'LV_SYMBOL_DOWN' }; break; 
+            default: 
+                // Ensure all widgets have some default width/height if not specified
+                widgetData.width = widgetData.width === undefined ? 100 : widgetData.width;
+                widgetData.height = widgetData.height === undefined ? 30 : widgetData.height;
+            break; 
+        } 
+        if (loadedData) { const elementRef = widgetData.element; widgetData = { ...widgetData, ...loadedData, element: elementRef }; widgetElement.style.left = `${widgetData.x}px`; widgetElement.style.top = `${widgetData.y}px`; widgetElement.style.zIndex = widgetData.zIndex || '1'; } 
+        
+        widgetElement.style.width = widgetData.width !== undefined ? `${widgetData.width}px` : 'auto'; 
+        widgetElement.style.height = widgetData.height !== undefined ? `${widgetData.height}px` : 'auto'; 
+        
+        switch(type) { case 'slider': widgetElement.textContent = ''; widgetElement.innerHTML = `<div class="w-full h-1 bg-gray-300 rounded-full relative my-auto"><div style="width: ${widgetData.value || 0}%;" class="h-1 bg-blue-500 rounded-full"></div><div class="w-4 h-4 bg-blue-600 rounded-full absolute top-1/2 left-${widgetData.value || 0}% transform -translate-x-1/2 -translate-y-1/2 cursor-pointer"></div></div>`; break; 
+            case 'button':
+                widgetElement.style.padding = '0px';
+                widgetElement.textContent = widgetData.text || 'Button';
+                widgetElement.style.textAlign = widgetData.align || 'center';
+                widgetElement.classList.add('bg-blue-500', 'text-white', 'hover:bg-blue-600', 'flex', 'items-center', 'justify-center');
+                if (widgetData.checkable) {
+                    widgetElement.classList.add('cursor-pointer');
+                    widgetElement.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (widgetData.checkable) {
+                            widgetData.checked = !widgetData.checked;
+                            widgetElement.classList.toggle('bg-green-500', widgetData.checked);
+                            widgetElement.classList.toggle('bg-blue-500', !widgetData.checked);
+                            updateCodeOutput();
+                            saveStateToLocalStorage();
+                        }
+                    });
+                }
+            break;
+            case 'label': 
+                widgetElement.textContent = widgetData.text || 'Label Text'; 
+                widgetElement.style.border = 'none'; 
+                widgetElement.style.background = 'transparent'; 
+                widgetElement.style.cursor = 'text'; 
+                widgetElement.style.minWidth = 'auto'; // Allow shrinking
+                widgetElement.style.padding = '2px'; 
+                // width and height are set above based on widgetData
+                break; case 'switch': 
+                widgetElement.textContent = ''; 
+                widgetElement.innerHTML = `<div class="w-full h-full ${widgetData.value ? 'bg-indigo-600' : 'bg-gray-300'} rounded-full relative cursor-pointer"><div class="w-[21px] h-[21px] bg-white rounded-full absolute top-[2px] ${widgetData.value ? 'left-[27px]' : 'left-[2px]'} transition-transform duration-200 ease-in-out"></div></div>`; break; case 'checkbox': widgetElement.textContent = ''; widgetElement.classList.add('border-2', 'border-gray-400', 'bg-white', 'flex', 'items-center', 'justify-center'); if (widgetData.value) { widgetElement.innerHTML = '<svg class="w-3 h-3 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>'; } else { widgetElement.innerHTML = ''; } break; 
+            case 'container': widgetElement.style.backgroundColor = '#f0f0'; break;
+            case 'bar': widgetElement.textContent = ''; const value = widgetData.value || 0;
+        const mode = widgetData.mode || 'NORMAL';
+        let indicatorStyle = '';
+        
+        switch(mode) {
+            case 'REVERSE':
+                indicatorStyle = `right: 0; width: ${value}%;`;
+                break;
+            case 'SYMMETRICAL':
+                const midPoint = 50;
+                const deviation = value - midPoint;
+                indicatorStyle = deviation >= 0 
+                    ? `left: 50%; width: ${deviation}%;`
+                    : `left: ${50 + deviation}%; width: ${Math.abs(deviation)}%;`;
+                break;
+            default: // NORMAL
+                indicatorStyle = `left: 0; width: ${value}%;`;
+        }
+        
+        widgetElement.innerHTML = `
+            <div class="w-full h-full bg-gray-200 rounded relative overflow-hidden">
+                <div class="h-full bg-indigo-500 absolute transition-all duration-500 ease-out"
+                    style="${indicatorStyle}"></div>
+            </div>`;
+        break; case 'line': widgetElement.textContent = ''; widgetElement.innerHTML = `<svg width="${widgetData.width || 100}" height="${widgetData.height || 50}" viewBox="0 0 ${widgetData.width || 100} ${widgetData.height || 50}" xmlns="http://www.w3.org/2000/svg"><polyline fill="none" points="" stroke="#333333" stroke-width="2"/></svg>`; updateLineSVG(widgetData, widgetElement); break; case 'dropdown': 
+            // widgetElement.style.height = 'auto'; // Already handled by generic height setter if widgetData.height is undefined
+            widgetElement.innerHTML = `<span class="dropdown-text flex-1 overflow-hidden whitespace-nowrap text-ellipsis">Dropdown</span><i class="material-icons-outlined ml-1">arrow_drop_down</i>`; 
+            widgetElement.classList.add('flex', 'items-center', 'justify-between', 'px-2'); // Ensure content is visible
+            updateDropdownPreview(widgetData, widgetElement); break; 
+        default: widgetElement.style.backgroundColor = '#e9e9e9'; widgetElement.textContent = type.charAt(0).toUpperCase() + type.slice(1); break; } widgetElement.addEventListener('click', (event) => { event.stopPropagation(); selectWidget(widgetElement); }); widgetElement.addEventListener('dragstart', (event) => { event.stopPropagation(); isDraggingWidgetOnCanvas = true; event.dataTransfer.setData('text/plain', widgetElement.dataset.widgetId); event.dataTransfer.effectAllowed = 'move'; const rect = widgetElement.getBoundingClientRect(); dragOffsetX = event.clientX - rect.left; dragOffsetY = event.clientY - rect.top; setTimeout(() => widgetElement.classList.add('opacity-50'), 0); selectWidget(widgetElement); }); widgetElement.addEventListener('dragend', (event) => { event.stopPropagation(); isDraggingWidgetOnCanvas = false; widgetElement.classList.remove('opacity-50'); }); canvas.appendChild(widgetElement); widgetsOnCanvas.push(widgetData); updateElementsList(); updateZIndices(); if (!loadedData) { selectWidget(widgetElement); saveStateToLocalStorage(); } }
+        function deleteWidgetById(idToDelete = null) { const targetId = idToDelete || selectedWidget?.dataset?.widgetId; if (!targetId) { console.warn("Delete action failed: No target ID provided or widget selected."); return; } const widgetElement = canvas.querySelector(`.canvas-widget[data-widget-id="${targetId}"]`); const indexToDelete = widgetsOnCanvas.findIndex(w => w.id === targetId); if (indexToDelete > -1) { widgetsOnCanvas.splice(indexToDelete, 1); } else { console.warn("Could not find widget data in state for ID:", targetId); } if (widgetElement) { widgetElement.remove(); } if (selectedWidget && selectedWidget.dataset.widgetId === targetId) { selectedWidget = null; updatePropertiesPanel(); } updateCodeOutput(); updateElementsList(); updateZIndices(); saveStateToLocalStorage(); }
+        function updateCanvasSize() {
+            const selectedValue = screenResolutionSelect.value;
+            const [width, height] = selectedValue.split('x').map(Number);
+            if (canvas && !isNaN(width) && !isNaN(height)) {
+                canvas.style.width = `${width}px`;
+                canvas.style.height = `${height}px`;
+                applyCanvasScale();
+            } else {
+                console.error("Could not update canvas size.");
+            }
+            saveStateToLocalStorage();
+        }
+        function applyCanvasScale() { if (canvas) { canvas.style.transform = `scale(${currentScale})`; } }
+        function handleScaleChange(event) { const clickedButton = event.target.closest('.scale-button'); if (!clickedButton) return; const newScale = parseFloat(clickedButton.dataset.scale); if (!isNaN(newScale) && newScale !== currentScale) { currentScale = newScale; applyCanvasScale(); scaleControls.querySelectorAll('.scale-button').forEach(btn => { btn.classList.remove('active-scale'); }); clickedButton.classList.add('active-scale'); saveStateToLocalStorage(); } }
+        function updateElementsList() { elementsListItemsContainer.innerHTML = ''; elementCountSpan.textContent = widgetsOnCanvas.length; if (widgetsOnCanvas.length === 0) { elementsListItemsContainer.innerHTML = '<p class="text-xs text-gray-500 italic px-2">No elements added yet.</p>'; return; } widgetsOnCanvas.forEach((widgetData, index) => { const listItem = document.createElement('div'); listItem.classList.add('elements-list-item'); listItem.dataset.widgetId = widgetData.id; const widgetInfo = document.createElement('div'); widgetInfo.classList.add('widget-info'); const icon = document.createElement('i'); icon.classList.add('material-icons-outlined'); icon.textContent = widgetIconMap[widgetData.type] || widgetIconMap.default; widgetInfo.appendChild(icon); const text = document.createElement('span'); text.textContent = widgetData.id; widgetInfo.appendChild(text); listItem.appendChild(widgetInfo); const actionsDiv = document.createElement('div'); actionsDiv.classList.add('actions'); const upButton = document.createElement('button'); upButton.classList.add('action-btn', 'move-up'); upButton.title = "Move Up"; upButton.innerHTML = '<i class="material-icons-outlined">keyboard_arrow_up</i>'; upButton.disabled = (index === 0); upButton.dataset.widgetId = widgetData.id; upButton.addEventListener('click', (e) => { e.stopPropagation(); moveWidget(widgetData.id, 'up'); }); actionsDiv.appendChild(upButton); const downButton = document.createElement('button'); downButton.classList.add('action-btn', 'move-down'); downButton.title = "Move Down"; downButton.innerHTML = '<i class="material-icons-outlined">keyboard_arrow_down</i>'; downButton.disabled = (index === widgetsOnCanvas.length - 1); downButton.dataset.widgetId = widgetData.id; downButton.addEventListener('click', (e) => { e.stopPropagation(); moveWidget(widgetData.id, 'down'); }); actionsDiv.appendChild(downButton); const deleteBtn = document.createElement('button'); deleteBtn.classList.add('action-btn', 'delete'); deleteBtn.title = "Delete"; deleteBtn.innerHTML = '<i class="material-icons-outlined">delete_outline</i>'; deleteBtn.dataset.widgetId = widgetData.id; deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteWidgetById(widgetData.id); }); actionsDiv.appendChild(deleteBtn); listItem.appendChild(actionsDiv); if (selectedWidget && selectedWidget.dataset.widgetId === widgetData.id) { listItem.classList.add('selected-element'); } listItem.addEventListener('click', () => { const targetWidgetElement = canvas.querySelector(`.canvas-widget[data-widget-id="${widgetData.id}"]`); if (targetWidgetElement) { selectWidget(targetWidgetElement); } }); elementsListItemsContainer.appendChild(listItem); }); }
+        function toggleElementsList() { elementsListItemsContainer.classList.toggle('hidden'); const icon = toggleElementsListButton.querySelector('.material-icons-outlined'); if (icon) { icon.classList.toggle('rotate-180'); } }
+        function moveWidget(widgetId, direction) { const currentIndex = widgetsOnCanvas.findIndex(w => w.id === widgetId); if (currentIndex === -1) return; let newIndex = currentIndex; if (direction === 'up' && currentIndex > 0) { newIndex = currentIndex - 1; } else if (direction === 'down' && currentIndex < widgetsOnCanvas.length - 1) { newIndex = currentIndex + 1; } if (newIndex !== currentIndex) { const [movedElement] = widgetsOnCanvas.splice(currentIndex, 1); widgetsOnCanvas.splice(newIndex, 0, movedElement); updateZIndices(); updateElementsList(); saveStateToLocalStorage(); } }
+        function updateZIndices() { widgetsOnCanvas.forEach((widgetData, index) => { if (widgetData.element) { const zIndex = index + 1; widgetData.zIndex = zIndex; widgetData.element.style.zIndex = zIndex; } }); if (selectedWidget) { selectedWidget.style.zIndex = '50'; } }
+        function saveStateToLocalStorage(resolutionToSave = null) {
+            try {
+                const serializableWidgets = widgetsOnCanvas.map(widget => {
+                    const { element, ...dataToSave } = widget;
+                    return dataToSave;
+                });
+
+                // Get any custom display options
+                const customOptions = Array.from(screenResolutionSelect.options)
+                    .filter(opt => opt.dataset.isCustomDisplay === "true")
+                    .map(opt => ({
+                        value: opt.value,
+                        text: opt.textContent
+                    }));
+
+                const state = {
+                    widgets: serializableWidgets,
+                    resolution: resolutionToSave || screenResolutionSelect.value,
+                    scale: currentScale,
+                    nextId: nextWidgetId,
+                    customSizes: customOptions // Save custom sizes list
+                };
+
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state));
+            } catch (error) {
+                console.error("Error saving state to localStorage:", error);
+            }
+        }
+
+        function loadStateFromLocalStorage() {
+            // Clear any existing custom options first
+            Array.from(screenResolutionSelect.options)
+                .filter(opt => opt.dataset.isCustomDisplay === "true")
+                .forEach(opt => opt.remove());
+
+            const savedStateString = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (!savedStateString) {
+                console.log("No saved state found.");
+                // Apply default from HTML select explicitly, then save this default state
+                const defaultResolution = screenResolutionSelect.value;
+                updateCanvasSize(defaultResolution); // This will also call saveStateToLocalStorage
+                updateCodeOutput(); updatePropertiesPanel(); updateElementsList();
+                return;
+            }
+
+            try {
+                const loadedState = JSON.parse(savedStateString);
+                console.log("Loading saved state:", loadedState);
+                canvas.innerHTML = '';
+                widgetsOnCanvas = [];
+                selectedWidget = null;
+                currentScale = loadedState.scale || 1;
+                nextWidgetId = loadedState.nextId || 0;
+
+                // Restore custom size options if any
+                if (loadedState.customSizes && Array.isArray(loadedState.customSizes)) {
+                    const customOption = screenResolutionSelect.querySelector('option[value="custom"]');
+                    loadedState.customSizes.forEach(size => {
+                        const option = document.createElement('option');
+                        option.value = size.value;
+                        option.textContent = size.text;
+                        option.dataset.isCustomDisplay = "true";
+                        screenResolutionSelect.insertBefore(option, customOption);
+                    });
+                }
+
+                // Set the resolution after restoring custom options
+                // Ensure there's a fallback if loadedState.resolution is somehow invalid or 'custom'
+                let finalResolutionToLoad = (loadedState.resolution && loadedState.resolution !== 'custom') ? loadedState.resolution : '128x160';
+                screenResolutionSelect.value = finalResolutionToLoad;
+
+
+                // Restore widgets
+                if (loadedState.widgets && Array.isArray(loadedState.widgets)) {
+                    loadedState.widgets.forEach(widgetData => {
+                        addWidgetToCanvas(widgetData.id, widgetData.type, widgetData.x, widgetData.y, widgetData);
+                    });
+                }
+
+                updateZIndices();
+                updateCanvasSize(finalResolutionToLoad); // Pass the loaded resolution explicitly
+                updateCodeOutput();
+                updatePropertiesPanel();
+                updateElementsList();
+
+                // Update scale buttons
+                scaleControls.querySelectorAll('.scale-button').forEach(btn => {
+                    btn.classList.toggle('active-scale', parseFloat(btn.dataset.scale) === currentScale);
+                });
+
+                console.log("State loaded successfully.");
+            } catch (error) {
+                console.error("Error loading state from localStorage:", error);
+                localStorage.removeItem(LOCAL_STORAGE_KEY);
+                // Apply default explicitly if loading fails, then save this default state
+                const defaultResolution = '128x160'; // A hardcoded default
+                screenResolutionSelect.value = defaultResolution;
+                updateCanvasSize(defaultResolution); // This will also call saveStateToLocalStorage
+                updateCodeOutput(); updatePropertiesPanel(); updateElementsList();
+            }
+        }
+
+        // --- Modal Control Functions ---
+        function showYamlModal() { 
+    generateAndShowYaml();
+    yamlModal.classList.remove('hidden'); 
+}
+
+// New function to generate and show YAML
+function generateAndShowYaml() {
+    updateCodeOutput();
+}
+
+// Add copy functionality
+copyYamlButton.addEventListener('click', async () => {
+    const yamlContent = modalCodeOutput.textContent;
+    try {
+        await navigator.clipboard.writeText(yamlContent);
+        const originalText = copyYamlButton.innerHTML;
+        copyYamlButton.innerHTML = '<i class="material-icons-outlined text-base mr-1">check</i> Copied!';
+        copyYamlButton.classList.add('text-green-600');
+        setTimeout(() => {
+            copyYamlButton.innerHTML = originalText;
+            copyYamlButton.classList.remove('text-green-600');
+        }, 2000);
+    } catch (err) {
+        console.error('Failed to copy text: ', err);
+        copyYamlButton.innerHTML = '<i class="material-icons-outlined text-base mr-1">error</i> Failed to copy';
+        copyYamlButton.classList.add('text-red-600');
+        setTimeout(() => {
+            copyYamlButton.innerHTML = originalText;
+            copyYamlButton.classList.remove('text-red-600');
+        }, 2000);
+    }
+});
+
+// Update the event listener
+generateYamlButton.addEventListener('click', showYamlModal);
+
+        function hideYamlModal() { yamlModal.classList.add('hidden'); }
+        function showImportModal() { yamlParseError.textContent = ''; importModal.classList.remove('hidden'); }
+        function hideImportModal() { importModal.classList.add('hidden'); }
+
+        function showCustomSizeModal() {
+            lastSelectedResolutionBeforeCustomModal = screenResolutionSelect.value;
+
+            const customModal = document.getElementById('custom-size-modal');
+            const widthInput = document.getElementById('custom-width');
+            const heightInput = document.getElementById('custom-height');
+
+            let prefillWidth = '';
+            let prefillHeight = '';
+
+            const currentSelectedOption = screenResolutionSelect.options[screenResolutionSelect.selectedIndex];
+            if (currentSelectedOption && currentSelectedOption.dataset.isCustomDisplay === "true") {
+                [prefillWidth, prefillHeight] = currentSelectedOption.value.split('x');
+            } else {
+                const lastCustomValue = localStorage.getItem('lastCustomScreenSizeValue');
+                if (lastCustomValue) {
+                    [prefillWidth, prefillHeight] = lastCustomValue.split('x');
+                }
+            }
+            widthInput.value = prefillWidth;
+            heightInput.value = prefillHeight;
+
+            customModal.classList.remove('hidden');
+            widthInput.focus();
+        }
+
+        function hideCustomSizeModal() {
+            document.getElementById('custom-size-modal').classList.add('hidden');
+            if (screenResolutionSelect.value === 'custom') { // User cancelled modal
+                if (lastSelectedResolutionBeforeCustomModal && lastSelectedResolutionBeforeCustomModal !== 'custom') {
+                    screenResolutionSelect.value = lastSelectedResolutionBeforeCustomModal;
+                } else {
+                    const lastCustomVal = localStorage.getItem('lastCustomScreenSizeValue');
+                    if (lastCustomVal) {
+                        let found = false;
+                        for(let opt of screenResolutionSelect.options){
+                            if(opt.value === lastCustomVal && opt.dataset.isCustomDisplay === "true"){
+                                screenResolutionSelect.value = lastCustomVal;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if(!found) screenResolutionSelect.value = '128x160'; // Fallback if option was removed
+                    } else {
+                        screenResolutionSelect.value = '128x160'; // Default
+                    }
+                }
+            }
+            // If selection changed, 'change' event on select would call updateCanvasSize.
+            // Call explicitly to ensure canvas reflects final state.
+            updateCanvasSize();
+        }
+
+        function handleSaveCustomSize() {
+            const widthInput = document.getElementById('custom-width');
+            const heightInput = document.getElementById('custom-height');
+            const width = parseInt(widthInput.value, 10);
+            const height = parseInt(heightInput.value, 10);
+
+            if (width && height && width >= 1 && height >= 1 && width <= 2048 && height <= 2048) {
+                const customValue = `${width}x${height}`;
+                const customText = `${width}x${height}*`;
+
+                const existingCustomOption = screenResolutionSelect.querySelector('option[data-is-custom-display="true"]');
+                if (existingCustomOption) {
+                    existingCustomOption.remove();
+                }
+
+                const newOption = document.createElement('option');
+                newOption.value = customValue;
+                newOption.textContent = customText;
+                newOption.dataset.isCustomDisplay = "true";
+
+                const customPlaceholderOption = screenResolutionSelect.querySelector('option[value="custom"]');
+                if (customPlaceholderOption) {
+                    screenResolutionSelect.insertBefore(newOption, customPlaceholderOption);
+                } else {
+                    screenResolutionSelect.appendChild(newOption);
+                }
+                
+                screenResolutionSelect.value = customValue; // This will trigger 'change' event
+                localStorage.setItem('lastCustomScreenSizeValue', customValue);
+                
+                hideCustomSizeModal();
+            } else {
+                alert('Please enter valid width and height values (1-2048px).');
+            }
+        }
+
+        function updateCanvasSize(resolutionToApply = null) {
+            const selectedValue = resolutionToApply || screenResolutionSelect.value;
+
+            if (selectedValue === 'custom') {
+                console.warn("updateCanvasSize called when 'Custom Size...' placeholder is selected. Canvas size not changed.");
+                return; // Do not save state or change canvas if "Custom..." is selected
+            }
+
+            if (selectedValue && selectedValue.includes('x')) {
+                const [width, height] = selectedValue.split('x').map(Number);
+                if (canvas && !isNaN(width) && !isNaN(height)) {
+                    canvas.style.width = `${width}px`;
+                    canvas.style.height = `${height}px`;
+                    applyCanvasScale();
+                    saveStateToLocalStorage(selectedValue); // Save state with the value that was applied
+                } else {
+                    console.error("Could not update canvas size for value:", selectedValue);
+                }
+            } else {
+                 console.error("Invalid resolution value for updateCanvasSize:", selectedValue);
+            }
+        }
+
+        // --- Global Event Listeners ---
+        toolbox.addEventListener('dragstart', (event) => { if (event.target.classList.contains('widget-item')) { isDraggingWidgetOnCanvas = false; draggedWidgetType = event.target.dataset.widgetType; event.dataTransfer.setData('text/plain', draggedWidgetType); event.dataTransfer.effectAllowed = 'copy'; dragOffsetX = event.offsetX; dragOffsetY = event.offsetY; } });
+        canvas.addEventListener('dragover', (event) => { event.preventDefault(); event.dataTransfer.dropEffect = isDraggingWidgetOnCanvas ? 'move' : 'copy'; });
+        canvas.addEventListener('drop', (event) => { event.preventDefault(); const canvasRect = canvas.getBoundingClientRect(); let dropX = event.clientX - canvasRect.left - dragOffsetX; let dropY = event.clientY - canvasRect.top - dragOffsetY; const gridSize = 10; dropX = Math.max(0, Math.round(dropX / gridSize) * gridSize); dropY = Math.max(0, Math.round(dropY / gridSize) * gridSize); if (isDraggingWidgetOnCanvas) { const widgetId = event.dataTransfer.getData('text/plain'); const widget = widgetsOnCanvas.find(w => w.id === widgetId); if (widget) { widget.x = dropX; widget.y = dropY; widget.element.style.left = `${dropX}px`; widget.element.style.top = `${dropY}px`; if (selectedWidget && selectedWidget.dataset.widgetId === widgetId) { updatePropertiesPanel(); } updateCodeOutput(); saveStateToLocalStorage(); } isDraggingWidgetOnCanvas = false; } else if (draggedWidgetType) { const newId = generateUniqueId(draggedWidgetType); addWidgetToCanvas(newId, draggedWidgetType, dropX, dropY); } draggedWidgetType = null; });
+        canvas.addEventListener('click', (event) => { if (event.target === canvas && selectedWidget) { selectWidget(null); } });
+
+        // --- Modal Event Listeners ---
+        importYamlButton.addEventListener('click', showImportModal);
+        modalCloseButtons.forEach(btn => { btn.addEventListener('click', () => { const modal = btn.closest('#yaml-modal, #import-modal'); if (modal) modal.classList.add('hidden'); }); });
+        yamlModal.addEventListener('click', (event) => { if (event.target === yamlModal) { hideYamlModal(); } });
+        importModal.addEventListener('click', (event) => { if (event.target === importModal) { hideImportModal(); } });
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape') { if (!yamlModal.classList.contains('hidden')) hideYamlModal(); if (!importModal.classList.contains('hidden')) hideImportModal(); } });
+
+        // Custom size modal specific listeners
+        document.getElementById('save-custom-size').addEventListener('click', handleSaveCustomSize);
+        document.querySelectorAll('#custom-size-modal .modal-close').forEach(btn => {
+            btn.addEventListener('click', hideCustomSizeModal);
+        });
+        document.getElementById('custom-size-modal').addEventListener('click', (event) => {
+            if (event.target === event.currentTarget) { // Click on backdrop
+                hideCustomSizeModal();
+            }
+        });
+
+        // --- Control Event Listeners ---
+        screenResolutionSelect.addEventListener('change', () => {
+            const currentSelection = screenResolutionSelect.value;
+            if (currentSelection === 'custom') {
+                showCustomSizeModal();
+            } else {
+                // If a concrete value is selected (predefined or custom display like "200x300*")
+                const selectedOption = screenResolutionSelect.options[screenResolutionSelect.selectedIndex];
+                if (selectedOption && selectedOption.dataset.isCustomDisplay === "true") {
+                    localStorage.setItem('lastCustomScreenSizeValue', currentSelection);
+                }
+                updateCanvasSize(currentSelection); // Pass the newly selected value
+            }
+        });
+        scaleControls.addEventListener('click', handleScaleChange);
+        elementsListHeader.addEventListener('click', toggleElementsList);
+        processYamlButton.addEventListener('click', processImportedYaml);
+        toggleToolboxButton.addEventListener('click', toggleToolbox); // Listener for hamburger button
+
+
+        // --- Initial Setup ---
+        loadStateFromLocalStorage(); // Load state first
+        // Apply initial toolbox visibility (default is visible)
+        if (!isToolboxVisible) { // Should normally not happen unless state saving is added later
+             toolboxPanel.classList.add('hidden-toolbox');
+             mainContent.classList.remove('lg:ml-[260px]');
+        }
+
+    </script>
+
+</body>
+</html>
