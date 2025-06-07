@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LVGL ESPHome Visual Designer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
@@ -322,9 +322,8 @@
         let dragOffsetY = 0;
         let isDraggingWidgetOnCanvas = false;
         let currentScale = 1;
-        const LOCAL_STORAGE_KEY = 'lvglDesignerState_v1';
-        let isToolboxVisible = true;
-
+        let isToolboxVisible = true; // Default value without localStorage
+        const LVGL_DESIGNER_STATE_KEY = 'lvglDesignerState';
         let lastSelectedResolutionBeforeCustomModal = null; // To store selection before opening custom modal
         // --- Icon Mapping ---
         const widgetIconMap = { arc: 'donut_large', bar: 'linear_scale', button: 'smart_button', buttonmatrix: 'view_module', calendar: 'calendar_today', canvas: 'draw', chart: 'show_chart', checkbox: 'check_box', container: 'check_box_outline_blank', dropdown: 'arrow_drop_down_circle', image: 'image', imagebutton: 'add_photo_alternate', keyboard: 'keyboard', label: 'segment', led: 'lightbulb', line: 'horizontal_rule', list: 'list', menu: 'menu', meter: 'speed', msgbox: 'chat_bubble_outline', roller: 'unfold_more', slider: 'tune', spinbox: 'iso', spinner: 'autorenew', switch: 'toggle_on', table: 'table_chart', tabview: 'tab', textarea: 'edit_note', tileview: 'view_quilt', window: 'web_asset', default: 'widgets' };
@@ -795,7 +794,6 @@ function updateWidgetSpecificProperties(widgetData, element) {
                     widgetElement.classList.toggle('bg-green-500', widgetData.checked);
                     widgetElement.classList.toggle('bg-blue-500', !widgetData.checked);
                     updateCodeOutput();
-                    saveStateToLocalStorage();
                 }
             });
             break;
@@ -819,7 +817,10 @@ function updateWidgetSpecificProperties(widgetData, element) {
             break; 
         } 
         if (loadedData) { const elementRef = widgetData.element; widgetData = { ...widgetData, ...loadedData, element: elementRef }; widgetElement.style.left = `${widgetData.x}px`; widgetElement.style.top = `${widgetData.y}px`; widgetElement.style.zIndex = widgetData.zIndex || '1'; } 
-        
+        // If loadedData is provided (e.g., from localStorage), we don't want to overwrite its specific text, value, etc.
+        // with defaults from the switch statement above if those properties already exist in loadedData.
+        // The current structure of addWidgetToCanvas with `widgetData = { ...widgetData, ...loadedData, element: elementRef };`
+        // correctly merges, with loadedData properties taking precedence.
         widgetElement.style.width = widgetData.width !== undefined ? `${widgetData.width}px` : 'auto'; 
         widgetElement.style.height = widgetData.height !== undefined ? `${widgetData.height}px` : 'auto'; 
         
@@ -838,7 +839,6 @@ function updateWidgetSpecificProperties(widgetData, element) {
                             widgetElement.classList.toggle('bg-green-500', widgetData.checked);
                             widgetElement.classList.toggle('bg-blue-500', !widgetData.checked);
                             updateCodeOutput();
-                            saveStateToLocalStorage();
                         }
                     });
                 }
@@ -884,164 +884,70 @@ function updateWidgetSpecificProperties(widgetData, element) {
             widgetElement.innerHTML = `<span class="dropdown-text flex-1 overflow-hidden whitespace-nowrap text-ellipsis">Dropdown</span><i class="material-icons-outlined ml-1">arrow_drop_down</i>`; 
             widgetElement.classList.add('flex', 'items-center', 'justify-between', 'px-2'); // Ensure content is visible
             updateDropdownPreview(widgetData, widgetElement); break; 
-        default: widgetElement.style.backgroundColor = '#e9e9e9'; widgetElement.textContent = type.charAt(0).toUpperCase() + type.slice(1); break; } widgetElement.addEventListener('click', (event) => { event.stopPropagation(); selectWidget(widgetElement); }); widgetElement.addEventListener('dragstart', (event) => { event.stopPropagation(); isDraggingWidgetOnCanvas = true; event.dataTransfer.setData('text/plain', widgetElement.dataset.widgetId); event.dataTransfer.effectAllowed = 'move'; const rect = widgetElement.getBoundingClientRect(); dragOffsetX = event.clientX - rect.left; dragOffsetY = event.clientY - rect.top; setTimeout(() => widgetElement.classList.add('opacity-50'), 0); selectWidget(widgetElement); }); widgetElement.addEventListener('dragend', (event) => { event.stopPropagation(); isDraggingWidgetOnCanvas = false; widgetElement.classList.remove('opacity-50'); }); canvas.appendChild(widgetElement); widgetsOnCanvas.push(widgetData); updateElementsList(); updateZIndices(); if (!loadedData) { selectWidget(widgetElement); saveStateToLocalStorage(); } }
-        function deleteWidgetById(idToDelete = null) { const targetId = idToDelete || selectedWidget?.dataset?.widgetId; if (!targetId) { console.warn("Delete action failed: No target ID provided or widget selected."); return; } const widgetElement = canvas.querySelector(`.canvas-widget[data-widget-id="${targetId}"]`); const indexToDelete = widgetsOnCanvas.findIndex(w => w.id === targetId); if (indexToDelete > -1) { widgetsOnCanvas.splice(indexToDelete, 1); } else { console.warn("Could not find widget data in state for ID:", targetId); } if (widgetElement) { widgetElement.remove(); } if (selectedWidget && selectedWidget.dataset.widgetId === targetId) { selectedWidget = null; updatePropertiesPanel(); } updateCodeOutput(); updateElementsList(); updateZIndices(); saveStateToLocalStorage(); }
-        function updateCanvasSize() {
-            const selectedValue = screenResolutionSelect.value;
-            const [width, height] = selectedValue.split('x').map(Number);
-            if (canvas && !isNaN(width) && !isNaN(height)) {
-                canvas.style.width = `${width}px`;
-                canvas.style.height = `${height}px`;
-                applyCanvasScale();
-            } else {
-                console.error("Could not update canvas size.");
-            }
-            saveStateToLocalStorage();
-        }
-        function applyCanvasScale() { if (canvas) { canvas.style.transform = `scale(${currentScale})`; } }
-        function handleScaleChange(event) { const clickedButton = event.target.closest('.scale-button'); if (!clickedButton) return; const newScale = parseFloat(clickedButton.dataset.scale); if (!isNaN(newScale) && newScale !== currentScale) { currentScale = newScale; applyCanvasScale(); scaleControls.querySelectorAll('.scale-button').forEach(btn => { btn.classList.remove('active-scale'); }); clickedButton.classList.add('active-scale'); saveStateToLocalStorage(); } }
-        function updateElementsList() { elementsListItemsContainer.innerHTML = ''; elementCountSpan.textContent = widgetsOnCanvas.length; if (widgetsOnCanvas.length === 0) { elementsListItemsContainer.innerHTML = '<p class="text-xs text-gray-500 italic px-2">No elements added yet.</p>'; return; } widgetsOnCanvas.forEach((widgetData, index) => { const listItem = document.createElement('div'); listItem.classList.add('elements-list-item'); listItem.dataset.widgetId = widgetData.id; const widgetInfo = document.createElement('div'); widgetInfo.classList.add('widget-info'); const icon = document.createElement('i'); icon.classList.add('material-icons-outlined'); icon.textContent = widgetIconMap[widgetData.type] || widgetIconMap.default; widgetInfo.appendChild(icon); const text = document.createElement('span'); text.textContent = widgetData.id; widgetInfo.appendChild(text); listItem.appendChild(widgetInfo); const actionsDiv = document.createElement('div'); actionsDiv.classList.add('actions'); const upButton = document.createElement('button'); upButton.classList.add('action-btn', 'move-up'); upButton.title = "Move Up"; upButton.innerHTML = '<i class="material-icons-outlined">keyboard_arrow_up</i>'; upButton.disabled = (index === 0); upButton.dataset.widgetId = widgetData.id; upButton.addEventListener('click', (e) => { e.stopPropagation(); moveWidget(widgetData.id, 'up'); }); actionsDiv.appendChild(upButton); const downButton = document.createElement('button'); downButton.classList.add('action-btn', 'move-down'); downButton.title = "Move Down"; downButton.innerHTML = '<i class="material-icons-outlined">keyboard_arrow_down</i>'; downButton.disabled = (index === widgetsOnCanvas.length - 1); downButton.dataset.widgetId = widgetData.id; downButton.addEventListener('click', (e) => { e.stopPropagation(); moveWidget(widgetData.id, 'down'); }); actionsDiv.appendChild(downButton); const deleteBtn = document.createElement('button'); deleteBtn.classList.add('action-btn', 'delete'); deleteBtn.title = "Delete"; deleteBtn.innerHTML = '<i class="material-icons-outlined">delete_outline</i>'; deleteBtn.dataset.widgetId = widgetData.id; deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteWidgetById(widgetData.id); }); actionsDiv.appendChild(deleteBtn); listItem.appendChild(actionsDiv); if (selectedWidget && selectedWidget.dataset.widgetId === widgetData.id) { listItem.classList.add('selected-element'); } listItem.addEventListener('click', () => { const targetWidgetElement = canvas.querySelector(`.canvas-widget[data-widget-id="${widgetData.id}"]`); if (targetWidgetElement) { selectWidget(targetWidgetElement); } }); elementsListItemsContainer.appendChild(listItem); }); }
-        function toggleElementsList() { elementsListItemsContainer.classList.toggle('hidden'); const icon = toggleElementsListButton.querySelector('.material-icons-outlined'); if (icon) { icon.classList.toggle('rotate-180'); } }
-        function moveWidget(widgetId, direction) { const currentIndex = widgetsOnCanvas.findIndex(w => w.id === widgetId); if (currentIndex === -1) return; let newIndex = currentIndex; if (direction === 'up' && currentIndex > 0) { newIndex = currentIndex - 1; } else if (direction === 'down' && currentIndex < widgetsOnCanvas.length - 1) { newIndex = currentIndex + 1; } if (newIndex !== currentIndex) { const [movedElement] = widgetsOnCanvas.splice(currentIndex, 1); widgetsOnCanvas.splice(newIndex, 0, movedElement); updateZIndices(); updateElementsList(); saveStateToLocalStorage(); } }
-        function updateZIndices() { widgetsOnCanvas.forEach((widgetData, index) => { if (widgetData.element) { const zIndex = index + 1; widgetData.zIndex = zIndex; widgetData.element.style.zIndex = zIndex; } }); if (selectedWidget) { selectedWidget.style.zIndex = '50'; } }
-        function saveStateToLocalStorage(resolutionToSave = null) {
-            try {
-                const serializableWidgets = widgetsOnCanvas.map(widget => {
-                    const { element, ...dataToSave } = widget;
-                    return dataToSave;
-                });
-
-                // Get any custom display options
-                const customOptions = Array.from(screenResolutionSelect.options)
-                    .filter(opt => opt.dataset.isCustomDisplay === "true")
-                    .map(opt => ({
-                        value: opt.value,
-                        text: opt.textContent
-                    }));
-
-                const state = {
-                    widgets: serializableWidgets,
-                    resolution: resolutionToSave || screenResolutionSelect.value,
-                    scale: currentScale,
-                    nextId: nextWidgetId,
-                    customSizes: customOptions // Save custom sizes list
-                };
-
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state));
-            } catch (error) {
-                console.error("Error saving state to localStorage:", error);
-            }
-        }
-
-        function loadStateFromLocalStorage() {
-            // Clear any existing custom options first
-            Array.from(screenResolutionSelect.options)
-                .filter(opt => opt.dataset.isCustomDisplay === "true")
-                .forEach(opt => opt.remove());
-
-            const savedStateString = localStorage.getItem(LOCAL_STORAGE_KEY);
-            if (!savedStateString) {
-                console.log("No saved state found.");
-                // Apply default from HTML select explicitly, then save this default state
-                const defaultResolution = screenResolutionSelect.value;
-                updateCanvasSize(defaultResolution); // This will also call saveStateToLocalStorage
-                updateCodeOutput(); updatePropertiesPanel(); updateElementsList();
+        default: widgetElement.style.backgroundColor = '#e9e9e9'; widgetElement.textContent = type.charAt(0).toUpperCase() + type.slice(1); break; } widgetElement.addEventListener('click', (event) => { event.stopPropagation(); selectWidget(widgetElement); }); widgetElement.addEventListener('dragstart', (event) => { event.stopPropagation(); isDraggingWidgetOnCanvas = true; event.dataTransfer.setData('text/plain', widgetElement.dataset.widgetId); event.dataTransfer.effectAllowed = 'move'; const rect = widgetElement.getBoundingClientRect(); dragOffsetX = event.clientX - rect.left; dragOffsetY = event.clientY - rect.top; setTimeout(() => widgetElement.classList.add('opacity-50'), 0); selectWidget(widgetElement); }); widgetElement.addEventListener('dragend', (event) => { event.stopPropagation(); isDraggingWidgetOnCanvas = false; widgetElement.classList.remove('opacity-50'); }); canvas.appendChild(widgetElement); widgetsOnCanvas.push(widgetData); updateElementsList(); updateZIndices(); if (!loadedData) { selectWidget(widgetElement); } }
+        function deleteWidgetById(idToDelete = null) { const targetId = idToDelete || selectedWidget?.dataset?.widgetId; if (!targetId) { console.warn("Delete action failed: No target ID provided or widget selected."); return; } const widgetElement = canvas.querySelector(`.canvas-widget[data-widget-id="${targetId}"]`); const indexToDelete = widgetsOnCanvas.findIndex(w => w.id === targetId); if (indexToDelete > -1) { widgetsOnCanvas.splice(indexToDelete, 1); } else { console.warn("Could not find widget data in state for ID:", targetId); } if (widgetElement) { widgetElement.remove(); } if (selectedWidget && selectedWidget.dataset.widgetId === targetId) { selectedWidget = null; updatePropertiesPanel(); } updateCodeOutput(); updateElementsList(); updateZIndices(); }
+        function updateCanvasSize(resolutionToApply = null) {
+            const selectedValue = resolutionToApply || screenResolutionSelect.value; // resolutionToApply is the actual value e.g. "320x240" or "300x200"
+            if (selectedValue === 'custom') { // This is the placeholder "Custom Size..." option
+                // Actual custom size setting and saving is handled by showCustomSizeModal/handleSaveCustomSize
                 return;
             }
 
-            try {
-                const loadedState = JSON.parse(savedStateString);
-                console.log("Loading saved state:", loadedState);
-                canvas.innerHTML = '';
-                widgetsOnCanvas = [];
-                selectedWidget = null;
-                currentScale = loadedState.scale || 1;
-                nextWidgetId = loadedState.nextId || 0;
-
-                // Restore custom size options if any
-                if (loadedState.customSizes && Array.isArray(loadedState.customSizes)) {
-                    const customOption = screenResolutionSelect.querySelector('option[value="custom"]');
-                    loadedState.customSizes.forEach(size => {
-                        const option = document.createElement('option');
-                        option.value = size.value;
-                        option.textContent = size.text;
-                        option.dataset.isCustomDisplay = "true";
-                        screenResolutionSelect.insertBefore(option, customOption);
-                    });
+            if (selectedValue && selectedValue.includes('x')) {
+                const [width, height] = selectedValue.split('x').map(Number);
+                if (canvas && !isNaN(width) && !isNaN(height)) {
+                    canvas.style.width = `${width}px`;
+                    canvas.style.height = `${height}px`;
+                    applyCanvasScale();
+                    // Saving state is handled by event listeners (select change, custom save button)
+                } else {
+                    console.error("Could not update canvas size.");
                 }
-
-                // Set the resolution after restoring custom options
-                // Ensure there's a fallback if loadedState.resolution is somehow invalid or 'custom'
-                let finalResolutionToLoad = (loadedState.resolution && loadedState.resolution !== 'custom') ? loadedState.resolution : '128x160';
-                screenResolutionSelect.value = finalResolutionToLoad;
-
-
-                // Restore widgets
-                if (loadedState.widgets && Array.isArray(loadedState.widgets)) {
-                    loadedState.widgets.forEach(widgetData => {
-                        addWidgetToCanvas(widgetData.id, widgetData.type, widgetData.x, widgetData.y, widgetData);
-                    });
-                }
-
-                updateZIndices();
-                updateCanvasSize(finalResolutionToLoad); // Pass the loaded resolution explicitly
-                updateCodeOutput();
-                updatePropertiesPanel();
-                updateElementsList();
-
-                // Update scale buttons
-                scaleControls.querySelectorAll('.scale-button').forEach(btn => {
-                    btn.classList.toggle('active-scale', parseFloat(btn.dataset.scale) === currentScale);
-                });
-
-                console.log("State loaded successfully.");
-            } catch (error) {
-                console.error("Error loading state from localStorage:", error);
-                localStorage.removeItem(LOCAL_STORAGE_KEY);
-                // Apply default explicitly if loading fails, then save this default state
-                const defaultResolution = '128x160'; // A hardcoded default
-                screenResolutionSelect.value = defaultResolution;
-                updateCanvasSize(defaultResolution); // This will also call saveStateToLocalStorage
-                updateCodeOutput(); updatePropertiesPanel(); updateElementsList();
             }
         }
-
+        function applyCanvasScale() { if (canvas) { canvas.style.transform = `scale(${currentScale})`; } }
+        function handleScaleChange(event) { const clickedButton = event.target.closest('.scale-button'); if (!clickedButton) return; const newScale = parseFloat(clickedButton.dataset.scale); if (!isNaN(newScale) && newScale !== currentScale) { currentScale = newScale; applyCanvasScale(); scaleControls.querySelectorAll('.scale-button').forEach(btn => { btn.classList.remove('active-scale'); }); clickedButton.classList.add('active-scale'); } }
+        function updateElementsList() { elementsListItemsContainer.innerHTML = ''; elementCountSpan.textContent = widgetsOnCanvas.length; if (widgetsOnCanvas.length === 0) { elementsListItemsContainer.innerHTML = '<p class="text-xs text-gray-500 italic px-2">No elements added yet.</p>'; return; } widgetsOnCanvas.slice().sort((a,b) => (a.zIndex || 0) - (b.zIndex || 0)).forEach((widgetData) => { const indexInSortedList = widgetsOnCanvas.findIndex(w => w.id === widgetData.id); const listItem = document.createElement('div'); listItem.classList.add('elements-list-item'); listItem.dataset.widgetId = widgetData.id; const widgetInfo = document.createElement('div'); widgetInfo.classList.add('widget-info'); const icon = document.createElement('i'); icon.classList.add('material-icons-outlined'); icon.textContent = widgetIconMap[widgetData.type] || widgetIconMap.default; widgetInfo.appendChild(icon); const text = document.createElement('span'); text.textContent = widgetData.id; widgetInfo.appendChild(text); listItem.appendChild(widgetInfo); const actionsDiv = document.createElement('div'); actionsDiv.classList.add('actions'); const upButton = document.createElement('button'); upButton.classList.add('action-btn', 'move-up'); upButton.title = "Move Up"; upButton.innerHTML = '<i class="material-icons-outlined">keyboard_arrow_up</i>'; upButton.disabled = (widgetData.zIndex >= widgetsOnCanvas.length); upButton.dataset.widgetId = widgetData.id; upButton.addEventListener('click', (e) => { e.stopPropagation(); moveWidget(widgetData.id, 'up'); }); actionsDiv.appendChild(upButton); const downButton = document.createElement('button'); downButton.classList.add('action-btn', 'move-down'); downButton.title = "Move Down"; downButton.innerHTML = '<i class="material-icons-outlined">keyboard_arrow_down</i>'; downButton.disabled = (widgetData.zIndex <= 1); downButton.dataset.widgetId = widgetData.id; downButton.addEventListener('click', (e) => { e.stopPropagation(); moveWidget(widgetData.id, 'down'); }); actionsDiv.appendChild(downButton); const deleteBtn = document.createElement('button'); deleteBtn.classList.add('action-btn', 'delete'); deleteBtn.title = "Delete"; deleteBtn.innerHTML = '<i class="material-icons-outlined">delete_outline</i>'; deleteBtn.dataset.widgetId = widgetData.id; deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteWidgetById(widgetData.id); }); actionsDiv.appendChild(deleteBtn); listItem.appendChild(actionsDiv); if (selectedWidget && selectedWidget.dataset.widgetId === widgetData.id) { listItem.classList.add('selected-element'); } listItem.addEventListener('click', () => { const targetWidgetElement = canvas.querySelector(`.canvas-widget[data-widget-id="${widgetData.id}"]`); if (targetWidgetElement) { selectWidget(targetWidgetElement); } }); elementsListItemsContainer.appendChild(listItem); }); }
+        function toggleElementsList() { elementsListItemsContainer.classList.toggle('hidden'); const icon = toggleElementsListButton.querySelector('.material-icons-outlined'); if (icon) { icon.classList.toggle('rotate-180'); } }
+        function moveWidget(widgetId, direction) { const currentIndex = widgetsOnCanvas.findIndex(w => w.id === widgetId); if (currentIndex === -1) return; let newIndex = currentIndex; if (direction === 'up' && currentIndex > 0) { newIndex = currentIndex - 1; } else if (direction === 'down' && currentIndex < widgetsOnCanvas.length - 1) { newIndex = currentIndex + 1; } if (newIndex !== currentIndex) { const [movedElement] = widgetsOnCanvas.splice(currentIndex, 1); widgetsOnCanvas.splice(newIndex, 0, movedElement); updateZIndices(); updateElementsList(); } }
+        function updateZIndices() { widgetsOnCanvas.forEach((widgetData, index) => { if (widgetData.element) { const zIndex = index + 1; widgetData.zIndex = zIndex; widgetData.element.style.zIndex = zIndex; } }); if (selectedWidget) { selectedWidget.style.zIndex = '50'; } }
         // --- Modal Control Functions ---
         function showYamlModal() { 
-    generateAndShowYaml();
-    yamlModal.classList.remove('hidden'); 
-}
+            generateAndShowYaml();
+            yamlModal.classList.remove('hidden'); 
+        }
 
-// New function to generate and show YAML
-function generateAndShowYaml() {
-    updateCodeOutput();
-}
+        // New function to generate and show YAML
+        function generateAndShowYaml() {
+            updateCodeOutput();
+        }
 
-// Add copy functionality
-copyYamlButton.addEventListener('click', async () => {
-    const yamlContent = modalCodeOutput.textContent;
-    try {
-        await navigator.clipboard.writeText(yamlContent);
-        const originalText = copyYamlButton.innerHTML;
-        copyYamlButton.innerHTML = '<i class="material-icons-outlined text-base mr-1">check</i> Copied!';
-        copyYamlButton.classList.add('text-green-600');
-        setTimeout(() => {
-            copyYamlButton.innerHTML = originalText;
-            copyYamlButton.classList.remove('text-green-600');
-        }, 2000);
-    } catch (err) {
-        console.error('Failed to copy text: ', err);
-        copyYamlButton.innerHTML = '<i class="material-icons-outlined text-base mr-1">error</i> Failed to copy';
-        copyYamlButton.classList.add('text-red-600');
-        setTimeout(() => {
-            copyYamlButton.innerHTML = originalText;
-            copyYamlButton.classList.remove('text-red-600');
-        }, 2000);
-    }
-});
+        // Add copy functionality
+        copyYamlButton.addEventListener('click', async () => {
+            const yamlContent = modalCodeOutput.textContent;
+            try {
+                await navigator.clipboard.writeText(yamlContent);
+                const originalText = copyYamlButton.innerHTML;
+                copyYamlButton.innerHTML = '<i class="material-icons-outlined text-base mr-1">check</i> Copied!';
+                copyYamlButton.classList.add('text-green-600');
+                setTimeout(() => {
+                    copyYamlButton.innerHTML = originalText;
+                    copyYamlButton.classList.remove('text-green-600');
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                copyYamlButton.innerHTML = '<i class="material-icons-outlined text-base mr-1">error</i> Failed to copy';
+                copyYamlButton.classList.add('text-red-600');
+                setTimeout(() => {
+                    copyYamlButton.innerHTML = originalText;
+                    copyYamlButton.classList.remove('text-red-600');
+                }, 2000);
+            }
+        });
 
-// Update the event listener
-generateYamlButton.addEventListener('click', showYamlModal);
+        // Update the event listener
+        generateYamlButton.addEventListener('click', showYamlModal);
+
 
         function hideYamlModal() { yamlModal.classList.add('hidden'); }
         function showImportModal() { yamlParseError.textContent = ''; importModal.classList.remove('hidden'); }
@@ -1097,7 +1003,7 @@ generateYamlButton.addEventListener('click', showYamlModal);
             }
             // If selection changed, 'change' event on select would call updateCanvasSize.
             // Call explicitly to ensure canvas reflects final state.
-            updateCanvasSize();
+            updateCanvasSize(screenResolutionSelect.value);
         }
 
         function handleSaveCustomSize() {
@@ -1110,9 +1016,9 @@ generateYamlButton.addEventListener('click', showYamlModal);
                 const customValue = `${width}x${height}`;
                 const customText = `${width}x${height}*`;
 
-                const existingCustomOption = screenResolutionSelect.querySelector('option[data-is-custom-display="true"]');
-                if (existingCustomOption) {
-                    existingCustomOption.remove();
+                const oldDynamicOption = screenResolutionSelect.querySelector(`option[data-is-custom-display="true"]`);
+                if (oldDynamicOption) {
+                    oldDynamicOption.remove();
                 }
 
                 const newOption = document.createElement('option');
@@ -1121,64 +1027,91 @@ generateYamlButton.addEventListener('click', showYamlModal);
                 newOption.dataset.isCustomDisplay = "true";
 
                 const customPlaceholderOption = screenResolutionSelect.querySelector('option[value="custom"]');
-                if (customPlaceholderOption) {
-                    screenResolutionSelect.insertBefore(newOption, customPlaceholderOption);
-                } else {
-                    screenResolutionSelect.appendChild(newOption);
-                }
-                
-                screenResolutionSelect.value = customValue; // This will trigger 'change' event
-                localStorage.setItem('lastCustomScreenSizeValue', customValue);
-                
+                screenResolutionSelect.insertBefore(newOption, customPlaceholderOption);
+                screenResolutionSelect.value = customValue;
+                updateCanvasSize(customValue);
+                localStorage.setItem('lastCustomScreenSizeValue', customValue); // Persist this specific custom value for modal prefill
                 hideCustomSizeModal();
+                saveStateToLocalStorage(); // Save state after custom size is set
             } else {
                 alert('Please enter valid width and height values (1-2048px).');
             }
         }
-
-        function updateCanvasSize(resolutionToApply = null) {
-            const selectedValue = resolutionToApply || screenResolutionSelect.value;
-
-            if (selectedValue === 'custom') {
-                console.warn("updateCanvasSize called when 'Custom Size...' placeholder is selected. Canvas size not changed.");
-                return; // Do not save state or change canvas if "Custom..." is selected
-            }
-
-            if (selectedValue && selectedValue.includes('x')) {
-                const [width, height] = selectedValue.split('x').map(Number);
-                if (canvas && !isNaN(width) && !isNaN(height)) {
-                    canvas.style.width = `${width}px`;
-                    canvas.style.height = `${height}px`;
-                    applyCanvasScale();
-                    saveStateToLocalStorage(selectedValue); // Save state with the value that was applied
-                } else {
-                    console.error("Could not update canvas size for value:", selectedValue);
+        // The primary updateCanvasSize(resolutionToApply = null) function is defined earlier and should be the only one.
+        function processImportedYaml() {
+            // console.log("processImportedYaml called.");
+            try {
+                const yamlText = yamlInputArea.value;
+                if (!yamlText.trim()) {
+                    yamlParseError.textContent = 'YAML input is empty.';
+                    return;
                 }
-            } else {
-                 console.error("Invalid resolution value for updateCanvasSize:", selectedValue);
+                const data = jsyaml.load(yamlText);
+                yamlParseError.textContent = ''; // Clear previous errors
+
+                if (data && data.lvgl && data.lvgl.pages && data.lvgl.pages.length > 0) {
+                    // Clear existing widgets from canvas and state
+                    widgetsOnCanvas = [];
+                    canvas.innerHTML = '';
+                    // nextWidgetId will be updated based on imported IDs
+
+                    const firstPage = data.lvgl.pages[0];
+                    if (firstPage.widgets && Array.isArray(firstPage.widgets)) {
+                        let maxIdNum = -1;
+                        firstPage.widgets.forEach(widgetConfig => {
+                            const type = Object.keys(widgetConfig)[0];
+                            const props = widgetConfig[type];
+                            
+                            if (props && props.id && type) {
+                                let currentWidgetId = props.id;
+                                addWidgetToCanvas(currentWidgetId, type, props.x || 0, props.y || 0, props);
+                                
+                                // Update maxIdNum for nextWidgetId calculation
+                                const idParts = String(currentWidgetId).split('_');
+                                const numPartStr = idParts[idParts.length - 1];
+                                if (numPartStr) {
+                                    const numPart = parseInt(numPartStr);
+                                    if (!isNaN(numPart) && numPart > maxIdNum) {
+                                        maxIdNum = numPart;
+                                    }
+                                }
+                            } else {
+                                console.warn("Skipping widget due to missing type, id, or props:", widgetConfig);
+                            }
+                        });
+                        nextWidgetId = Math.max(nextWidgetId || 0, maxIdNum + 1); // Ensure next ID is unique
+                    }
+                    updateElementsList();
+                    updateZIndices();
+                    updateCodeOutput();
+                    selectWidget(null); // Deselect any widget
+                    saveStateToLocalStorage(); // Save the new state
+                    hideImportModal();
+                } else {
+                    yamlParseError.textContent = 'Invalid YAML structure. Expected lvgl -> pages -> widgets.';
+                }
+            } catch (e) {
+                console.error("Error processing YAML:", e);
+                yamlParseError.textContent = `Error parsing YAML: ${e.message}`;
             }
         }
-
         // --- Global Event Listeners ---
         toolbox.addEventListener('dragstart', (event) => { if (event.target.classList.contains('widget-item')) { isDraggingWidgetOnCanvas = false; draggedWidgetType = event.target.dataset.widgetType; event.dataTransfer.setData('text/plain', draggedWidgetType); event.dataTransfer.effectAllowed = 'copy'; dragOffsetX = event.offsetX; dragOffsetY = event.offsetY; } });
         canvas.addEventListener('dragover', (event) => { event.preventDefault(); event.dataTransfer.dropEffect = isDraggingWidgetOnCanvas ? 'move' : 'copy'; });
-        canvas.addEventListener('drop', (event) => { event.preventDefault(); const canvasRect = canvas.getBoundingClientRect(); let dropX = event.clientX - canvasRect.left - dragOffsetX; let dropY = event.clientY - canvasRect.top - dragOffsetY; const gridSize = 10; dropX = Math.max(0, Math.round(dropX / gridSize) * gridSize); dropY = Math.max(0, Math.round(dropY / gridSize) * gridSize); if (isDraggingWidgetOnCanvas) { const widgetId = event.dataTransfer.getData('text/plain'); const widget = widgetsOnCanvas.find(w => w.id === widgetId); if (widget) { widget.x = dropX; widget.y = dropY; widget.element.style.left = `${dropX}px`; widget.element.style.top = `${dropY}px`; if (selectedWidget && selectedWidget.dataset.widgetId === widgetId) { updatePropertiesPanel(); } updateCodeOutput(); saveStateToLocalStorage(); } isDraggingWidgetOnCanvas = false; } else if (draggedWidgetType) { const newId = generateUniqueId(draggedWidgetType); addWidgetToCanvas(newId, draggedWidgetType, dropX, dropY); } draggedWidgetType = null; });
+        canvas.addEventListener('drop', (event) => { event.preventDefault(); const canvasRect = canvas.getBoundingClientRect(); let dropX = event.clientX - canvasRect.left - dragOffsetX; let dropY = event.clientY - canvasRect.top - dragOffsetY; const gridSize = 10; dropX = Math.max(0, Math.round(dropX / gridSize) * gridSize); dropY = Math.max(0, Math.round(dropY / gridSize) * gridSize); if (isDraggingWidgetOnCanvas) { const widgetId = event.dataTransfer.getData('text/plain'); const widget = widgetsOnCanvas.find(w => w.id === widgetId); if (widget) { widget.x = dropX; widget.y = dropY; widget.element.style.left = `${dropX}px`; widget.element.style.top = `${dropY}px`; if (selectedWidget && selectedWidget.dataset.widgetId === widgetId) { updatePropertiesPanel(); } updateCodeOutput(); } isDraggingWidgetOnCanvas = false; } else if (draggedWidgetType) { const newId = generateUniqueId(draggedWidgetType); addWidgetToCanvas(newId, draggedWidgetType, dropX, dropY); } draggedWidgetType = null; });
         canvas.addEventListener('click', (event) => { if (event.target === canvas && selectedWidget) { selectWidget(null); } });
 
         // --- Modal Event Listeners ---
         importYamlButton.addEventListener('click', showImportModal);
-        modalCloseButtons.forEach(btn => { btn.addEventListener('click', () => { const modal = btn.closest('#yaml-modal, #import-modal'); if (modal) modal.classList.add('hidden'); }); });
+        modalCloseButtons.forEach(btn => { btn.addEventListener('click', () => { const modal = btn.closest('#yaml-modal, #import-modal, #custom-size-modal'); if (modal) modal.classList.add('hidden'); }); });
         yamlModal.addEventListener('click', (event) => { if (event.target === yamlModal) { hideYamlModal(); } });
         importModal.addEventListener('click', (event) => { if (event.target === importModal) { hideImportModal(); } });
-        document.addEventListener('keydown', (event) => { if (event.key === 'Escape') { if (!yamlModal.classList.contains('hidden')) hideYamlModal(); if (!importModal.classList.contains('hidden')) hideImportModal(); } });
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape') { if (!yamlModal.classList.contains('hidden')) hideYamlModal(); if (!importModal.classList.contains('hidden')) hideImportModal(); if(!document.getElementById('custom-size-modal').classList.contains('hidden')) hideCustomSizeModal(); } });
 
-        // Custom size modal specific listeners
+        // Custom size modal specific listeners (save button already handled by modalCloseButtons for cancel/X)
         document.getElementById('save-custom-size').addEventListener('click', handleSaveCustomSize);
-        document.querySelectorAll('#custom-size-modal .modal-close').forEach(btn => {
-            btn.addEventListener('click', hideCustomSizeModal);
-        });
         document.getElementById('custom-size-modal').addEventListener('click', (event) => {
-            if (event.target === event.currentTarget) { // Click on backdrop
+            if (event.target === document.getElementById('custom-size-modal')) { // Click on backdrop
                 hideCustomSizeModal();
             }
         });
@@ -1194,22 +1127,128 @@ generateYamlButton.addEventListener('click', showYamlModal);
                 if (selectedOption && selectedOption.dataset.isCustomDisplay === "true") {
                     localStorage.setItem('lastCustomScreenSizeValue', currentSelection);
                 }
-                updateCanvasSize(currentSelection); // Pass the newly selected value
+                updateCanvasSize(currentSelection);
+                saveStateToLocalStorage(); // Save on any direct resolution change
             }
         });
-        scaleControls.addEventListener('click', handleScaleChange);
+        scaleControls.addEventListener('click', (event) => {
+            handleScaleChange(event); // Original logic
+            const clickedButton = event.target.closest('.scale-button');
+            if (clickedButton && parseFloat(clickedButton.dataset.scale) !== currentScale) {
+                 // currentScale is updated inside handleScaleChange if valid
+                saveStateToLocalStorage(); // Save if scale actually changed
+            }
+        });
         elementsListHeader.addEventListener('click', toggleElementsList);
         processYamlButton.addEventListener('click', processImportedYaml);
-        toggleToolboxButton.addEventListener('click', toggleToolbox); // Listener for hamburger button
+        
+        function toggleToolbox() {
+            isToolboxVisible = !isToolboxVisible;
+            toolboxPanel.classList.toggle('hidden-toolbox');
+            mainContent.classList.toggle('lg:ml-[260px]');
+            const menuIcon = toggleToolboxButton.querySelector('.material-icons-outlined');
+            if (menuIcon) {
+                menuIcon.textContent = isToolboxVisible ? 'menu' : 'menu_open';
+            }
+            saveStateToLocalStorage();
+        }
+        toggleToolboxButton.addEventListener('click', toggleToolbox);
 
+        // --- LocalStorage Functions ---
+        function saveStateToLocalStorage() {
+            const selectedOption = screenResolutionSelect.options[screenResolutionSelect.selectedIndex];
+            const isCustom = selectedOption ? selectedOption.dataset.isCustomDisplay === "true" : false;
+            const customText = isCustom ? selectedOption.textContent : null;
+
+            const state = {
+                widgets: widgetsOnCanvas.map(widget => {
+                    const { element, ...serializableWidget } = widget; // Exclude DOM element
+                    return serializableWidget;
+                }),
+                resolution: screenResolutionSelect.value,
+                isCustomResolution: isCustom,
+                customResolutionText: customText,
+                scale: currentScale,
+                nextWidgetId: nextWidgetId,
+                isToolboxVisible: isToolboxVisible
+            };
+            localStorage.setItem(LVGL_DESIGNER_STATE_KEY, JSON.stringify(state));
+        }
+
+        function loadStateFromLocalStorage() {
+            const savedStateJSON = localStorage.getItem(LVGL_DESIGNER_STATE_KEY);
+            if (!savedStateJSON) {
+                // No saved state, apply defaults
+                updateCanvasSize('128x160'); // Default size
+                // isToolboxVisible is true by default
+                if (!isToolboxVisible) { // Should not happen if no saved state and default is true
+                    toolboxPanel.classList.add('hidden-toolbox');
+                    mainContent.classList.remove('lg:ml-[260px]');
+                    toggleToolboxButton.querySelector('.material-icons-outlined').textContent = 'menu_open';
+                }
+                return;
+            }
+
+            try {
+                const savedState = JSON.parse(savedStateJSON);
+
+                isToolboxVisible = savedState.isToolboxVisible !== undefined ? savedState.isToolboxVisible : true;
+                const menuIcon = toggleToolboxButton.querySelector('.material-icons-outlined');
+                if (!isToolboxVisible) {
+                    toolboxPanel.classList.add('hidden-toolbox');
+                    mainContent.classList.remove('lg:ml-[260px]');
+                    if (menuIcon) menuIcon.textContent = 'menu_open';
+                } else {
+                    toolboxPanel.classList.remove('hidden-toolbox'); // Ensure it's shown
+                    mainContent.classList.add('lg:ml-[260px]'); // Ensure margin is present
+                    if (menuIcon) menuIcon.textContent = 'menu';
+                }
+
+                if (savedState.scale !== undefined) currentScale = savedState.scale;
+
+                if (savedState.resolution) {
+                    if (savedState.isCustomResolution && savedState.customResolutionText && savedState.resolution !== 'custom') {
+                        let existingOption = screenResolutionSelect.querySelector(`option[value="${savedState.resolution}"]`);
+                        if (!existingOption) {
+                            const newOption = document.createElement('option');
+                            newOption.value = savedState.resolution;
+                            newOption.textContent = savedState.customResolutionText;
+                            newOption.dataset.isCustomDisplay = "true";
+                            const customPlaceholderOption = screenResolutionSelect.querySelector('option[value="custom"]');
+                            screenResolutionSelect.insertBefore(newOption, customPlaceholderOption);
+                        }
+                    }
+                    screenResolutionSelect.value = savedState.resolution;
+                    updateCanvasSize(savedState.resolution); // This will also call applyCanvasScale
+                } else {
+                    updateCanvasSize('128x160'); // Fallback default
+                }
+                 scaleControls.querySelectorAll('.scale-button').forEach(btn => {
+                    btn.classList.toggle('active-scale', parseFloat(btn.dataset.scale) === currentScale);
+                });
+
+                if (savedState.nextWidgetId !== undefined) nextWidgetId = savedState.nextWidgetId;
+
+                if (savedState.widgets && Array.isArray(savedState.widgets)) {
+                    widgetsOnCanvas = []; canvas.innerHTML = ''; // Clear current state
+                    let maxIdNum = -1;
+                    savedState.widgets.forEach(widgetData => {
+                        addWidgetToCanvas(widgetData.id, widgetData.type, widgetData.x, widgetData.y, widgetData);
+                        const idNum = parseInt(String(widgetData.id).split('_').pop());
+                        if (!isNaN(idNum) && idNum > maxIdNum) maxIdNum = idNum;
+                    });
+                    nextWidgetId = Math.max(nextWidgetId || 0, maxIdNum + 1);
+                    updateElementsList(); updateZIndices(); updateCodeOutput(); selectWidget(null);
+                }
+            } catch (error) {
+                console.error("Error loading state from localStorage:", error);
+                localStorage.removeItem(LVGL_DESIGNER_STATE_KEY); // Clear corrupted state
+                updateCanvasSize('128x160'); // Apply defaults
+            }
+        }
 
         // --- Initial Setup ---
-        loadStateFromLocalStorage(); // Load state first
-        // Apply initial toolbox visibility (default is visible)
-        if (!isToolboxVisible) { // Should normally not happen unless state saving is added later
-             toolboxPanel.classList.add('hidden-toolbox');
-             mainContent.classList.remove('lg:ml-[260px]');
-        }
+        loadStateFromLocalStorage(); // Load state or apply defaults
 
     </script>
 
