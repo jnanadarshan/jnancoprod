@@ -26,11 +26,15 @@
         #toolbox-panel.hidden-toolbox { transform: translateX(-100%); }
         #main-content { transition: margin-left 0.3s ease-in-out; }
 
-        .widget-item { display: flex; align-items: center; cursor: grab; border: 1px solid transparent; padding: 8px 12px; margin-bottom: 4px; background-color: transparent; color: #334155; border-radius: 0.375rem; text-align: left; transition: background-color 0.2s ease, border-color 0.2s ease; font-size: 0.875rem; }
+        .widget-item { display: flex; justify-content: space-between; align-items: center; cursor: grab; border: 1px solid transparent; padding: 8px 12px; margin-bottom: 4px; background-color: transparent; color: #334155; border-radius: 0.375rem; text-align: left; transition: background-color 0.2s ease, border-color 0.2s ease; font-size: 0.875rem; }
         .widget-item:hover { background-color: #f1f5f9; color: #0f172a; }
         .widget-item:active { cursor: grabbing; background-color: #e2e8f0; }
-        .widget-item .material-icons-outlined { margin-right: 0.75rem; font-size: 1.25rem; color: #64748b; flex-shrink: 0; vertical-align: middle; }
-        .widget-item:hover .material-icons-outlined { color: #334155; }
+        .widget-item .widget-icon-name { display: flex; align-items: center; }
+        .widget-item .widget-icon-name .material-icons-outlined { margin-right: 0.75rem; font-size: 1.25rem; color: #64748b; flex-shrink: 0; vertical-align: middle; }
+        .widget-item:hover .widget-icon-name .material-icons-outlined { color: #334155; }
+        .widget-item .add-widget-btn { background: none; border: none; color: #9ca3af; cursor: pointer; padding: 2px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .widget-item .add-widget-btn:hover { background-color: #e5e7eb; color: #374151; }
+        .widget-item .add-widget-btn .material-icons-outlined { font-size: 1.125rem; } /* 18px */
         .canvas-widget { position: absolute; border: 1px solid #94a3b8; background-color: rgba(255, 255, 255, 0.9); cursor: move; border-radius: 0.375rem; user-select: none; min-width: 20px; min-height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; box-shadow: 0 1px 3px rgba(0,0,0,0.07); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .canvas-widget[data-widget-type="line"] { padding: 0; background-color: rgba(230, 230, 250, 0.3); border-style: dashed; overflow: visible; }
         .canvas-widget[data-widget-type="line"] svg { display: block; overflow: visible; }
@@ -178,35 +182,35 @@
         <div id="toolbox-panel" class="fixed top-14 left-0 h-[calc(100vh-3.5rem)] bg-white p-4 shadow-md border-r border-gray-200 overflow-y-auto">
             <h2 class="panel-header">Toolbox</h2>
             <div id="toolbox">
-                <div class="widget-item" draggable="true" data-widget-type="arc"><i class="material-icons-outlined">donut_large</i><span>Arc</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="bar"><i class="material-icons-outlined">linear_scale</i><span>Bar</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="button"><i class="material-icons-outlined">smart_button</i><span>Button</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="buttonmatrix"><i class="material-icons-outlined">view_module</i><span>Button Matrix</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="calendar"><i class="material-icons-outlined">calendar_today</i><span>Calendar</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="canvas"><i class="material-icons-outlined">draw</i><span>Canvas</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="chart"><i class="material-icons-outlined">show_chart</i><span>Chart</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="checkbox"><i class="material-icons-outlined">check_box</i><span>Checkbox</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="container"><i class="material-icons-outlined">check_box_outline_blank</i><span>Container</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="dropdown"><i class="material-icons-outlined">arrow_drop_down_circle</i><span>Dropdown</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="image"><i class="material-icons-outlined">image</i><span>Image</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="imagebutton"><i class="material-icons-outlined">add_photo_alternate</i><span>Image Button</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="keyboard"><i class="material-icons-outlined">keyboard</i><span>Keyboard</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="label"><i class="material-icons-outlined">segment</i><span>Label</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="led"><i class="material-icons-outlined">lightbulb</i><span>LED</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="line"><i class="material-icons-outlined">horizontal_rule</i><span>Line</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="list"><i class="material-icons-outlined">list</i><span>Menu</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="meter"><i class="material-icons-outlined">speed</i><span>Meter</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="msgbox"><i class="material-icons-outlined">chat_bubble_outline</i><span>Message Box</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="roller"><i class="material-icons-outlined">unfold_more</i><span>Roller</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="slider"><i class="material-icons-outlined">tune</i><span>Slider</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="spinbox"><i class="material-icons-outlined">iso</i><span>Spinbox</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="spinner"><i class="material-icons-outlined">autorenew</i><span>Spinner</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="switch"><i class="material-icons-outlined">toggle_on</i><span>Switch</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="table"><i class="material-icons-outlined">table_chart</i><span>Table</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="tabview"><i class="material-icons-outlined">tab</i><span>Tab View</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="textarea"><i class="material-icons-outlined">edit_note</i><span>Text Area</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="tileview"><i class="material-icons-outlined">view_quilt</i><span>Tile View</span></div>
-                <div class="widget-item" draggable="true" data-widget-type="window"><i class="material-icons-outlined">web_asset</i><span>Window</span></div>
+                <div class="widget-item" draggable="true" data-widget-type="arc"><div class="widget-icon-name"><i class="material-icons-outlined">donut_large</i><span>Arc</span></div><button class="add-widget-btn" title="Add Arc to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="bar"><div class="widget-icon-name"><i class="material-icons-outlined">linear_scale</i><span>Bar</span></div><button class="add-widget-btn" title="Add Bar to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="button"><div class="widget-icon-name"><i class="material-icons-outlined">smart_button</i><span>Button</span></div><button class="add-widget-btn" title="Add Button to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="buttonmatrix"><div class="widget-icon-name"><i class="material-icons-outlined">view_module</i><span>Button Matrix</span></div><button class="add-widget-btn" title="Add Button Matrix to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="calendar"><div class="widget-icon-name"><i class="material-icons-outlined">calendar_today</i><span>Calendar</span></div><button class="add-widget-btn" title="Add Calendar to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="canvas"><div class="widget-icon-name"><i class="material-icons-outlined">draw</i><span>Canvas</span></div><button class="add-widget-btn" title="Add Canvas to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="chart"><div class="widget-icon-name"><i class="material-icons-outlined">show_chart</i><span>Chart</span></div><button class="add-widget-btn" title="Add Chart to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="checkbox"><div class="widget-icon-name"><i class="material-icons-outlined">check_box</i><span>Checkbox</span></div><button class="add-widget-btn" title="Add Checkbox to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="container"><div class="widget-icon-name"><i class="material-icons-outlined">check_box_outline_blank</i><span>Container</span></div><button class="add-widget-btn" title="Add Container to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="dropdown"><div class="widget-icon-name"><i class="material-icons-outlined">arrow_drop_down_circle</i><span>Dropdown</span></div><button class="add-widget-btn" title="Add Dropdown to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="image"><div class="widget-icon-name"><i class="material-icons-outlined">image</i><span>Image</span></div><button class="add-widget-btn" title="Add Image to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="imagebutton"><div class="widget-icon-name"><i class="material-icons-outlined">add_photo_alternate</i><span>Image Button</span></div><button class="add-widget-btn" title="Add Image Button to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="keyboard"><div class="widget-icon-name"><i class="material-icons-outlined">keyboard</i><span>Keyboard</span></div><button class="add-widget-btn" title="Add Keyboard to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="label"><div class="widget-icon-name"><i class="material-icons-outlined">segment</i><span>Label</span></div><button class="add-widget-btn" title="Add Label to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="led"><div class="widget-icon-name"><i class="material-icons-outlined">lightbulb</i><span>LED</span></div><button class="add-widget-btn" title="Add LED to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="line"><div class="widget-icon-name"><i class="material-icons-outlined">horizontal_rule</i><span>Line</span></div><button class="add-widget-btn" title="Add Line to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="list"><div class="widget-icon-name"><i class="material-icons-outlined">list</i><span>Menu</span></div><button class="add-widget-btn" title="Add Menu to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="meter"><div class="widget-icon-name"><i class="material-icons-outlined">speed</i><span>Meter</span></div><button class="add-widget-btn" title="Add Meter to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="msgbox"><div class="widget-icon-name"><i class="material-icons-outlined">chat_bubble_outline</i><span>Message Box</span></div><button class="add-widget-btn" title="Add Message Box to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="roller"><div class="widget-icon-name"><i class="material-icons-outlined">unfold_more</i><span>Roller</span></div><button class="add-widget-btn" title="Add Roller to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="slider"><div class="widget-icon-name"><i class="material-icons-outlined">tune</i><span>Slider</span></div><button class="add-widget-btn" title="Add Slider to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="spinbox"><div class="widget-icon-name"><i class="material-icons-outlined">iso</i><span>Spinbox</span></div><button class="add-widget-btn" title="Add Spinbox to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="spinner"><div class="widget-icon-name"><i class="material-icons-outlined">autorenew</i><span>Spinner</span></div><button class="add-widget-btn" title="Add Spinner to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="switch"><div class="widget-icon-name"><i class="material-icons-outlined">toggle_on</i><span>Switch</span></div><button class="add-widget-btn" title="Add Switch to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="table"><div class="widget-icon-name"><i class="material-icons-outlined">table_chart</i><span>Table</span></div><button class="add-widget-btn" title="Add Table to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="tabview"><div class="widget-icon-name"><i class="material-icons-outlined">tab</i><span>Tab View</span></div><button class="add-widget-btn" title="Add Tab View to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="textarea"><div class="widget-icon-name"><i class="material-icons-outlined">edit_note</i><span>Text Area</span></div><button class="add-widget-btn" title="Add Text Area to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="tileview"><div class="widget-icon-name"><i class="material-icons-outlined">view_quilt</i><span>Tile View</span></div><button class="add-widget-btn" title="Add Tile View to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
+                <div class="widget-item" draggable="true" data-widget-type="window"><div class="widget-icon-name"><i class="material-icons-outlined">web_asset</i><span>Window</span></div><button class="add-widget-btn" title="Add Window to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
             </div>
         </div>
 
@@ -1132,7 +1136,37 @@ function updateWidgetSpecificProperties(widgetData, element) {
             }
         }
         // --- Global Event Listeners ---
-        toolbox.addEventListener('dragstart', (event) => { if (event.target.classList.contains('widget-item')) { isDraggingWidgetOnCanvas = false; draggedWidgetType = event.target.dataset.widgetType; event.dataTransfer.setData('text/plain', draggedWidgetType); event.dataTransfer.effectAllowed = 'copy'; dragOffsetX = event.offsetX; dragOffsetY = event.offsetY; } });
+        toolbox.addEventListener('dragstart', (event) => { 
+            const widgetItem = event.target.closest('.widget-item');
+            if (widgetItem) { 
+                isDraggingWidgetOnCanvas = false; 
+                draggedWidgetType = widgetItem.dataset.widgetType; 
+                event.dataTransfer.setData('text/plain', draggedWidgetType); 
+                event.dataTransfer.effectAllowed = 'copy'; 
+                // Calculate drag offset relative to the widget item, not the icon/button if clicked directly
+                const rect = widgetItem.getBoundingClientRect();
+                dragOffsetX = event.clientX - rect.left;
+                dragOffsetY = event.clientY - rect.top;
+            } 
+        });
+        toolbox.addEventListener('click', (event) => {
+            const addButton = event.target.closest('.add-widget-btn');
+            if (addButton) {
+                const widgetItem = addButton.closest('.widget-item');
+                if (widgetItem && widgetItem.dataset.widgetType) {
+                    const type = widgetItem.dataset.widgetType;
+                    const canvasRect = canvas.getBoundingClientRect();
+                    // Calculate center of the canvas for dropping
+                    // For simplicity, we'll use the current canvas dimensions.
+                    // A more robust approach might consider the widget's default size.
+                    const dropX = Math.max(0, Math.round((canvas.clientWidth / 2) - 50)); // -50 to roughly center a 100px wide widget
+                    const dropY = Math.max(0, Math.round((canvas.clientHeight / 2) - 15)); // -15 to roughly center a 30px high widget
+                    
+                    const newId = generateUniqueId(type);
+                    addWidgetToCanvas(newId, type, dropX, dropY);
+                }
+            }
+        });
         canvas.addEventListener('dragover', (event) => { event.preventDefault(); event.dataTransfer.dropEffect = isDraggingWidgetOnCanvas ? 'move' : 'copy'; });
         canvas.addEventListener('drop', (event) => { event.preventDefault(); const canvasRect = canvas.getBoundingClientRect(); let dropX = event.clientX - canvasRect.left - dragOffsetX; let dropY = event.clientY - canvasRect.top - dragOffsetY; const gridSize = 10; dropX = Math.max(0, Math.round(dropX / gridSize) * gridSize); dropY = Math.max(0, Math.round(dropY / gridSize) * gridSize); if (isDraggingWidgetOnCanvas) { const widgetId = event.dataTransfer.getData('text/plain'); const widget = widgetsOnCanvas.find(w => w.id === widgetId); if (widget) { widget.x = dropX; widget.y = dropY; widget.element.style.left = `${dropX}px`; widget.element.style.top = `${dropY}px`; if (selectedWidget && selectedWidget.dataset.widgetId === widgetId) { updatePropertiesPanel(); } updateCodeOutput(); } isDraggingWidgetOnCanvas = false; } else if (draggedWidgetType) { const newId = generateUniqueId(draggedWidgetType); addWidgetToCanvas(newId, draggedWidgetType, dropX, dropY); } draggedWidgetType = null; });
         canvas.addEventListener('click', (event) => { if (event.target === canvas && selectedWidget) { selectWidget(null); } });
