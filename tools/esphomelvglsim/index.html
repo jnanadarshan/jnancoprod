@@ -167,7 +167,11 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-2">
-                     <button id="import-yaml-button" type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <!-- New Keyboard Shortcuts Button -->
+                    <button id="keyboard-shortcuts-button" type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <i class="material-icons-outlined text-base mr-1 -ml-1">keyboard</i> Shortcuts
+                    </button>
+                    <button id="import-yaml-button" type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                         <i class="material-icons-outlined text-base mr-1 -ml-1">file_upload</i> Import YAML
                     </button>
                     <button id="generate-yaml-button" type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -324,6 +328,30 @@
         </div>
     </div>
 
+    <!-- Add the Keyboard Shortcuts Popup -->
+<div id="keyboard-shortcuts-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-[60] hidden">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+        <div class="flex justify-between items-center p-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900">Keyboard Shortcuts</h3>
+            <button type="button" class="modal-close text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            </button>
+        </div>
+        <div class="p-4 space-y-4">
+            <ul class="list-disc pl-5 text-sm text-gray-700">
+                <li><strong>Delete/Backspace:</strong> Delete selected widget</li>
+                <li><strong>Arrow Keys:</strong> Move selected widget</li>
+                <li><strong>Escape:</strong> Close modals</li>
+                <li><strong>Ctrl + S:</strong> Save state</li>
+                <li><strong>Ctrl + Z:</strong> Undo last action</li>
+            </ul>
+        </div>
+        <div class="flex items-center justify-end p-4 border-t border-gray-200">
+            <button type="button" class="modal-close px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Close</button>
+        </div>
+    </div>
+</div>
+
     <script>
         // --- DOM Element References ---
         const toolboxPanel = document.getElementById('toolbox-panel');
@@ -351,6 +379,8 @@
         const processYamlButton = document.getElementById('process-yaml-button');
         const yamlParseError = document.getElementById('yaml-parse-error');
         const propertiesHeader = document.getElementById('properties-header');
+        const keyboardShortcutsButton = document.getElementById('keyboard-shortcuts-button');
+        const keyboardShortcutsModal = document.getElementById('keyboard-shortcuts-modal');
         const togglePropertiesButton = document.getElementById('toggle-properties');
         const propertiesWrapper = document.getElementById('properties-wrapper');
 
@@ -948,7 +978,7 @@ function updateWidgetSpecificProperties(widgetData, element) {
         }
         function applyCanvasScale() { if (canvas) { canvas.style.transform = `scale(${currentScale})`; } }
         function handleScaleChange(event) { const clickedButton = event.target.closest('.scale-button'); if (!clickedButton) return; const newScale = parseFloat(clickedButton.dataset.scale); if (!isNaN(newScale) && newScale !== currentScale) { currentScale = newScale; applyCanvasScale(); scaleControls.querySelectorAll('.scale-button').forEach(btn => { btn.classList.remove('active-scale'); }); clickedButton.classList.add('active-scale'); } }
-        function updateElementsList() { elementsListItemsContainer.innerHTML = ''; elementCountSpan.textContent = widgetsOnCanvas.length; if (widgetsOnCanvas.length === 0) { elementsListItemsContainer.innerHTML = '<p class="text-xs text-gray-500 italic px-2">No elements added yet.</p>'; return; } widgetsOnCanvas.slice().sort((a,b) => (a.zIndex || 0) - (b.zIndex || 0)).forEach((widgetData) => { const indexInSortedList = widgetsOnCanvas.findIndex(w => w.id === widgetData.id); const listItem = document.createElement('div'); listItem.classList.add('elements-list-item'); listItem.dataset.widgetId = widgetData.id; const widgetInfo = document.createElement('div'); widgetInfo.classList.add('widget-info'); const icon = document.createElement('i'); icon.classList.add('material-icons-outlined'); icon.textContent = widgetIconMap[widgetData.type] || widgetIconMap.default; widgetInfo.appendChild(icon); const text = document.createElement('span'); text.textContent = widgetData.id; widgetInfo.appendChild(text); listItem.appendChild(widgetInfo); const actionsDiv = document.createElement('div'); actionsDiv.classList.add('actions'); const upButton = document.createElement('button'); upButton.classList.add('action-btn', 'move-up'); upButton.title = "Move Up"; upButton.innerHTML = '<i class="material-icons-outlined">keyboard_arrow_up</i>'; upButton.disabled = (widgetData.zIndex >= widgetsOnCanvas.length); upButton.dataset.widgetId = widgetData.id; upButton.addEventListener('click', (e) => { e.stopPropagation(); moveWidget(widgetData.id, 'up'); }); actionsDiv.appendChild(upButton); const downButton = document.createElement('button'); downButton.classList.add('action-btn', 'move-down'); downButton.title = "Move Down"; downButton.innerHTML = '<i class="material-icons-outlined">keyboard_arrow_down</i>'; downButton.disabled = (widgetData.zIndex <= 1); downButton.dataset.widgetId = widgetData.id; downButton.addEventListener('click', (e) => { e.stopPropagation(); moveWidget(widgetData.id, 'down'); }); actionsDiv.appendChild(downButton); const deleteBtn = document.createElement('button'); deleteBtn.classList.add('action-btn', 'delete'); deleteBtn.title = "Delete"; deleteBtn.innerHTML = '<i class="material-icons-outlined">delete_outline</i>'; deleteBtn.dataset.widgetId = widgetData.id; deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteWidgetById(widgetData.id); }); actionsDiv.appendChild(deleteBtn); listItem.appendChild(actionsDiv); if (selectedWidget && selectedWidget.dataset.widgetId === widgetData.id) { listItem.classList.add('selected-element'); } listItem.addEventListener('click', () => { const targetWidgetElement = canvas.querySelector(`.canvas-widget[data-widget-id="${widgetData.id}"]`); if (targetWidgetElement) { selectWidget(targetWidgetElement); } }); elementsListItemsContainer.appendChild(listItem); }); }
+        function updateElementsList() { elementsListItemsContainer.innerHTML = ''; elementCountSpan.textContent = widgetsOnCanvas.length; if (widgetsOnCanvas.length === 0) { elementsListItemsContainer.innerHTML = '<p class="text-xs text-gray-500 italic px-2">No elements added yet.</p>'; return; } widgetsOnCanvas.slice().sort((a,b) => (a.zIndex || 0) - (b.zIndex || 0)).forEach((widgetData) => { const indexInSortedList = widgetsOnCanvas.findIndex(w => w.id === widgetData.id); const listItem = document.createElement('div'); listItem.classList.add('elements-list-item'); listItem.dataset.widgetId = widgetData.id; const widgetInfo = document.createElement('div'); widgetInfo.classList.add('widget-info'); const icon = document.createElement('i'); icon.classList.add('material-icons-outlined'); icon.textContent = widgetIconMap[widgetData.type] || widgetIconMap.default; widgetInfo.appendChild(icon); const text = document.createElement('span'); text.textContent = widgetData.id; widgetInfo.appendChild(text); listItem.appendChild(widgetInfo); const actionsDiv = document.createElement('div'); actionsDiv.classList.add('actions'); const upButton = document.createElement('button'); upButton.classList.add('action-btn', 'move-up'); upButton.title = "Move Up"; upButton.innerHTML = '<i class="material-icons-outlined">keyboard_arrow_up</i>'; upButton.disabled = (widgetData.zIndex >= widgetsOnCanvas.length); upButton.dataset.widgetId = widgetData.id; upButton.addEventListener('click', (e) => { e.stopPropagation(); moveWidget(widgetData.id, 'up'); }); actionsDiv.appendChild(upButton); const downButton = document.createElement('button'); downButton.classList.add('action-btn', 'move-down'); downButton.title = "Move Down"; downButton.innerHTML = '<i class="material-icons-outlined">keyboard_arrow_down</i>'; downButton.disabled = (widgetData.zIndex <= 1); downButton.dataset.widgetId = widgetData.id; downButton.addEventListener('click', (e) => { e.stopPropagation(); moveWidget(widgetData.id, 'down'); }); actionsDiv.appendChild(downButton); const deleteBtn = document.createElement('button'); deleteBtn.classList.add('action-btn', 'delete'); deleteBtn.title = "Delete"; deleteBtn.innerHTML = '<i class="material-icons-outlined">delete_outline</i>'; deleteBtn.dataset.widgetId = widgetData.id; deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteWidgetById(widgetData.id); }); actionsDiv.appendChild(deleteBtn); listItem.appendChild(actionsDiv); if (selectedWidget && selectedWidget.dataset.widgetId === widgetData.id) { listItem.classList.add('selected-element'); } listItem.addEventListener('click', () => { const targetWidgetElement = canvas.querySelector(`.canvas-widget[data-widget-id="${widgetData.id}"]`); if (targetWidgetElement) { selectWidget(targetTargetWidgetElement); } }); elementsListItemsContainer.appendChild(listItem); }); }
         function toggleElementsList() { elementsListItemsContainer.classList.toggle('hidden'); const icon = toggleElementsListButton.querySelector('.material-icons-outlined'); if (icon) { icon.classList.toggle('rotate-180'); } }
         function moveWidget(widgetId, direction) { const currentIndex = widgetsOnCanvas.findIndex(w => w.id === widgetId); if (currentIndex === -1) return; let newIndex = currentIndex; if (direction === 'up' && currentIndex > 0) { newIndex = currentIndex - 1; } else if (direction === 'down' && currentIndex < widgetsOnCanvas.length - 1) { newIndex = currentIndex + 1; } if (newIndex !== currentIndex) { const [movedElement] = widgetsOnCanvas.splice(currentIndex, 1); widgetsOnCanvas.splice(newIndex, 0, movedElement); updateZIndices(); updateElementsList(); } }
         function updateZIndices() { widgetsOnCanvas.forEach((widgetData, index) => { if (widgetData.element) { const zIndex = index + 1; widgetData.zIndex = zIndex; widgetData.element.style.zIndex = zIndex; } }); if (selectedWidget) { selectedWidget.style.zIndex = '50'; } }
@@ -1177,16 +1207,26 @@ function updateWidgetSpecificProperties(widgetData, element) {
         // generateYamlButton.addEventListener('click', showYamlModal); // This is already handled by the updated showYamlModal logic
 
         // Consolidate modal close logic
-        const allModals = [yamlModal, importModal, document.getElementById('custom-size-modal')];
+        const allModals = [yamlModal, importModal, document.getElementById('custom-size-modal'), keyboardShortcutsModal];
         allModals.forEach(modal => {
             modal.addEventListener('click', (event) => {
-                if (event.target === modal) modal.classList.add('hidden');
+                if (event.target === modal) {
+                    modal.classList.add('hidden');
+                }
             });
         });
-        modalCloseButtons.forEach(btn => { btn.addEventListener('click', () => { const modal = btn.closest('#yaml-modal, #import-modal, #custom-size-modal'); if (modal) modal.classList.add('hidden'); }); });
-        yamlModal.addEventListener('click', (event) => { if (event.target === yamlModal) { hideYamlModal(); } });
+        modalCloseButtons.forEach(btn => { btn.addEventListener('click', () => { const modal = btn.closest('#yaml-modal, #import-modal, #custom-size-modal, #keyboard-shortcuts-modal'); if (modal) modal.classList.add('hidden'); }); });
+        
+        // Specific modal hide functions (can be simplified if only toggling 'hidden')
+        function hideKeyboardShortcutsModal() { keyboardShortcutsModal.classList.add('hidden'); }
+
+        yamlModal.addEventListener('click', (event) => { 
+            if (event.target === yamlModal) { 
+                hideYamlModal(); 
+            } 
+        });
         importModal.addEventListener('click', (event) => { if (event.target === importModal) { hideImportModal(); } });
-        document.addEventListener('keydown', (event) => { if (event.key === 'Escape') { if (!yamlModal.classList.contains('hidden')) hideYamlModal(); if (!importModal.classList.contains('hidden')) hideImportModal(); if(!document.getElementById('custom-size-modal').classList.contains('hidden')) hideCustomSizeModal(); } });
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape') { if (!yamlModal.classList.contains('hidden')) hideYamlModal(); if (!importModal.classList.contains('hidden')) hideImportModal(); if(!document.getElementById('custom-size-modal').classList.contains('hidden')) hideCustomSizeModal(); if (!keyboardShortcutsModal.classList.contains('hidden')) hideKeyboardShortcutsModal(); } });
 
         // Custom size modal specific listeners (save button already handled by modalCloseButtons for cancel/X)
         // The save button needs its own listener, not just modal-close
@@ -1202,6 +1242,11 @@ function updateWidgetSpecificProperties(widgetData, element) {
             if (event.target === document.getElementById('custom-size-modal')) { // Click on backdrop
                 hideCustomSizeModal();
             }
+        });
+
+        // Keyboard shortcuts modal listener
+        keyboardShortcutsButton.addEventListener('click', () => {
+            keyboardShortcutsModal.classList.remove('hidden');
         });
 
         // --- Control Event Listeners ---
