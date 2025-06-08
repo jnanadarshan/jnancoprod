@@ -212,6 +212,7 @@
                 <div class="widget-item" draggable="true" data-widget-type="tileview"><div class="widget-icon-name"><i class="material-icons-outlined">view_quilt</i><span>Tile View</span></div><button class="add-widget-btn" title="Add Tile View to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
                 <div class="widget-item" draggable="true" data-widget-type="window"><div class="widget-icon-name"><i class="material-icons-outlined">web_asset</i><span>Window</span></div><button class="add-widget-btn" title="Add Window to canvas"><i class="material-icons-outlined">add_circle_outline</i></button></div>
             </div>
+            
         </div>
 
         <div id="main-content" class="flex-1 p-4 md:p-6 lg:p-8 lg:ml-[260px] min-h-[calc(100vh-3.5rem)]">
@@ -1172,13 +1173,30 @@ function updateWidgetSpecificProperties(widgetData, element) {
         canvas.addEventListener('click', (event) => { if (event.target === canvas && selectedWidget) { selectWidget(null); } });
 
         // --- Modal Event Listeners ---
-        importYamlButton.addEventListener('click', showImportModal);
+        importYamlButton.addEventListener('click', showImportModal); // Keep this
+        // generateYamlButton.addEventListener('click', showYamlModal); // This is already handled by the updated showYamlModal logic
+
+        // Consolidate modal close logic
+        const allModals = [yamlModal, importModal, document.getElementById('custom-size-modal')];
+        allModals.forEach(modal => {
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) modal.classList.add('hidden');
+            });
+        });
         modalCloseButtons.forEach(btn => { btn.addEventListener('click', () => { const modal = btn.closest('#yaml-modal, #import-modal, #custom-size-modal'); if (modal) modal.classList.add('hidden'); }); });
         yamlModal.addEventListener('click', (event) => { if (event.target === yamlModal) { hideYamlModal(); } });
         importModal.addEventListener('click', (event) => { if (event.target === importModal) { hideImportModal(); } });
         document.addEventListener('keydown', (event) => { if (event.key === 'Escape') { if (!yamlModal.classList.contains('hidden')) hideYamlModal(); if (!importModal.classList.contains('hidden')) hideImportModal(); if(!document.getElementById('custom-size-modal').classList.contains('hidden')) hideCustomSizeModal(); } });
 
         // Custom size modal specific listeners (save button already handled by modalCloseButtons for cancel/X)
+        // The save button needs its own listener, not just modal-close
+        // document.getElementById('save-custom-size').addEventListener('click', handleSaveCustomSize);
+        // The backdrop click is handled by the consolidated logic above.
+        // document.getElementById('custom-size-modal').addEventListener('click', (event) => {
+        //     if (event.target === document.getElementById('custom-size-modal')) { // Click on backdrop
+        //         hideCustomSizeModal();
+        //     }
+        // });
         document.getElementById('save-custom-size').addEventListener('click', handleSaveCustomSize);
         document.getElementById('custom-size-modal').addEventListener('click', (event) => {
             if (event.target === document.getElementById('custom-size-modal')) { // Click on backdrop
@@ -1223,6 +1241,20 @@ function updateWidgetSpecificProperties(widgetData, element) {
             saveStateToLocalStorage();
         }
         toggleToolboxButton.addEventListener('click', toggleToolbox);
+
+        // --- Keyboard Shortcuts ---
+        document.addEventListener('keydown', (event) => {
+            // Delete selected widget with Delete/Backspace key
+            if (selectedWidget && (event.key === 'Delete' || event.key === 'Backspace')) {
+                // Prevent default browser action for Backspace (navigation)
+                // especially if an input field within properties panel is not focused.
+                const activeElement = document.activeElement;
+                if (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA') {
+                    event.preventDefault();
+                    deleteWidgetById(selectedWidget.dataset.widgetId);
+                }
+            }
+        });
 
         // --- LocalStorage Functions ---
         function saveStateToLocalStorage() {
