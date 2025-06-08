@@ -1908,6 +1908,50 @@ if (localStorage.getItem('darkMode') === 'true') {
             updateConfigToggleButtonState();
         }
         // --- End Configuration Section Toggle Button ---
+
+        // --- Keyboard Arrow Key Navigation for Selected Element ---
+        document.addEventListener('keydown', (event) => {
+            if (selectedElementId === null) return; // No element selected
+
+            const activeElement = document.activeElement;
+            // If an input, textarea, or contentEditable element is focused,
+            // let arrow keys behave normally for text navigation.
+            if (activeElement &&
+                (activeElement.tagName === 'INPUT' ||
+                 activeElement.tagName === 'TEXTAREA' ||
+                 activeElement.isContentEditable)) {
+                // Allow arrow keys for text navigation within these elements
+                if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+                    return;
+                }
+            }
+
+            const el = elements.find(e => e.id === selectedElementId);
+            if (!el) return; // Should not happen if selectedElementId is valid
+
+            let moved = false;
+            const step = event.shiftKey ? 10 : 1; // Move 10px if Shift is pressed, else 1px
+
+            switch (event.key) {
+                case 'ArrowUp':    el.y -= step; moved = true; break;
+                case 'ArrowDown':  el.y += step; moved = true; break;
+                case 'ArrowLeft':  el.x -= step; moved = true; break;
+                case 'ArrowRight': el.x += step; moved = true; break;
+            }
+
+            if (moved) {
+                event.preventDefault(); // Prevent default browser action (e.g., scrolling)
+                
+                // Ensure coordinates don't go negative if that's desired (optional)
+                // el.x = Math.max(0, el.x);
+                // el.y = Math.max(0, el.y);
+
+                updateEditorForm();   // Update the input fields and sliders in the editor
+                drawPreview();        // Redraw the canvas
+                saveToCache();        // Save the changes
+            }
+        });
+        // --- End Keyboard Arrow Key Navigation ---
     </script>
 
 </body>
