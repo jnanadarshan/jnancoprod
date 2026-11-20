@@ -1,0 +1,1261 @@
+/* ==========================================================================
+   glass.css — frosted-glass skin for Display Designer
+   Loaded AFTER style.css and the inline <style> in index.html.
+   Pure visual override: no layout-logic or JS hooks are changed.
+   Works with the existing light theme and body.dark-mode.
+   ========================================================================== */
+
+/* ---- Design tokens ----------------------------------------------------- */
+html body:not(.x) {
+    --g-accent: #6366f1;
+    --g-accent-2: #8b5cf6;
+    --g-accent-grad: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    --g-accent-soft: rgba(99, 102, 241, 0.14);
+    --g-accent-ring: rgba(99, 102, 241, 0.28);
+
+    --g-glass: rgba(255, 255, 255, 0.52);
+    --g-glass-strong: rgba(255, 255, 255, 0.82);
+    --g-inner: rgba(255, 255, 255, 0.45);
+    --g-field: rgba(255, 255, 255, 0.62);
+    --g-hover: rgba(99, 102, 241, 0.09);
+    --g-edge: rgba(255, 255, 255, 0.75);
+    --g-line: rgba(30, 32, 80, 0.09);
+    --g-text: #1b1d3a;
+    --g-text-2: rgba(27, 29, 58, 0.62);
+    --g-shadow: 0 10px 40px rgba(60, 60, 140, 0.14), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
+    --g-blur: blur(22px) saturate(170%);
+    --g-radius: 18px;
+    --g-radius-sm: 11px;
+    --g-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%231b1d3a' stroke-opacity='.55' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+
+    font-family: 'Inter', 'Roboto', system-ui, sans-serif;
+    color: var(--g-text);
+    background:
+        radial-gradient(900px 620px at 8% -5%, rgba(129, 140, 248, 0.55), transparent 60%),
+        radial-gradient(780px 560px at 100% 15%, rgba(244, 114, 182, 0.38), transparent 58%),
+        radial-gradient(900px 700px at 55% 115%, rgba(34, 211, 238, 0.38), transparent 58%),
+        #eef1fb;
+    background-attachment: fixed;
+
+    padding: 12px;
+    gap: 12px;
+    box-sizing: border-box;
+    letter-spacing: -0.003em;
+    -webkit-font-smoothing: antialiased;
+}
+
+html body.dark-mode {
+    --g-accent: #8b93ff;
+    --g-accent-2: #a78bfa;
+    --g-accent-grad: linear-gradient(135deg, #6d73f5 0%, #9b6cf7 100%);
+    --g-accent-soft: rgba(139, 147, 255, 0.18);
+    --g-accent-ring: rgba(139, 147, 255, 0.35);
+
+    --g-glass: rgba(24, 27, 52, 0.5);
+    --g-glass-strong: rgba(22, 25, 48, 0.88);
+    --g-inner: rgba(255, 255, 255, 0.045);
+    --g-field: rgba(8, 10, 24, 0.45);
+    --g-hover: rgba(255, 255, 255, 0.07);
+    --g-edge: rgba(255, 255, 255, 0.11);
+    --g-line: rgba(255, 255, 255, 0.09);
+    --g-text: rgba(255, 255, 255, 0.92);
+    --g-text-2: rgba(255, 255, 255, 0.58);
+    --g-shadow: 0 14px 48px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.07) inset;
+    --g-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23ffffff' stroke-opacity='.6' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+
+    background:
+        radial-gradient(900px 620px at 8% -5%, rgba(79, 70, 229, 0.50), transparent 60%),
+        radial-gradient(780px 560px at 100% 15%, rgba(168, 85, 247, 0.32), transparent 58%),
+        radial-gradient(900px 700px at 55% 115%, rgba(8, 145, 178, 0.34), transparent 58%),
+        #080914;
+    background-attachment: fixed;
+}
+
+/* ---- Shared glass surface --------------------------------------------- */
+html body:not(.x) .top-nav,
+html body:not(.x) .panel {
+    background: var(--g-glass);
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+    border: 1px solid var(--g-edge);
+    border-radius: var(--g-radius);
+    box-shadow: var(--g-shadow);
+}
+
+/* ---- Top bar ------------------------------------------------------------ */
+html body:not(.x) .top-nav {
+    padding: 0 10px;
+}
+html body:not(.x) .top-nav .title {
+    font-weight: 600;
+    font-size: 1.05em;
+    letter-spacing: -0.01em;
+    color: var(--g-text);
+}
+html body:not(.x) .top-nav .title .material-symbols-outlined {
+    color: #fff;
+    background: var(--g-accent-grad);
+    border-radius: 9px;
+    padding: 4px;
+    font-size: 20px;
+    box-shadow: 0 4px 12px var(--g-accent-ring);
+}
+html body:not(.x) .top-nav .nav-icons { gap: 4px; }
+html body:not(.x) .top-nav .nav-icons > .material-symbols-outlined {
+    font-size: 22px;
+    width: 36px;
+    height: 36px;
+    margin: 0 !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    box-sizing: border-box;
+    color: var(--g-text-2);
+}
+html body:not(.x) .top-nav .nav-icons > .material-symbols-outlined:hover {
+    background: var(--g-hover);
+    color: var(--g-text);
+    transform: none;
+}
+html body:not(.x) .top-nav .nav-icons a { color: inherit; text-decoration: none; }
+html body:not(.x) .export-button { color: var(--g-accent) !important; }
+html body:not(.x) .hamburger-menu { color: var(--g-text-2); margin-right: 6px; }
+html body:not(.x) .hamburger-menu:hover { background: var(--g-hover); color: var(--g-text); }
+
+/* ---- Panels ------------------------------------------------------------- */
+html body:not(.x) .panel {
+    height: auto;
+    min-height: 0;
+    padding: 14px;
+    gap: 12px;
+}
+html body:not(.x) .left-panel,
+html body:not(.x) .center-panel,
+html body:not(.x) .right-panel { background: var(--g-glass); }
+
+/* Left panel collapsing: keep working with the glass border/gap */
+html body.left-panel-collapsed { column-gap: 0; }
+html body.left-panel-collapsed .center-panel { margin-left: 0; }
+html body.left-panel-collapsed .left-panel {
+    border-width: 0;
+    padding: 0;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+html body.left-panel-collapsed .center-panel { margin-right: 12px; }
+
+/* ---- Sections (details/summary) ---------------------------------------- */
+html body:not(.x) details,
+html body:not(.x) .left-panel details,
+html body:not(.x) .center-panel details,
+html body:not(.x) .right-panel details {
+    background: var(--g-inner);
+    border: 1px solid var(--g-line);
+    border-radius: 14px;
+    box-shadow: none;
+    margin-bottom: 0;
+    overflow: hidden;
+    transition: background 0.25s ease, border-color 0.25s ease;
+}
+html body:not(.x) details:hover,
+html body:not(.x) details[open] { box-shadow: none; }
+
+html body:not(.x) details > summary,
+html body:not(.x) .left-panel details > summary {
+    background: transparent;
+    border-radius: 0;
+    height: 42px;
+    padding: 0 14px;
+    font-size: 0.93em;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    color: var(--g-text);
+}
+html body:not(.x) details > summary:hover { background: var(--g-hover); }
+html body:not(.x) details[open] > summary {
+    background: transparent;
+    border-bottom: 1px solid var(--g-line);
+}
+html body:not(.x) details > summary > .material-symbols-outlined,
+html body:not(.x) details > summary .summary-main-content .material-symbols-outlined {
+    font-size: 20px;
+    color: var(--g-accent);
+}
+
+/* Collapsed section: soft accent pill instead of heavy solid block */
+html body:not(.x) details:not([open]) {
+    background: var(--g-accent-soft);
+    border-color: var(--g-accent-ring);
+}
+html body:not(.x) details:not([open]) > summary { color: var(--g-text); }
+html body:not(.x) details:not([open]) .material-symbols-outlined { color: var(--g-accent); }
+
+html body:not(.x) .details-content { padding-left: 14px; padding-right: 14px; }
+
+/* ---- Labels, fields ----------------------------------------------------- */
+html body:not(.x) label {
+    color: var(--g-text-2);
+    font-size: 0.78em;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+html body:not(.x) .checkbox-control label,
+html body:not(.x) .coord-control label { text-transform: none; font-size: 0.9em; letter-spacing: 0; }
+
+html body:not(.x) input[type="text"],
+html body:not(.x) input[type="number"],
+html body:not(.x) select,
+html body:not(.x) textarea {
+    background-color: var(--g-field);
+    color: var(--g-text);
+    border: 1px solid var(--g-line);
+    border-radius: var(--g-radius-sm);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    padding: 9px 12px;
+    font-family: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+html body:not(.x) input::placeholder,
+html body:not(.x) textarea::placeholder { color: var(--g-text-2); opacity: 0.55; }
+html body:not(.x) input[type="text"]:focus,
+html body:not(.x) input[type="number"]:focus,
+html body:not(.x) select:focus,
+html body:not(.x) textarea:focus {
+    border-color: var(--g-accent);
+    box-shadow: 0 0 0 3px var(--g-accent-ring);
+    outline: none;
+}
+html body:not(.x) select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: var(--g-chevron);
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+    cursor: pointer;
+}
+html body.dark-mode select option { background: #14162b; color: #fff; }
+html body:not(.x) textarea#configCustomFonts,
+html body:not(.x) textarea#configColors { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 0.85em; }
+
+html body:not(.x) input[type="color"] {
+    background: var(--g-field);
+    border: 1px solid var(--g-line);
+    border-radius: var(--g-radius-sm);
+    padding: 3px;
+    cursor: pointer;
+}
+html body:not(.x) input[type="checkbox"] { accent-color: var(--g-accent); }
+
+/* Range sliders */
+html body:not(.x) input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    accent-color: var(--g-accent);
+    height: 18px !important;
+    cursor: pointer;
+}
+html body:not(.x) input[type="range"]::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 99px;
+    background: var(--g-line);
+}
+html body:not(.x) input[type="range"]::-moz-range-track {
+    height: 4px;
+    border-radius: 99px;
+    background: var(--g-line);
+}
+html body:not(.x) input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    margin-top: -6px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid var(--g-accent);
+    box-shadow: 0 2px 8px var(--g-accent-ring);
+    transition: transform 0.15s ease;
+}
+html body:not(.x) input[type="range"]::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid var(--g-accent);
+    box-shadow: 0 2px 8px var(--g-accent-ring);
+}
+html body:not(.x) input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.15); }
+
+/* ---- Buttons ------------------------------------------------------------ */
+/* :where() keeps specificity at 0 so class-specific button styles still win */
+:where(html body) button {
+    background: var(--g-accent-grad);
+    color: #fff;
+    border-radius: var(--g-radius-sm);
+    text-transform: none;
+    letter-spacing: 0;
+    font-family: inherit;
+    font-weight: 600;
+    padding: 7px 14px;
+    box-shadow: 0 4px 14px var(--g-accent-ring);
+    transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease, background 0.2s ease;
+}
+:where(html body) button:hover {
+    background: var(--g-accent-grad);
+    filter: brightness(1.08);
+    box-shadow: 0 6px 20px var(--g-accent-ring);
+}
+
+/* Secondary / "ghost glass" buttons */
+html body:not(.x) .add-elements-container button,
+html body:not(.x) .code-actions-container button,
+html body:not(.x) .popup-add-elements button,
+html body:not(.x) .info-actions button.secondary,
+html body:not(.x) #copyCodeBtn,
+html body:not(.x) #copyFontCodeBtn {
+    background: var(--g-field);
+    color: var(--g-text);
+    border: 1px solid var(--g-line);
+    box-shadow: none;
+    text-transform: none;
+    border-radius: var(--g-radius-sm);
+}
+html body:not(.x) .add-elements-container button:hover,
+html body:not(.x) .code-actions-container button:hover,
+html body:not(.x) .popup-add-elements button:hover,
+html body:not(.x) .info-actions button.secondary:hover,
+html body:not(.x) #copyCodeBtn:hover,
+html body:not(.x) #copyFontCodeBtn:hover {
+    background: var(--g-accent-grad);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 6px 18px var(--g-accent-ring);
+}
+html body:not(.x) .add-elements-container { gap: 6px; }
+html body:not(.x) .add-elements-container button { min-width: calc(33.33% - 6px); justify-content: center; }
+html body:not(.x) .add-elements-container button .material-symbols-outlined,
+html body:not(.x) .popup-add-elements button .material-symbols-outlined { color: inherit; }
+
+/* Primary actions */
+html body:not(.x) #generateCodeBtn,
+html body:not(.x) #generateFontCodeBtn {
+    background: var(--g-accent-grad);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 4px 14px var(--g-accent-ring);
+}
+html body:not(.x) #copyCodeBtn.success,
+html body:not(.x) #copyFontCodeBtn.success {
+    background: linear-gradient(135deg, #10b981, #34d399);
+    color: #fff;
+    border-color: transparent;
+}
+
+/* Small round icon buttons */
+html body:not(.x) #toggleConfigBtn {
+    background: var(--g-hover);
+    color: var(--g-text-2);
+    box-shadow: none;
+    padding: 0;
+}
+html body:not(.x) #toggleConfigBtn:hover { background: var(--g-accent-soft); color: var(--g-accent); filter: none; box-shadow: none; }
+html body:not(.x) .scale-button { color: var(--g-text-2); background: none; box-shadow: none; filter: none; }
+html body:not(.x) .scale-button:hover { color: var(--g-accent); background: none; box-shadow: none; }
+
+/* ---- Element list ------------------------------------------------------- */
+html body:not(.x) #elementList,
+html body:not(.x) .popup-element-list {
+    border: none;
+    border-radius: 0;
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+html body:not(.x) #elementList li,
+html body:not(.x) .popup-element-list li {
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 6px 8px;
+    min-height: 34px;
+    color: var(--g-text);
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+html body:not(.x) #elementList li:hover,
+html body:not(.x) .popup-element-list li:hover { background: var(--g-hover); }
+html body:not(.x) #elementList li.selected,
+html body:not(.x) .popup-element-list li.selected {
+    background: var(--g-accent-soft);
+    border-color: var(--g-accent-ring);
+    font-weight: 600;
+}
+html body:not(.x) #elementList li.drag-over { border-top: 2px solid var(--g-accent); }
+html body:not(.x) .element-label .material-symbols-outlined { color: var(--g-text-2); }
+html body:not(.x) #elementList li.selected .element-label .material-symbols-outlined,
+html body:not(.x) .popup-element-list li.selected .element-label .material-symbols-outlined { color: var(--g-accent); }
+html body:not(.x) .element-controls button {
+    background: none;
+    color: var(--g-text-2);
+    box-shadow: none;
+    border-radius: 8px;
+    opacity: 0.55;
+}
+html body:not(.x) li:hover .element-controls button { opacity: 1; }
+html body:not(.x) .element-controls button:hover {
+    background: rgba(239, 68, 68, 0.14);
+    color: #ef4444;
+    filter: none;
+    box-shadow: none;
+}
+
+/* ---- Preview: device bezel --------------------------------------------- */
+html body:not(.x) #screenPreview {
+    border: 2px solid rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+    margin: 22px auto;
+    background-color: var(--md-canvas-background, #000);
+    box-shadow:
+        0 0 0 7px #0d0e18,
+        0 0 0 8px rgba(255, 255, 255, 0.16),
+        0 24px 60px rgba(30, 30, 90, 0.4),
+        0 0 80px var(--g-accent-ring);
+}
+
+/* ---- Code output -------------------------------------------------------- */
+html body:not(.x) .code-output {
+    background: rgba(9, 11, 24, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+html body:not(.x) .code-output textarea {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: #c8d0f0;
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 12.5px;
+}
+html body:not(.x) .code-output textarea:focus { box-shadow: none; }
+html body:not(.x) .code-note { color: var(--g-text-2); }
+
+/* ---- Icon suggestions dropdown ----------------------------------------- */
+html body:not(.x) #iconSuggestions {
+    background: var(--g-glass-strong);
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+    border: 1px solid var(--g-edge);
+    border-radius: 12px;
+    box-shadow: 0 16px 40px rgba(20, 20, 70, 0.22);
+    padding: 4px;
+}
+html body:not(.x) #iconSuggestions div { border-radius: 8px; color: var(--g-text); }
+html body:not(.x) #iconSuggestions div:hover { background: var(--g-hover); }
+
+/* ---- Info overlay ------------------------------------------------------- */
+html body:not(.x) .info-overlay {
+    background: rgba(10, 12, 30, 0.35);
+    -webkit-backdrop-filter: blur(10px) saturate(130%);
+    backdrop-filter: blur(10px) saturate(130%);
+}
+html body:not(.x) .info-content {
+    background: var(--g-glass-strong);
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+    border: 1px solid var(--g-edge);
+    border-radius: 22px;
+    box-shadow: 0 30px 80px rgba(10, 10, 50, 0.35);
+    color: var(--g-text);
+    padding: 22px;
+}
+html body:not(.x) .info-content h2 { color: var(--g-text); font-weight: 650; }
+html body:not(.x) .info-content h2 .material-symbols-outlined { color: var(--g-accent); }
+html body:not(.x) .info-body h3 { color: var(--g-text); font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.06em; }
+html body:not(.x) .info-body ul li { color: var(--g-text-2); }
+html body:not(.x) .info-body ul li::before { background: var(--g-accent-grad); }
+html body:not(.x) .info-actions { border-top-color: var(--g-line); }
+
+/* ---- FAB + elements popup ---------------------------------------------- */
+html body:not(.x) .fab {
+    background: var(--g-accent-grad);
+    color: #fff;
+    box-shadow: 0 10px 28px var(--g-accent-ring);
+}
+html body:not(.x) .elements-popup {
+    background: var(--g-glass-strong);
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+    border: 1px solid var(--g-edge);
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(10, 10, 50, 0.3);
+}
+html body:not(.x) .elements-popup-header {
+    background: transparent;
+    border-bottom: 1px solid var(--g-line);
+}
+html body:not(.x) .elements-popup-header h3 { color: var(--g-text); }
+html body:not(.x) .elements-popup-header .close-popup-btn {
+    background: none;
+    color: var(--g-text-2);
+    box-shadow: none;
+}
+html body:not(.x) .elements-popup-header .close-popup-btn:hover { background: var(--g-hover); color: var(--g-text); filter: none; }
+
+/* ---- Links, misc text --------------------------------------------------- */
+html body:not(.x) a { color: var(--g-accent); text-decoration-color: var(--g-accent-ring); }
+html body:not(.x) #editor-placeholder { color: var(--g-text-2); font-size: 0.9em; padding: 6px 0; }
+html body:not(.x) .slider-value { color: var(--g-text-2); font-variant-numeric: tabular-nums; }
+
+/* ---- Scrollbars --------------------------------------------------------- */
+html body:not(.x) * { scrollbar-width: thin; scrollbar-color: rgba(128, 132, 190, 0.4) transparent; }
+html body:not(.x) *::-webkit-scrollbar { width: 8px; height: 8px; }
+html body:not(.x) *::-webkit-scrollbar-track { background: transparent; }
+html body:not(.x) *::-webkit-scrollbar-thumb {
+    background: rgba(128, 132, 190, 0.38);
+    border-radius: 99px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+html body:not(.x) *::-webkit-scrollbar-thumb:hover { background: rgba(128, 132, 190, 0.6); background-clip: padding-box; }
+
+/* ---- Fallback when backdrop-filter is unsupported ----------------------- */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    html body:not(.x) { --g-glass: rgba(255, 255, 255, 0.9); --g-glass-strong: rgba(255, 255, 255, 0.97); }
+    html body.dark-mode { --g-glass: rgba(24, 27, 52, 0.94); --g-glass-strong: rgba(22, 25, 48, 0.98); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body:not(.x) * { transition: none !important; }
+}
+
+
+/* ==========================================================================
+   v2 additions: expanded viewport, floating code pills, E-Ink, border, options
+   ========================================================================== */
+
+/* ---- Bigger viewport: preview takes the whole right panel -------------- */
+html body:not(.x) { --left-panel-width: 300px; --center-panel-width: 340px; }
+html body:not(.x) .right-panel { overflow: hidden; }
+html body:not(.x) #previewSection {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+html body:not(.x) #previewSection > .details-content {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+}
+html body:not(.x) #previewSection > .details-content > p { font-size: 0.75em; text-align: center; max-width: 560px; opacity: 0.8; }
+
+/* ---- E-Ink screen ------------------------------------------------------- */
+html body:not(.x) #screenPreview.eink {
+    background-color: #fff;
+    border-color: rgba(0, 0, 0, 0.18);
+    box-shadow:
+        0 0 0 7px #d9d8d2,
+        0 0 0 8px rgba(0, 0, 0, 0.22),
+        0 24px 60px rgba(30, 30, 60, 0.28);
+}
+
+/* ---- Display options (E-Ink + border) ---------------------------------- */
+html body:not(.x) .display-options {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 12px 0 4px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: var(--g-field);
+    border: 1px solid var(--g-line);
+}
+html body:not(.x) .opt-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+html body:not(.x) .opt-text { display: flex; flex-direction: column; line-height: 1.25; }
+html body:not(.x) .opt-title { font-weight: 600; font-size: 0.9em; color: var(--g-text); }
+html body:not(.x) .opt-sub { font-size: 0.75em; color: var(--g-text-2); }
+html body:not(.x) input.opt-number { width: 72px; margin: 0; text-align: right; }
+html body:not(.x) .custom-size-title {
+    margin-top: 10px;
+    font-size: 0.78em;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--g-text-2);
+}
+html body:not(.x) label.switch {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 24px;
+    margin: 0;
+    flex: none;
+}
+html body:not(.x) label.switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+html body:not(.x) .slider-track {
+    position: absolute;
+    inset: 0;
+    border-radius: 99px;
+    background: var(--g-line);
+    border: 1px solid var(--g-line);
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+html body:not(.x) .slider-track::before {
+    content: "";
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease;
+}
+html body:not(.x) label.switch input:checked + .slider-track { background: var(--g-accent-grad); border-color: transparent; }
+html body:not(.x) label.switch input:checked + .slider-track::before { transform: translateX(18px); }
+html body:not(.x) label.switch input:focus-visible + .slider-track { box-shadow: 0 0 0 3px var(--g-accent-ring); }
+
+/* ---- Floating pills (bottom-right) ------------------------------------- */
+.pill-dock {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 120;
+    display: flex;
+    gap: 10px;
+}
+html body:not(.x) .pill-btn {
+    height: 46px;
+    padding: 0 20px 0 16px;
+    margin: 0;
+    border-radius: 999px;
+    gap: 8px;
+    font-size: 0.9em;
+    font-weight: 600;
+    color: var(--g-text);
+    background: var(--g-glass-strong);
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+    border: 1px solid var(--g-edge);
+    box-shadow: 0 10px 30px rgba(30, 30, 90, 0.25);
+}
+html body:not(.x) .pill-btn:hover { background: var(--g-glass-strong); filter: none; transform: translateY(-2px); box-shadow: 0 14px 36px rgba(30, 30, 90, 0.3); }
+html body:not(.x) .pill-btn .material-symbols-outlined { font-size: 20px; color: var(--g-accent); }
+html body:not(.x) .pill-btn.primary {
+    background: var(--g-accent-grad);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 12px 32px var(--g-accent-ring);
+}
+html body:not(.x) .pill-btn.primary:hover { background: var(--g-accent-grad); filter: brightness(1.08); }
+html body:not(.x) .pill-btn.primary .material-symbols-outlined { color: #fff; }
+html body:not(.x) .pill-btn.active { outline: 2px solid var(--g-accent); outline-offset: 2px; }
+
+/* ---- Code drawer (floats above the pills) ------------------------------ */
+.code-drawer {
+    position: fixed;
+    right: 24px;
+    bottom: 84px;
+    width: min(520px, calc(100vw - 48px));
+    max-height: min(72vh, 680px);
+    z-index: 119;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+}
+.code-drawer.visible { display: flex; animation: drawerIn 0.22s ease; }
+@keyframes drawerIn { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
+html body:not(.x) .code-drawer {
+    background: var(--g-glass-strong);
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+    border: 1px solid var(--g-edge);
+    border-radius: 20px;
+    box-shadow: 0 28px 70px rgba(10, 10, 50, 0.35);
+}
+.code-drawer-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 12px 12px 16px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--g-line);
+}
+.code-drawer-head .material-symbols-outlined { color: var(--g-accent); font-size: 20px; }
+html body:not(.x) .code-drawer-head > span:nth-child(2) { color: var(--g-text); flex: 1; }
+html body:not(.x) .drawer-close {
+    background: none;
+    color: var(--g-text-2);
+    box-shadow: none;
+    width: 32px; height: 32px;
+    padding: 0; margin: 0;
+    border-radius: 50%;
+    justify-content: center;
+}
+html body:not(.x) .drawer-close:hover { background: var(--g-hover); color: var(--g-text); filter: none; box-shadow: none; }
+html body:not(.x) .drawer-close .material-symbols-outlined { color: inherit; }
+.code-drawer-body { padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+html body:not(.x) .code-drawer details { background: transparent; border-color: var(--g-line); }
+html body:not(.x) .code-drawer .code-output textarea { min-height: 220px; }
+
+@media (max-width: 760px) {
+    .pill-dock { right: 12px; bottom: 12px; }
+    .code-drawer { right: 12px; bottom: 70px; width: calc(100vw - 24px); }
+    html body:not(.x) .pill-btn { padding: 0 14px 0 12px; }
+}
+
+
+/* ==========================================================================
+   v3: scrollable config, guided setup workflow, first-time hint
+   ========================================================================== */
+
+/* Left panel scrolls (style.css had overflow:hidden for the collapse animation) */
+html body:not(.x) .left-panel { overflow-y: auto; overflow-x: hidden; }
+html body.left-panel-collapsed:not(.x) .left-panel { overflow: hidden; }
+html body:not(.x) .left-panel > details { flex-shrink: 0; }
+html body:not(.x) .left-panel details > .details-content { overflow: visible; }
+
+/* Locked Elements panel until config is confirmed */
+html body:not(.x) details.workflow-locked { display: none; }
+
+/* Confirm row */
+html body:not(.x) .config-confirm { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+html body:not(.x) .config-confirm button {
+    width: 100%;
+    margin: 0;
+    height: 42px;
+    justify-content: center;
+    font-size: 0.95em;
+}
+html body:not(.x) .config-error { min-height: 0; color: #ef4444; font-size: 0.82em; font-weight: 500; }
+html body:not(.x) .config-error:empty { display: none; }
+html body:not(.x) #confirmConfigBtn.pulse { animation: confirmPulse 1.6s ease-in-out infinite; }
+html body:not(.x) #confirmConfigBtn.shake { animation: shake 0.4s ease; }
+@keyframes confirmPulse {
+    0%, 100% { box-shadow: 0 4px 14px var(--g-accent-ring), 0 0 0 0 var(--g-accent-ring); }
+    50%      { box-shadow: 0 4px 14px var(--g-accent-ring), 0 0 0 8px transparent; }
+}
+@keyframes shake { 0%,100% { transform: none; } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+/* First-time hint bubble pointing at the resolution select */
+html body:not(.x) .first-hint {
+    position: relative;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin: 4px 0 14px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 0.84em;
+    line-height: 1.4;
+    color: var(--g-text);
+    background: var(--g-accent-soft);
+    border: 1px solid var(--g-accent-ring);
+}
+html body:not(.x) .first-hint[hidden] { display: none; }
+html body:not(.x) .first-hint .material-symbols-outlined { color: var(--g-accent); font-size: 20px; flex: none; animation: nudge 1.2s ease-in-out infinite; }
+html body:not(.x) .first-hint.first-time { box-shadow: 0 0 0 0 var(--g-accent-ring); animation: hintGlow 2s ease-in-out 3; }
+@keyframes nudge { 0%,100% { transform: translateY(-2px); } 50% { transform: translateY(3px); } }
+@keyframes hintGlow { 0%,100% { box-shadow: 0 0 0 0 var(--g-accent-ring); } 50% { box-shadow: 0 0 0 6px transparent; } }
+
+
+/* ==========================================================================
+   v4: custom-size reveal, floating icon search, full-height Properties
+   ========================================================================== */
+html body:not(.x) #customSizeBox[hidden] { display: none; }
+
+/* Icon suggestions now live on <body>: sit above every panel */
+html body:not(.x) #iconSuggestions { z-index: 5000; overflow-y: auto; }
+
+/* Properties panel: fill the column height and scroll inside */
+html body:not(.x) .center-panel { overflow: hidden; }
+html body:not(.x) #editorDetails { overflow: visible; }
+html body:not(.x) #editorDetails[open] > .details-content {
+    height: calc(100vh - 168px);
+    height: calc(100dvh - 168px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 24px;
+}
+
+
+/* ==========================================================================
+   v5: Visual Color ID creator
+   ========================================================================== */
+html body:not(.x) .palette-creator {
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 12px;
+    background: var(--g-field);
+    border: 1px solid var(--g-line);
+}
+html body:not(.x) .palette-creator .custom-size-title { margin-top: 0; margin-bottom: 8px; }
+html body:not(.x) .palette-add { display: flex; gap: 8px; align-items: center; }
+html body:not(.x) .palette-add input[type="color"] { width: 42px; height: 38px; flex: none; margin: 0; padding: 3px; }
+html body:not(.x) .palette-add input[type="text"] { flex: 1; margin: 0; min-width: 0; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.85em; }
+html body:not(.x) .palette-add button { margin: 0; height: 38px; padding: 0 12px; flex: none; }
+html body:not(.x) .palette-hexline { display: flex; justify-content: space-between; gap: 8px; margin: 6px 2px 8px; font-size: 0.78em; color: var(--g-text-2); font-family: ui-monospace, Menlo, Consolas, monospace; }
+html body:not(.x) .palette-msg.bad { color: #ef4444; }
+html body:not(.x) .palette-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 6px; }
+html body:not(.x) .palette-empty { grid-column: 1 / -1; font-size: 0.8em; color: var(--g-text-2); padding: 4px 2px; }
+html body:not(.x) .palette-chip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 6px 6px 8px;
+    border-radius: 10px;
+    background: var(--g-inner);
+    border: 1px solid var(--g-line);
+}
+html body:not(.x) .palette-swatch { width: 24px; height: 24px; border-radius: 7px; flex: none; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(128,128,128,0.35); }
+html body:not(.x) .palette-meta { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1.2; }
+html body:not(.x) .palette-meta b { font-size: 0.78em; font-weight: 600; color: var(--g-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: ui-monospace, Menlo, Consolas, monospace; }
+html body:not(.x) .palette-meta i { font-size: 0.7em; font-style: normal; color: var(--g-text-2); font-family: ui-monospace, Menlo, Consolas, monospace; }
+html body:not(.x) .palette-del { width: 24px; height: 24px; padding: 0; margin: 0; flex: none; justify-content: center; background: none; box-shadow: none; color: var(--g-text-2); border-radius: 7px; }
+html body:not(.x) .palette-del:hover { background: rgba(239,68,68,0.14); color: #ef4444; filter: none; box-shadow: none; }
+html body:not(.x) .palette-del .material-symbols-outlined { font-size: 16px; color: inherit; }
+html body:not(.x) .palette-convert {
+    width: 100%; margin: 10px 0 0; height: 36px; justify-content: center; font-size: 0.85em;
+    background: var(--g-inner); color: var(--g-text); border: 1px solid var(--g-line); box-shadow: none;
+}
+html body:not(.x) .palette-convert:hover { background: var(--g-accent-grad); color: #fff; border-color: transparent; box-shadow: 0 6px 18px var(--g-accent-ring); }
+html body:not(.x) .palette-convert .material-symbols-outlined { font-size: 18px; color: inherit; }
+
+/* Color-code buttons share the code-action look */
+html body:not(.x) #generateColorCodeBtn { background: var(--g-accent-grad); color: #fff; border-color: transparent; box-shadow: 0 4px 14px var(--g-accent-ring); }
+html body:not(.x) #copyColorCodeBtn { background: var(--g-field); color: var(--g-text); border: 1px solid var(--g-line); box-shadow: none; }
+html body:not(.x) #copyColorCodeBtn:hover { background: var(--g-accent-grad); color: #fff; border-color: transparent; }
+html body:not(.x) #copyColorCodeBtn.success { background: linear-gradient(135deg, #10b981, #34d399); color: #fff; border-color: transparent; }
+
+
+/* ==========================================================================
+   v7: Settings button + popover (pin / unpin Config panel)
+   ========================================================================== */
+
+/* Floating settings button (bottom-left) */
+html body:not(.x) .settings-fab {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    z-index: 121;
+    width: 48px;
+    height: 48px;
+    margin: 0;
+    padding: 0;
+    border-radius: 50%;
+    justify-content: center;
+    color: var(--g-text);
+    background: var(--g-glass-strong);
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+    border: 1px solid var(--g-edge);
+    box-shadow: 0 10px 30px rgba(30, 30, 90, 0.25);
+}
+html body:not(.x) .settings-fab:hover { background: var(--g-glass-strong); filter: none; transform: translateY(-2px); box-shadow: 0 14px 36px rgba(30, 30, 90, 0.3); }
+html body:not(.x) .settings-fab .material-symbols-outlined { font-size: 24px; color: var(--g-accent); transition: transform 0.4s ease; }
+html body:not(.x) .settings-fab:hover .material-symbols-outlined,
+html body:not(.x) .settings-fab.active .material-symbols-outlined { transform: rotate(60deg); }
+html body:not(.x) .settings-fab.active { outline: 2px solid var(--g-accent); outline-offset: 2px; }
+
+/* The existing "Elements" FAB/popup moves up so they don't collide */
+html body:not(.x) .fab.elements-fab { bottom: 84px; }
+html body:not(.x) .elements-popup { bottom: 150px; }
+
+/* Popover */
+.settings-popover {
+    position: fixed;
+    left: 24px;
+    bottom: 84px;
+    width: min(840px, calc(100vw - 48px));
+    max-height: calc(100vh - 116px);
+    max-height: calc(100dvh - 116px);
+    z-index: 122;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+}
+.settings-popover.visible { display: flex; animation: popIn 0.22s ease; transform-origin: bottom left; }
+@keyframes popIn { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: none; } }
+html body:not(.x) .settings-popover {
+    background: var(--g-glass-strong);
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+    border: 1px solid var(--g-edge);
+    border-radius: 22px;
+    box-shadow: 0 30px 80px rgba(10, 10, 50, 0.38);
+}
+.settings-head { display: flex; align-items: center; gap: 10px; padding: 14px 14px 14px 20px; border-bottom: 1px solid var(--g-line); }
+.settings-head > .material-symbols-outlined { color: var(--g-accent); font-size: 22px; }
+html body:not(.x) .settings-title { flex: 1; font-weight: 650; font-size: 1.05em; color: var(--g-text); }
+.settings-body { overflow-y: auto; padding: 4px 6px 8px; }
+
+/* Pin buttons */
+html body:not(.x) .pin-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 32px; padding: 0 12px; margin: 0;
+    border-radius: 999px;
+    font-size: 0.82em; font-weight: 600;
+    color: var(--g-text-2);
+    background: var(--g-field);
+    border: 1px solid var(--g-line);
+    box-shadow: none;
+}
+html body:not(.x) .pin-btn:hover { background: var(--g-hover); color: var(--g-text); filter: none; box-shadow: none; }
+html body:not(.x) .pin-btn .material-symbols-outlined { font-size: 18px; color: inherit; }
+html body:not(.x) .pin-btn.is-pinned { color: var(--g-accent); background: var(--g-accent-soft); border-color: var(--g-accent-ring); }
+html body:not(.x) .pin-btn.is-pinned .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+/* small round pin in the sidebar header */
+html body:not(.x) #pinConfigBtnSide { width: 28px; height: 28px; padding: 0; margin-left: auto; border-radius: 50%; justify-content: center; border: none; background: var(--g-accent-soft); }
+html body:not(.x) #pinConfigBtnSide + #toggleConfigBtn { margin-left: 4px; }
+
+/* Config panel when hosted in the popover: no card chrome, two columns */
+html body:not(.x) details#configDetailsElement.in-popover { border: none; background: transparent; margin: 0; border-radius: 0; }
+html body:not(.x) details#configDetailsElement.in-popover > summary { display: none; }
+html body:not(.x) details#configDetailsElement.in-popover > .details-content { padding: 14px 14px 18px; opacity: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; }
+html body:not(.x) details#configDetailsElement.in-popover .cfg-group { min-width: 0; }
+html body:not(.x) details#configDetailsElement.in-popover .config-confirm { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: flex-end; }
+html body:not(.x) details#configDetailsElement.in-popover .config-confirm button { width: auto; padding: 0 22px; }
+html body:not(.x) details#configDetailsElement.in-popover .config-error { flex: 1; }
+html body:not(.x) details#configDetailsElement.in-popover textarea { min-height: 92px; }
+
+/* section headings (visible only in the popover) */
+.cfg-heading { display: none; }
+html body:not(.x) .in-popover .cfg-heading {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 10px; padding-bottom: 8px;
+    font-weight: 650; font-size: 0.95em; color: var(--g-text);
+    border-bottom: 1px solid var(--g-line);
+}
+html body:not(.x) .in-popover .cfg-heading .material-symbols-outlined { font-size: 18px; color: var(--g-accent); }
+
+/* sidebar: brief highlight when the settings button reveals it */
+html body:not(.x) details#configDetailsElement.flash { animation: cfgFlash 1.2s ease; }
+@keyframes cfgFlash { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 30% { box-shadow: 0 0 0 4px var(--g-accent-ring); } }
+
+@media (max-width: 760px) {
+    html body:not(.x) details#configDetailsElement.in-popover > .details-content { grid-template-columns: 1fr; }
+    .settings-popover { left: 12px; width: calc(100vw - 24px); }
+    html body:not(.x) .settings-fab { left: 12px; bottom: 12px; }
+}
+
+
+/* ==========================================================================
+   v8: Config defaults to the popover; sidebar empty state; larger window
+   ========================================================================== */
+.settings-popover { width: min(920px, calc(100vw - 48px)); }
+
+.left-empty { display: none; }
+html body:not(.x) .left-panel:has(> details.workflow-locked):not(:has(> #configDetailsElement)) .left-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+    padding: 28px 12px;
+    color: var(--g-text-2);
+}
+html body:not(.x) .left-empty > .material-symbols-outlined { font-size: 34px; color: var(--g-accent); }
+html body:not(.x) .left-empty p { margin: 0 0 6px; font-size: 0.9em; line-height: 1.45; }
+html body:not(.x) .left-empty b { color: var(--g-text); }
+html body:not(.x) .left-empty button { margin: 0; }
+
+
+/* ==========================================================================
+   v9: Settings popover — single column, scrollable body
+   ========================================================================== */
+.settings-popover { width: min(620px, calc(100vw - 48px)); }
+.settings-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+html body:not(.x) details#configDetailsElement.in-popover > .details-content {
+    grid-template-columns: 1fr;
+    gap: 22px;
+    overflow: visible;
+}
+/* keep Confirm reachable while scrolling */
+html body:not(.x) details#configDetailsElement.in-popover .config-confirm {
+    position: sticky;
+    bottom: -18px;
+    z-index: 2;
+    margin: 0 -14px -18px;
+    padding: 12px 14px 14px;
+    background: var(--g-glass-strong);
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+    border-top: 1px solid var(--g-line);
+}
+
+
+/* ==========================================================================
+   v10: layout tools — drag, snap, multi-select, align/center/spacing/match
+   ========================================================================== */
+.layout-overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
+html body:not(.x) #previewCanvas { cursor: default; }
+
+html body:not(.x) .layout-toolbar {
+    flex: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    padding: 8px 10px;
+    border-radius: 14px;
+    background: var(--g-inner);
+    border: 1px solid var(--g-line);
+}
+html body:not(.x) .lt-group { display: flex; align-items: center; gap: 3px; }
+html body:not(.x) .lt-group.disabled { opacity: 0.4; }
+html body:not(.x) .lt-sep { width: 1px; height: 22px; background: var(--g-line); }
+html body:not(.x) .lt-btn {
+    height: 32px; min-width: 32px; padding: 0 7px; margin: 0; gap: 4px;
+    justify-content: center;
+    border-radius: 9px;
+    font-size: 0.78em; font-weight: 600;
+    color: var(--g-text);
+    background: transparent;
+    border: 1px solid transparent;
+    box-shadow: none;
+}
+html body:not(.x) .lt-btn:hover:not(:disabled) { background: var(--g-hover); filter: none; box-shadow: none; transform: none; }
+html body:not(.x) .lt-btn:disabled { cursor: default; }
+html body:not(.x) .lt-btn .material-symbols-outlined { font-size: 19px; color: var(--g-text-2); }
+html body:not(.x) .lt-btn:hover:not(:disabled) .material-symbols-outlined { color: var(--g-accent); }
+html body:not(.x) .lt-btn.on { background: var(--g-accent-soft); border-color: var(--g-accent-ring); color: var(--g-accent); }
+html body:not(.x) .lt-btn.on .material-symbols-outlined { color: var(--g-accent); }
+html body:not(.x) select.lt-select { width: 70px; height: 32px; margin: 0; padding: 0 24px 0 8px; font-size: 0.8em; background-position: right 8px center; }
+html body:not(.x) input.lt-gap { width: 62px; height: 32px; margin: 0; padding: 0 8px; font-size: 0.8em; text-align: center; }
+html body:not(.x) .lt-info { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 0.75em; color: var(--g-text-2); }
+html body:not(.x) #ltMsg { color: var(--g-accent); font-weight: 600; }
+
+/* multi-selected rows in the element list */
+html body:not(.x) #elementList li.multi,
+html body:not(.x) .popup-element-list li.multi { background: var(--g-accent-soft); border-color: var(--g-accent-ring); }
+
+
+/* ==========================================================================
+   v11: High-resolution view
+   ========================================================================== */
+.hires-canvas { display: none; position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+html body:not(.x) #screenPreview.hires .hires-canvas { display: block; }
+html body:not(.x) #screenPreview.hires #previewCanvas { opacity: 0; }
+/* HD toggle in the Preview header, right-aligned next to the expand button */
+html body:not(.x) #previewSection > summary .scale-button { margin-left: 6px; }
+html body:not(.x) .hd-switch {
+    margin-left: auto;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 0.78em; font-weight: 700; letter-spacing: 0.04em;
+    color: var(--g-text-2);
+}
+html body:not(.x) .hd-switch.on { color: var(--g-accent); }
+html body:not(.x) .hd-track {
+    position: relative; display: inline-block; width: 38px; height: 22px;
+    border-radius: 99px; background: var(--g-line); border: 1px solid var(--g-line);
+    transition: background 0.2s ease;
+}
+html body:not(.x) .hd-track input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; z-index: 2; }
+html body:not(.x) .hd-knob {
+    position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%;
+    background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.3); transition: transform 0.2s ease; pointer-events: none;
+}
+html body:not(.x) .hd-switch.on .hd-track { background: var(--g-accent-grad); border-color: transparent; }
+html body:not(.x) .hd-switch.on .hd-knob { transform: translateX(16px); }
+html body:not(.x) .hd-track:has(input:focus-visible) { box-shadow: 0 0 0 3px var(--g-accent-ring); }
+
+
+/* ==========================================================================
+   v12: Elements panel fills the sidebar height; the list scrolls inside
+   ========================================================================== */
+html body:not(.x) #elementsDetails[open] > .details-content {
+    display: flex;
+    flex-direction: column;
+    height: max(260px, calc(100vh - 160px));
+    height: max(260px, calc(100dvh - 160px));
+    overflow: hidden;
+}
+/* when Config is also in the sidebar, leave room for its header */
+html body:not(.x) .left-panel:has(> #configDetailsElement) #elementsDetails[open] > .details-content {
+    height: max(260px, calc(100vh - 214px));
+    height: max(260px, calc(100dvh - 214px));
+}
+html body:not(.x) #elementsDetails > .details-content > .add-elements-container { flex: none; }
+html body:not(.x) #elementsDetails #elementList {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+}
+html body:not(.x) #elementsDetails > .details-content > p { flex: none; margin-top: 10px !important; padding-top: 0 !important; }
+
+
+/* ==========================================================================
+   v13: Clean redesign — split floating navbar, compact capsule dock,
+   simplified flat palette (one blue accent, no gradients)
+   ========================================================================== */
+
+/* ---- Simplified palette ------------------------------------------------ */
+html body:not(.x) {
+    --g-accent: #3d6df2;
+    --g-accent-2: #3d6df2;
+    --g-accent-grad: #3d6df2;            /* solid: every former gradient becomes flat blue */
+    --g-accent-soft: rgba(61, 109, 242, 0.10);
+    --g-accent-ring: rgba(61, 109, 242, 0.22);
+    --g-glass: rgba(255, 255, 255, 0.92);
+    --g-glass-strong: rgba(255, 255, 255, 0.97);
+    --g-inner: #f6f8fc;
+    --g-field: #ffffff;
+    --g-hover: rgba(30, 50, 100, 0.05);
+    --g-edge: rgba(30, 50, 100, 0.07);
+    --g-line: rgba(30, 50, 100, 0.09);
+    --g-text: #1c2333;
+    --g-text-2: #6b7487;
+    --g-shadow: 0 6px 24px rgba(31, 45, 90, 0.07);
+    --g-blur: blur(14px) saturate(140%);
+    background: #f4f6fb;
+}
+html body.dark-mode {
+    --g-accent: #6b93ff;
+    --g-accent-2: #6b93ff;
+    --g-accent-grad: #4b78f5;
+    --g-accent-soft: rgba(107, 147, 255, 0.14);
+    --g-accent-ring: rgba(107, 147, 255, 0.28);
+    --g-glass: rgba(24, 28, 38, 0.92);
+    --g-glass-strong: rgba(26, 30, 42, 0.97);
+    --g-inner: rgba(255, 255, 255, 0.04);
+    --g-field: rgba(255, 255, 255, 0.05);
+    --g-hover: rgba(255, 255, 255, 0.07);
+    --g-edge: rgba(255, 255, 255, 0.07);
+    --g-line: rgba(255, 255, 255, 0.09);
+    --g-text: rgba(255, 255, 255, 0.92);
+    --g-text-2: rgba(255, 255, 255, 0.55);
+    --g-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+    background: #0e1118;
+}
+html body:not(.x) .panel { border-radius: 22px; }
+html body:not(.x) details { border-radius: 16px; }
+/* flatter buttons: soft shadow only */
+:where(html body) button { box-shadow: 0 2px 8px var(--g-accent-ring); }
+
+/* ---- Split floating navbar --------------------------------------------- */
+html body:not(.x) .top-nav {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    padding: 0;
+    gap: 10px;
+    justify-content: flex-start;
+    align-items: center;
+}
+html body:not(.x) .nav-logo {
+    flex: none;
+    width: 46px; height: 46px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 15px;
+    background: var(--g-glass-strong);
+    border: 1px solid var(--g-edge);
+    box-shadow: var(--g-shadow);
+}
+html body:not(.x) .nav-logo img { width: 26px; height: 26px; object-fit: contain; border-radius: 6px; }
+html body:not(.x) .nav-left-section,
+html body:not(.x) .top-nav .nav-icons {
+    height: 46px;
+    box-sizing: border-box;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: var(--g-glass-strong);
+    border: 1px solid var(--g-edge);
+    box-shadow: var(--g-shadow);
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+}
+html body:not(.x) .nav-left-section { gap: 6px; padding-right: 18px; margin-right: auto; }
+html body:not(.x) .top-nav .nav-icons { gap: 2px; padding: 0 8px; }
+html body:not(.x) .hamburger-menu { width: 34px; height: 34px; margin-right: 0; }
+html body:not(.x) .hamburger-menu .material-symbols-outlined { font-size: 20px; }
+html body:not(.x) .top-nav .title { font-size: 0.98em; gap: 8px; padding-left: 10px; border-left: 1px solid var(--g-line); }
+html body:not(.x) .top-nav .title .material-symbols-outlined { box-shadow: none; padding: 4px; border-radius: 50%; font-size: 18px; }
+html body:not(.x) .top-nav .nav-icons > .material-symbols-outlined { width: 34px; height: 34px; font-size: 20px; }
+html body:not(.x) .export-button { width: 34px !important; height: 34px !important; padding: 0 !important; }
+html body:not(.x) .export-button .material-symbols-outlined { font-size: 20px; }
+
+/* ---- Compact floating capsule dock (bottom-right) ----------------------- */
+.pill-dock { right: 22px; bottom: 22px; gap: 2px; }
+html body:not(.x) .pill-dock {
+    padding: 4px;
+    border-radius: 999px;
+    background: var(--g-glass-strong);
+    border: 1px solid var(--g-edge);
+    box-shadow: 0 8px 26px rgba(31, 45, 90, 0.14);
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+}
+html body:not(.x) .pill-btn,
+html body:not(.x) .pill-btn.primary {
+    height: 34px;
+    padding: 0 14px 0 11px;
+    gap: 6px;
+    font-size: 0.8em;
+    font-weight: 600;
+    color: var(--g-text-2);
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    outline: none;
+}
+html body:not(.x) .pill-btn .material-symbols-outlined,
+html body:not(.x) .pill-btn.primary .material-symbols-outlined { font-size: 18px; color: inherit; }
+html body:not(.x) .pill-btn:hover,
+html body:not(.x) .pill-btn.primary:hover { background: var(--g-hover); color: var(--g-text); transform: none; filter: none; box-shadow: none; }
+html body:not(.x) .pill-btn.active,
+html body:not(.x) .pill-btn.active:hover {
+    background: var(--g-accent-grad);
+    color: #fff;
+    outline: none;
+    box-shadow: 0 3px 10px var(--g-accent-ring);
+}
+
+/* ---- Smaller settings button ------------------------------------------- */
+html body:not(.x) .settings-fab { left: 22px; bottom: 22px; width: 42px; height: 42px; box-shadow: 0 8px 22px rgba(31, 45, 90, 0.14); }
+html body:not(.x) .settings-fab .material-symbols-outlined { font-size: 21px; }
+html body:not(.x) .settings-fab.active { outline: none; background: var(--g-accent-grad); }
+html body:not(.x) .settings-fab.active .material-symbols-outlined { color: #fff; }
+html body:not(.x) .fab.elements-fab { bottom: 74px; left: 22px; width: 42px; height: 42px; }
+html body:not(.x) .fab.elements-fab .material-symbols-outlined { font-size: 22px; }
+html body:not(.x) .elements-popup { bottom: 126px; left: 22px; }
+.settings-popover { left: 22px; bottom: 74px; }
+.code-drawer { right: 22px; bottom: 74px; }
+
+/* ---- Calmer surfaces ---------------------------------------------------- */
+html body:not(.x) .panel,
+html body:not(.x) .settings-popover,
+html body:not(.x) .code-drawer,
+html body:not(.x) .elements-popup,
+html body:not(.x) .info-content { box-shadow: var(--g-shadow); }
+html body:not(.x) details:not([open]) { background: var(--g-inner); border-color: var(--g-line); }
+html body:not(.x) details:not([open]) > summary { color: var(--g-text); }
+html body:not(.x) details:not([open]) .material-symbols-outlined { color: var(--g-accent); }
+html body:not(.x) #screenPreview {
+    box-shadow: 0 0 0 7px #101421, 0 0 0 8px rgba(255,255,255,0.14), 0 18px 40px rgba(31, 45, 90, 0.22);
+}
+html body:not(.x) #screenPreview.eink {
+    box-shadow: 0 0 0 7px #d9d8d2, 0 0 0 8px rgba(0,0,0,0.2), 0 18px 40px rgba(31, 45, 90, 0.18);
+}
+html body:not(.x) .info-overlay { background: rgba(20, 28, 50, 0.3); }
+html body:not(.x) .first-hint.first-time { animation: none; }
+
+@media (max-width: 760px) {
+    .pill-dock { right: 10px; bottom: 10px; }
+    html body:not(.x) .pill-btn { padding: 0 10px 0 8px; }
+    html body:not(.x) .pill-btn { font-size: 0; gap: 0; }
+    html body:not(.x) .pill-btn .material-symbols-outlined { font-size: 20px; }
+    .settings-popover, .code-drawer { left: 10px; right: 10px; width: auto; bottom: 64px; }
+    html body:not(.x) .settings-fab { left: 10px; bottom: 10px; }
+}
