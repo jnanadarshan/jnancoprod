@@ -160,10 +160,15 @@ body.dark-mode details:not([open]) {
     border-color: var(--md-accent-dark-color, #483ae0);
 }
     </style>
+    <!-- Frosted-glass skin (must load last so it overrides the styles above) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="glass.css">
 </head>
 <body>
 
     <header class="top-nav">
+        <a class="nav-logo" href="#" onclick="return false" title="Display Designer"><img src="favicon.png" alt=""></a>
         <div class="nav-left-section">
             <button class="hamburger-menu" id="hamburgerBtn" title="Toggle Menu">
                 <span class="material-symbols-outlined">menu</span>
@@ -177,6 +182,7 @@ body.dark-mode details:not([open]) {
             <span class="material-symbols-outlined export-button" id="exportBtn" title="Export PDF">picture_as_pdf</span>
             <span class="material-symbols-outlined" id="clearCacheBtn" title="Clear Saved Data">delete_sweep</span>
             <span class="material-symbols-outlined" id="export-text-btn" title="Export Lambda and Font Codes (TXT)" style="cursor: pointer; margin-left: 10px; vertical-align: middle;">download</span>
+            <span class="material-symbols-outlined" id="export-md-btn" title="Export Markdown (human + AI agent readable)" style="cursor: pointer; margin-left: 10px; vertical-align: middle;">description</span>
             <span class="material-symbols-outlined" id="import-text-btn" title="Import Lambda and Font Codes (TXT)" style="cursor: pointer; margin-left: 10px; vertical-align: middle;">upload</span>
             <input type="file" id="import-file-input" accept=".txt" style="display: none;">
             <span class="material-symbols-outlined" id="darkModeBtn" title="Toggle Dark Mode">dark_mode</span>
@@ -185,24 +191,58 @@ body.dark-mode details:not([open]) {
     </header>
 
     <div class="left-panel panel">
+        <div class="left-empty"><span class="material-symbols-outlined">tune</span><p>Choose your screen size and fonts in <b>Settings</b> to start designing.</p><button type="button" id="leftEmptyOpen"><span class="material-symbols-outlined">settings</span>Open Settings</button></div>
         <details open id="configDetailsElement">
             <summary>
                 <span class="summary-main-content">
                     <span class="material-symbols-outlined">tune</span>
                     <span>Configuration</span>
                 </span>
+                <button type="button" id="pinConfigBtnSide" class="summary-toggle-btn pin-btn is-pinned" title="Unpin to a popover"><span class="material-symbols-outlined">keep</span></button>
                 <button type="button" id="toggleConfigBtn" class="summary-toggle-btn" title="Collapse Section">
                     <span class="material-symbols-outlined">unfold_less</span>
                 </button>
             </summary>
              <div class="details-content">
-                 <div class="flex-row"> <div class="flex-grow"> <label for="configResolution">Resolution:</label> <select id="configResolution"> <option value="128x64">128 x 64</option> <option value="128x160" selected>128 x 160</option> <option value="135x240">135 x 240</option> <option value="160x128">160 x 128</option> <option value="240x135">240 x 135</option> <option value="240x240">240 x 240</option> <option value="240x320">240 x 320</option> <option value="320x240">320 x 240</option> <option value="480x320">480 x 320</option><option value="960x540">960 x 540</option>  </select> </div> </div>
-                 <div class="flex-row"> <div class="flex-grow">  <label for="customWidth">Custom Width:</label>  <input type="number" id="customWidth" placeholder="e.g., 480" min="1"> </div> <div class="flex-grow"> <label for="customHeight">Custom Height:</label> <input type="number" id="customHeight" placeholder="e.g., 320" min="1"> </div> <button id="addCustomResolution">Add</button> </div>
+                 <div class="cfg-group cfg-screen"><div class="cfg-heading"><span class="material-symbols-outlined">monitor</span>Screen</div>
+                 <div class="flex-row"> <div class="flex-grow"> <label for="configResolution">Resolution:</label> <div class="first-hint" id="firstHint" role="note"><span class="material-symbols-outlined">arrow_downward</span><span id="firstHintText"><b>Start here:</b> pick your screen size, check the fonts below, then press <b>Confirm</b> to begin designing.</span></div> <select id="configResolution"> <option value="" disabled selected>Select a screen size…</option> <option value="__custom__">Custom size…</option> <option value="128x64">128 x 64</option> <option value="128x160">128 x 160</option> <option value="135x240">135 x 240</option> <option value="160x128">160 x 128</option> <option value="240x135">240 x 135</option> <option value="240x240">240 x 240</option> <option value="240x320">240 x 320</option> <option value="320x240">320 x 240</option> <option value="480x320">480 x 320</option><option value="960x540">960 x 540</option>  </select> </div> </div>
+                 <div class="display-options">
+                     <div class="opt-row">
+                         <div class="opt-text"><span class="opt-title">E-Ink mode</span><span class="opt-sub">White paper, black ink by default</span></div>
+                         <label class="switch" for="einkToggle"><input type="checkbox" id="einkToggle"><span class="slider-track"></span></label>
+                     </div>
+                     <div class="opt-row">
+                         <div class="opt-text"><span class="opt-title">Border pixels</span><span class="opt-sub">Unusable outer edge (px)</span></div>
+                         <input type="number" id="screenBorder" class="opt-number" value="0" min="0" step="1">
+                     </div>
+                 </div>
+                 <div id="customSizeBox" hidden>
+                 <div class="custom-size-title">Custom screen size</div>
+                 <div class="flex-row"> <div class="flex-grow">  <label for="customWidth">Custom Width:</label>  <input type="number" id="customWidth" placeholder="e.g., 480" min="1"> </div> <div class="flex-grow"> <label for="customHeight">Custom Height:</label> <input type="number" id="customHeight" placeholder="e.g., 320" min="1"> </div> <button id="addCustomResolution" title="Add &amp; use this size">Use</button> </div>
+                 </div>
+                 </div>
+                 <div class="cfg-group cfg-style"><div class="cfg-heading"><span class="material-symbols-outlined">palette</span>Fonts &amp; colors</div>
                  <label for="configCustomFonts">Available Font IDs (comma-separated):</label> <textarea id="configCustomFonts" placeholder="id(roboto_12), id(material_symbols_24)" >id(roboto_12), id(roboto_bold_16), id(material_symbols_18), id(material_symbols_24)</textarea>
                  <label for="configColors">Available Color IDs (comma-separated):</label> <textarea id="configColors">id(primary_color), id(accent_color), white, black, red, green, blue</textarea>
+                 <div class="palette-creator">
+                     <div class="custom-size-title">Color ID creator</div>
+                     <div class="palette-add">
+                         <input type="color" id="paletteColor" value="#3f51b5" title="Pick a color">
+                         <input type="text" id="paletteName" placeholder="color_id, e.g. sky_blue" autocomplete="off" spellcheck="false">
+                         <button type="button" id="paletteAddBtn" title="Add as ESPHome Color ID"><span class="material-symbols-outlined">add</span>Add</button>
+                     </div>
+                     <div class="palette-hexline"><span id="paletteHex">#3F51B5</span><span class="palette-msg" id="paletteMsg"></span></div>
+                     <div id="paletteList" class="palette-list"></div>
+                     <button type="button" id="paletteConvertBtn" class="palette-convert"><span class="material-symbols-outlined">auto_fix_high</span>Convert picker colors in design to IDs</button>
+                 </div>
+                 </div>
+                 <div class="config-confirm">
+                     <div class="config-error" id="configError" role="alert"></div>
+                     <button type="button" id="confirmConfigBtn"><span class="material-symbols-outlined">check_circle</span>Confirm &amp; continue</button>
+                 </div>
              </div>
         </details>
-        <details open> 
+        <details open id="elementsDetails" class="workflow-locked"> 
             <summary><span class="material-symbols-outlined">widgets</span> Elements</summary>
             <div class="details-content">
                 <div class="add-elements-container"> 
@@ -258,6 +298,7 @@ body.dark-mode details:not([open]) {
         <details id="previewSection" open> 
             <summary>
                 <span class="material-symbols-outlined">visibility</span>Preview
+                <span class="hd-switch" id="hiResSwitch" title="High resolution view (smooth, no pixelation)"><span class="hd-label">HD</span><span class="hd-track"><input type="checkbox" id="hiResToggle" aria-label="High resolution view"><span class="hd-knob"></span></span></span>
                 <button id="scaleToFitBtn" class="scale-button" title="Toggle Scale to Fit">
                     <span class="material-symbols-outlined">zoom_out_map</span>
                 </button>
@@ -269,6 +310,15 @@ body.dark-mode details:not([open]) {
                 <p style="font-size: 0.85em; color: var(--md-text-secondary-on-background); margin-top: 10px;">Note: Fonts & corners are approximations. If preview shows names instead of actual Icon, select the element/Icon list on left panel or ensure the Front ID is "id(material_symbol_size)"</p>
             </div>
         </details>
+    </div> 
+
+    <!-- Floating code generators -->
+    <div class="code-drawer" id="codeDrawer" aria-hidden="true">
+        <div class="code-drawer-head">
+            <span class="material-symbols-outlined">terminal</span><span>Generated Code</span>
+            <button type="button" class="drawer-close" id="codeDrawerClose" title="Close"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        <div class="code-drawer-body">
         <details id="codeSection"> 
             <summary><span class="material-symbols-outlined">code</span> Generated Lambda Code</summary> 
             <div class="details-content">
@@ -294,7 +344,34 @@ body.dark-mode details:not([open]) {
                 </div>
             </div>
         </details>
-    </div> 
+            <details id="colorCodeSection">
+                <summary><span class="material-symbols-outlined">palette</span> Generate Color Code</summary>
+                <div class="details-content">
+                    <p class="code-note">ESPHome <code>color:</code> block for your Color IDs. Add it to your YAML.</p>
+                    <div class="code-actions-container">
+                        <button id="generateColorCodeBtn"><span class="material-symbols-outlined">generating_tokens</span>Generate</button>
+                        <button id="copyColorCodeBtn" title="Copy Color Code"><span class="material-symbols-outlined">content_copy</span>Copy</button>
+                    </div>
+                    <div class="code-output"><textarea id="generatedColorCodeOutput" readonly placeholder="Generated ESPHome color YAML will appear here..."></textarea></div>
+                </div>
+            </details>
+        </div>
+    </div>
+    <!-- Settings: floating button + popover host for the Config panel -->
+    <button type="button" class="settings-fab" id="settingsFab" title="Settings"><span class="material-symbols-outlined">settings</span></button>
+    <div class="settings-popover" id="settingsPopover" aria-hidden="true">
+        <div class="settings-head">
+            <span class="material-symbols-outlined">tune</span><span class="settings-title">Settings</span>
+            <button type="button" class="pin-btn" id="pinConfigBtn" title="Pin to sidebar"><span class="material-symbols-outlined">keep</span><span class="pin-label">Pin to sidebar</span></button>
+            <button type="button" class="drawer-close" id="settingsClose" title="Close"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        <div class="settings-body" id="settingsBody"></div>
+    </div>
+    <div class="pill-dock">
+        <button type="button" class="pill-btn" id="pillColor" title="Generate Color Code"><span class="material-symbols-outlined">palette</span>Color Code</button>
+        <button type="button" class="pill-btn" id="pillFont" title="Generate Font Code"><span class="material-symbols-outlined">font_download</span>Font Code</button>
+        <button type="button" class="pill-btn primary" id="pillLambda" title="Generate Lambda Code"><span class="material-symbols-outlined">code</span>Generate Lambda</button>
+    </div>
 
     <!-- Add this after the top navigation but before the panels -->
     <div class="info-overlay" id="infoOverlay">
@@ -312,16 +389,13 @@ body.dark-mode details:not([open]) {
                 <h3>Known Limitations</h3>
                 <ul>
                     <li>Font previews are approximate</li>
-                    <li>All Material Icons will not appear in search window. </li>
-                    <li>Need search to Icon Names from <a href="https://fonts.google.com/icons">https://fonts.google.com/icons</a> manually </li>
+                    <li>Icon search covers all ~4,300 Material Symbols (Outlined) names from <a href="https://fonts.google.com/icons">fonts.google.com/icons</a></li>
                     <li>Corner radius is preview-only {ESPHome limitation}</li>
-                    <li>Some Material Icons may not render correctly</li>
-                    <li>UI does not render properly on a Mobile Device></li>
+                                        <li>UI does not render properly on a Mobile Device></li>
                 </ul>
                 <h3>Known Bugs</h3>
                 <ul>
                     <li>Import TXT file feature has issues</li>
-                    <li>On page reload need to click on elements name for Icons to display correctly</li>
                     <li>Screen Resolution beyond 480px overflows in UI and scaling button has to be used.</li>
                 </ul>
             </div>
@@ -364,85 +438,18 @@ body.dark-mode details:not([open]) {
 
 
     <script>
-        // --- Expanded Google Icons Ligature-to-Codepoint Data ---
-        const googleIconsLigatureToCodepoint = {
-            // Navigation
-            "menu": "e5d2", "arrow_back": "e5c4", "arrow_forward": "e5c8", "arrow_upward": "e5d8", "arrow_downward": "e5db",
-            "chevron_left": "e5cb", "chevron_right": "e5cc", "expand_more": "e5cf", "expand_less": "e5ce",
-            "home": "e88a", "close": "e5cd", "fullscreen": "e5d0", "fullscreen_exit": "e5d1",
-            
-            // Actions
-            "settings": "e8b8", "refresh": "e5d5", "done": "e876", "add": "e145", "edit": "e3c9", "delete": "e872",
-            "search": "e8b6", "check": "e5ca", "clear": "e14c", "visibility": "e8f4", "visibility_off": "e8f5",
-            "favorite": "e87d", "favorite_border": "e87e", "info": "e88e", "help": "e887", "warning": "e002",
-            
-            // Communication
-            "mail": "e158", "message": "e0c9", "phone": "e0cd", "chat": "e0b7", "notifications": "e7f4",
-            "share": "e80d", "send": "e163", "link": "e157", "cloud": "e2bd", "cloud_upload": "e2c3",
-            
-            // AV
-            "play_arrow": "e037", "pause": "e034", "stop": "e047", "volume_up": "e050", "volume_off": "e04f",
-            "skip_next": "e044", "skip_previous": "e045", "replay": "e042", "shuffle": "e043",
-            
-            // Device
-            "bluetooth": "e1a7", "wifi": "e63e", "battery_full": "e1a4", "battery_charging_full": "e1a3",
-            "signal_cellular_4_bar": "e1c8", "signal_wifi_4_bar": "e1d8", "sd_storage": "e1db",
-            
-            // Image
-            "image": "e3f4", "camera": "e3af", "camera_alt": "e3b0", "photo": "e410", "photo_camera": "e412",
-            "collections": "e3b6", "crop": "e3be", "filter": "e3d3", "flash_on": "e3e7",
-            
-            // Maps
-            "place": "e55f", "map": "e55b", "my_location": "e55c", "navigation": "e55d", "pin_drop": "e55e",
-            "restaurant": "e56c", "local_parking": "e54f", "traffic": "e565", "directions": "e52e",
-            
-            // Social
-            "person": "e7fd", "person_outline": "e7ff", "group": "e7ef", "public": "e80b", "school": "e80c",
-            "sentiment_satisfied": "e813", "thumb_up": "e8dc", "thumb_down": "e8db",
-            
-            // Alert
-            "error": "e000", "error_outline": "e001", "warning": "e002", "notification_important": "e004",
-            
-            // Hardware
-            "computer": "e30a", "desktop_windows": "e30c", "laptop": "e31e", "keyboard": "e312", "mouse": "e323",
-            "smartphone": "e32c", "tablet": "e32f", "tv": "e333", "watch": "e334",
-            
-            // Content
-            "add_circle": "e147", "remove_circle": "e15c", "block": "e14b", "flag": "e153", "inbox": "e156",
-            "report": "e160", "save": "e161", "select_all": "e162",
-            
-            // File
-            "folder": "e2c7", "folder_open": "e2c8", "file_download": "e2c4", "file_upload": "e2c6",
-            "cloud_download": "e2c0", "attachment": "e226", "description": "e873",
-            
-            // Editor
-            "format_bold": "e238", "format_italic": "e23f", "format_underlined": "e249", "format_list_bulleted": "e241",
-            "format_list_numbered": "e242", "format_quote": "e244", "format_size": "e245",
-            
-            // Toggle
-            "check_box": "e834", "check_box_outline_blank": "e835", "radio_button_checked": "e837",
-            "radio_button_unchecked": "e836", "star": "e838", "star_border": "e83a", "toggle_on": "e9f6",
-            
-            // IoT & Smart Home
-            "thermostat": "f076", "light": "e0f0", "ac_unit": "eb3b", "water": "e798", "security": "e32a",
-            "door_front": "efef", "window": "f11c", "garage": "f011", "sensor_door": "f1b5", "sensor_window": "f1b4",
-            "motion_sensor": "f1b2", "light_mode": "e518", "dark_mode": "e51c", "brightness_high": "e1ac",
-            "humidity_high": "e1eb", "power": "e63c", "timer": "e425", "schedule": "e8b5", "speed": "e9e4",
-            
-            // Weather
-            "sunny": "e430", "cloudy": "e2bd", "rainy": "e2c4", "thunderstorm": "e2c3", "snowy": "e2c1",
-            "windy": "e2c2", "foggy": "e2c5", "partly_cloudy": "e2c0",
-            
-            // Misc
-            "api": "f1b7", "code": "e86f", "dashboard": "e871", "bug_report": "e868", "build": "e869",
-            "update": "e923", "history": "e889", "language": "e894", "translate": "e8e2"
-        };
+</script>
+    <script src="icons.js"></script>
+    <script>
 
         // --- Global State & Elements ---
         let elements = [];
         let selectedElementId = null;
         let nextId = 0;
         let customResolutions = [];
+        let einkMode = false;
+        let colorPalette = []; // [{name, hex:"#RRGGBB"}] -> ESPHome color: ids
+        let screenBorder = 0;
         let isScaleToFit = false;
 
         // Get ALL element references
@@ -488,6 +495,7 @@ body.dark-mode details:not([open]) {
                 colors: configColorsInput.value,
                 elements: elements, customResolutions: customResolutions,
                 isScaleToFit: isScaleToFit,
+                einkMode: einkMode, screenBorder: screenBorder, colorPalette: colorPalette,
                 nextId: nextId
             };
             localStorage.setItem('esphomeDisplayDesignerCache', JSON.stringify(cacheData));
@@ -506,6 +514,10 @@ body.dark-mode details:not([open]) {
                 if (data.customFonts) configCustomFontsTextarea.value = data.customFonts;
                 if (data.colors) configColorsInput.value = data.colors;
                 if (data.customResolutions) { customResolutions = data.customResolutions; populateResolutionSelect(); }
+                if (Array.isArray(data.colorPalette)) colorPalette = data.colorPalette.filter(c => c && c.name && /^#[0-9a-f]{6}$/i.test(c.hex));
+                if (data.einkMode !== undefined) einkMode = !!data.einkMode;
+                if (data.screenBorder !== undefined) screenBorder = Math.max(0, parseInt(data.screenBorder) || 0);
+                syncDisplayOptionsUI();
                 if (data.isScaleToFit !== undefined) {
                     isScaleToFit = data.isScaleToFit;
                     screenPreviewDiv.classList.toggle('scale-to-fit', isScaleToFit);}
@@ -547,12 +559,12 @@ body.dark-mode details:not([open]) {
 
         function clearCache() {
             if (confirm('Are you sure you want to clear all saved elements and configuration?')) {
-                localStorage.removeItem('esphomeDisplayDesignerCache');
+                localStorage.removeItem('esphomeDisplayDesignerCache'); localStorage.removeItem('ddConfigConfirmed');
                 location.reload();
             }
         }
 
-        function mapColorPreview(colorId) { if (!colorId) return '#FFFFFF'; const lowerColor = colorId.toLowerCase(); const colorMatch = colorId.match(/Color\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i); if (colorMatch) { return `rgb(${colorMatch[1]}, ${colorMatch[2]}, ${colorMatch[3]})`; } if (lowerColor === 'white') return '#FFFFFF'; if (lowerColor === 'black') return '#000000'; if (lowerColor === 'red' || lowerColor.includes('red')) return '#FF0000'; if (lowerColor === 'green' || lowerColor.includes('green')) return '#00FF00'; if (lowerColor === 'blue' || lowerColor.includes('blue')) return '#0000FF'; if (lowerColor.includes('primary')) return getComputedStyle(document.documentElement).getPropertyValue('--md-primary-color').trim() || '#3f51b5'; if (lowerColor.includes('accent')) return getComputedStyle(document.documentElement).getPropertyValue('--md-accent-color').trim() || '#ff4081'; return '#CCCCCC'; }
+        function mapColorPreview(colorId) { if (!colorId) return '#FFFFFF'; const idMatch = colorId.match(/^id\(\s*(\w+)\s*\)$/); if (idMatch) { const pc = colorPalette.find(c => c.name === idMatch[1]); if (pc) return pc.hex; } const lowerColor = colorId.toLowerCase(); const colorMatch = colorId.match(/Color\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i); if (colorMatch) { return `rgb(${colorMatch[1]}, ${colorMatch[2]}, ${colorMatch[3]})`; } if (lowerColor === 'white') return '#FFFFFF'; if (lowerColor === 'black') return '#000000'; if (lowerColor === 'red' || lowerColor.includes('red')) return '#FF0000'; if (lowerColor === 'green' || lowerColor.includes('green')) return '#00FF00'; if (lowerColor === 'blue' || lowerColor.includes('blue')) return '#0000FF'; if (lowerColor.includes('primary')) return getComputedStyle(document.documentElement).getPropertyValue('--md-primary-color').trim() || '#3f51b5'; if (lowerColor.includes('accent')) return getComputedStyle(document.documentElement).getPropertyValue('--md-accent-color').trim() || '#ff4081'; return '#CCCCCC'; }
         function populateIconSuggestions(searchTerm) {
             iconSuggestionsDiv.innerHTML = '';
             iconSuggestionsDiv.style.display = 'none';
@@ -586,6 +598,18 @@ body.dark-mode details:not([open]) {
             }
         }
 
+        // Draw the real glyph (codepoint) - exactly what the device renders - instead of relying on ligature substitution.
+        function iconGlyph(ligature) {
+            const hex = getIconCodepoint((ligature || '').trim());
+            return hex ? String.fromCodePoint(parseInt(hex, 16)) : (ligature || '');
+        }
+        // Redraw once the icon font has actually loaded (fixes blank/name-text icons after reload)
+        if (document.fonts) {
+            const redraw = () => { try { drawPreview(); renderElementList(); } catch (e) {} };
+            document.fonts.load("24px 'Material Symbols Outlined'", '').then(redraw).catch(() => {});
+            document.fonts.ready.then(redraw);
+            document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', redraw);
+        }
         function getIconCodepoint(ligature) {
             if (!ligature) return null;
             return googleIconsLigatureToCodepoint[ligature.toLowerCase()] || null;
@@ -596,9 +620,9 @@ body.dark-mode details:not([open]) {
 
         // --- Screen Size Logic ---
         function updateScreenSize() { 
-            const resolution = configResolutionSelect.value; 
+            const resolution = /^\d+x\d+$/.test(configResolutionSelect.value) ? configResolutionSelect.value : '128x160'; 
             const [baseWidth, baseHeight] = resolution.split('x').map(Number); 
-            const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--canvas-scale-factor') || 1.5); 
+            const scale = computePreviewScale(baseWidth, baseHeight); 
             
             // Set the canvas dimensions to match the selected resolution
             previewCanvas.width = baseWidth; 
@@ -621,8 +645,9 @@ body.dark-mode details:not([open]) {
             document.documentElement.style.setProperty('--canvas-base-height', `${baseHeight}px`); 
             
             // Update slider maximums
-            editXSlider.max = baseWidth; 
-            editYSlider.max = baseHeight; 
+            editXSlider.min = screenBorder; editYSlider.min = screenBorder;
+            editXSlider.max = Math.max(screenBorder, baseWidth - screenBorder); 
+            editYSlider.max = Math.max(screenBorder, baseHeight - screenBorder); 
             editRectRadiusSlider.max = Math.floor(Math.min(baseWidth, baseHeight) / 2); 
             
             // Redraw with the new dimensions
@@ -630,9 +655,13 @@ body.dark-mode details:not([open]) {
         }
 
         // --- Core Logic ---
-        function drawPreview() { /* Unchanged */
-             previewCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--md-canvas-background').trim(); previewCtx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
-             elements.forEach(el => { const x = parseInt(el.x || 0); const y = parseInt(el.y || 0); if (el.type === 'text' || el.type === 'icon') { previewCtx.font = mapFontPreview(el.fontId); previewCtx.fillStyle = mapColorPreview(el.colorId); const fontSizeMatch = previewCtx.font.match(/(\d+)px/); const fontSize = fontSizeMatch ? parseInt(fontSizeMatch[1]) : 12; const drawY = y + Math.round(fontSize * 0.8); if (el.type === 'text') { const align = el.align || 'LEFT'; previewCtx.textAlign = align.toLowerCase(); let displayText = el.content || ''; if (el.args) displayText = displayText.replace(/%[.\d]*[fdis]/, `[${el.args.split('.')[0].replace('id(','').replace(')','')}]`); previewCtx.fillText(displayText, x, drawY); } else { previewCtx.textAlign = 'start'; previewCtx.fillText(el.iconLigature || '', x, drawY); } previewCtx.textAlign = 'start'; } else if (el.type === 'bar') { previewCtx.fillStyle = mapColorPreview(el.colorId); const w = parseInt(el.width || 10); const h = parseInt(el.height || 1); previewCtx.fillRect(x, y, w, h); } else if (el.type === 'rectangle') { const w = parseInt(el.width || 10); const h = parseInt(el.height || 10); const radius = parseInt(el.cornerRadius || 0); previewCtx.beginPath(); if (radius > 0 && previewCtx.roundRect) { previewCtx.roundRect(x, y, w, h, radius); } else { previewCtx.rect(x, y, w, h); } previewCtx.closePath(); if (el.fill) { previewCtx.fillStyle = mapColorPreview(el.colorId); previewCtx.fill(); } else { previewCtx.strokeStyle = mapColorPreview(el.colorId); previewCtx.lineWidth = parseInt(el.thickness || 1); previewCtx.stroke(); } } else if (el.type === 'circle') {
+        function drawPreview() { renderScene(previewCtx, previewCanvas.width, previewCanvas.height); }
+        /* Single scene renderer: used by the pixel preview AND the high-res view (the ctx param shadows previewCtx). */
+        function renderScene(previewCtx, cw, ch) {
+             previewCtx.fillStyle = einkMode ? '#ffffff' : getComputedStyle(document.documentElement).getPropertyValue('--md-canvas-background').trim(); previewCtx.fillRect(0, 0, cw, ch);
+             previewCtx.save();
+             if (screenBorder > 0) { previewCtx.beginPath(); previewCtx.rect(screenBorder, screenBorder, Math.max(0, cw - 2 * screenBorder), Math.max(0, ch - 2 * screenBorder)); previewCtx.clip(); }
+             elements.forEach(el => { const x = parseInt(el.x || 0); const y = parseInt(el.y || 0); if (el.type === 'text' || el.type === 'icon') { previewCtx.font = mapFontPreview(el.fontId); previewCtx.fillStyle = mapColorPreview(el.colorId); const fontSizeMatch = previewCtx.font.match(/(\d+)px/); const fontSize = fontSizeMatch ? parseInt(fontSizeMatch[1]) : 12; const drawY = y + Math.round(fontSize * 0.8); if (el.type === 'text') { const align = el.align || 'LEFT'; previewCtx.textAlign = align.toLowerCase(); let displayText = el.content || ''; if (el.args) displayText = displayText.replace(/%[.\d]*[fdis]/, `[${el.args.split('.')[0].replace('id(','').replace(')','')}]`); previewCtx.fillText(displayText, x, drawY); } else { previewCtx.textAlign = 'start'; previewCtx.fillText(iconGlyph(el.iconLigature), x, drawY); } previewCtx.textAlign = 'start'; } else if (el.type === 'bar') { previewCtx.fillStyle = mapColorPreview(el.colorId); const w = parseInt(el.width || 10); const h = parseInt(el.height || 1); previewCtx.fillRect(x, y, w, h); } else if (el.type === 'rectangle') { const w = parseInt(el.width || 10); const h = parseInt(el.height || 10); const radius = parseInt(el.cornerRadius || 0); previewCtx.beginPath(); if (radius > 0 && previewCtx.roundRect) { previewCtx.roundRect(x, y, w, h, radius); } else { previewCtx.rect(x, y, w, h); } previewCtx.closePath(); if (el.fill) { previewCtx.fillStyle = mapColorPreview(el.colorId); previewCtx.fill(); } else { previewCtx.strokeStyle = mapColorPreview(el.colorId); previewCtx.lineWidth = parseInt(el.thickness || 1); previewCtx.stroke(); } } else if (el.type === 'circle') {
     const radius = parseInt(el.radius || 10);
     previewCtx.beginPath();
     previewCtx.arc(x, y, radius, 0, 2 * Math.PI);
@@ -645,7 +674,83 @@ body.dark-mode details:not([open]) {
         previewCtx.stroke();
     }
 }
-}); }
+});
+             previewCtx.restore();
+             drawBorderOverlay(previewCtx, cw, ch);
+        }
+
+        // --- Display options: E-Ink, border pixels, auto-fit scale ---
+        function drawBorderOverlay(previewCtx, cw, ch) {
+            if (screenBorder <= 0) return;
+            const w = cw, h = ch, b = Math.min(screenBorder, Math.floor(Math.min(w, h) / 2));
+            previewCtx.save();
+            previewCtx.fillStyle = einkMode ? 'rgba(120,120,120,0.28)' : 'rgba(255,80,80,0.22)';
+            previewCtx.fillRect(0, 0, w, b); previewCtx.fillRect(0, h - b, w, b);
+            previewCtx.fillRect(0, b, b, h - 2 * b); previewCtx.fillRect(w - b, b, b, h - 2 * b);
+            previewCtx.strokeStyle = einkMode ? 'rgba(90,90,90,0.9)' : 'rgba(255,110,110,0.95)';
+            previewCtx.lineWidth = 1; previewCtx.setLineDash([3, 2]);
+            previewCtx.strokeRect(b + 0.5, b + 0.5, w - 2 * b - 1, h - 2 * b - 1);
+            previewCtx.restore();
+        }
+        function computePreviewScale(baseW, baseH) {
+            const panel = document.querySelector('.right-panel');
+            if (!panel || !panel.clientWidth) return 1.5;
+            const availW = panel.clientWidth - 28 - 44 - 28;
+            const availH = panel.clientHeight - 28 - 42 - 28 - 70;
+            let s = Math.min(availW / baseW, availH / baseH);
+            if (!isFinite(s) || s <= 0) return 1.5;
+            s = Math.min(s, 8);
+            return (!window.__hiRes && s >= 2) ? Math.floor(s) : Math.max(0.25, s);
+        }
+        function syncDisplayOptionsUI() {
+            const t = document.getElementById('einkToggle'), b = document.getElementById('screenBorder');
+            if (t) t.checked = einkMode;
+            if (b) b.value = screenBorder;
+            screenPreviewDiv.classList.toggle('eink', einkMode);
+        }
+        function setEinkMode(on) {
+            einkMode = on;
+            // Swap default ink: white<->black. Only elements we flipped are flipped back.
+            elements.forEach(el => {
+                const c = (el.colorId || '').toLowerCase();
+                if (on && c === 'white') { el.colorId = 'black'; el._einkFlipped = true; }
+                else if (!on && el._einkFlipped && c === 'black') { el.colorId = 'white'; }
+                if (!on) delete el._einkFlipped;
+            });
+            syncDisplayOptionsUI(); updateEditorForm(); renderElementList(); drawPreview(); saveToCache();
+        }
+        document.getElementById('einkToggle').addEventListener('change', e => setEinkMode(e.target.checked));
+        document.getElementById('screenBorder').addEventListener('input', e => {
+            screenBorder = Math.max(0, parseInt(e.target.value) || 0);
+            updateScreenSize(); saveToCache();
+        });
+        window.addEventListener('resize', () => { if (!isScaleToFit) updateScreenSize(); });
+        if (window.ResizeObserver) new ResizeObserver(() => { if (!isScaleToFit) updateScreenSize(); }).observe(document.querySelector('.right-panel'));
+
+        // --- Floating code pills + drawer ---
+        const codeDrawer = document.getElementById('codeDrawer');
+        function openCodeDrawer(which) {
+            const secs = { lambda: document.getElementById('codeSection'), font: document.getElementById('fontCodeSection'), color: document.getElementById('colorCodeSection') };
+            if (which === 'lambda') generateLambdaCode(); else if (which === 'font') generateFontYaml(); else generateColorYaml();
+            Object.entries(secs).forEach(([k, d]) => { d.open = (k === which); });
+            codeDrawer.classList.add('visible'); codeDrawer.setAttribute('aria-hidden', 'false');
+            document.getElementById('pillLambda').classList.toggle('active', which === 'lambda');
+            document.getElementById('pillFont').classList.toggle('active', which === 'font');
+            document.getElementById('pillColor').classList.toggle('active', which === 'color');
+        }
+        function closeCodeDrawer() {
+            codeDrawer.classList.remove('visible'); codeDrawer.setAttribute('aria-hidden', 'true');
+            document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+        }
+        document.getElementById('pillLambda').addEventListener('click', () => {
+            (codeDrawer.classList.contains('visible') && document.getElementById('pillLambda').classList.contains('active')) ? closeCodeDrawer() : openCodeDrawer('lambda'); });
+        document.getElementById('pillFont').addEventListener('click', () => {
+            (codeDrawer.classList.contains('visible') && document.getElementById('pillFont').classList.contains('active')) ? closeCodeDrawer() : openCodeDrawer('font'); });
+        document.getElementById('pillColor').addEventListener('click', () => {
+            (codeDrawer.classList.contains('visible') && document.getElementById('pillColor').classList.contains('active')) ? closeCodeDrawer() : openCodeDrawer('color'); });
+        document.getElementById('codeDrawerClose').addEventListener('click', closeCodeDrawer);
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCodeDrawer(); });
+
         // --- Modify renderElementList function ---
         function renderElementList(forcePopupRender = false) { // Add optional parameter
             const listToUpdate = [elementList]; // Always update main list
@@ -784,7 +889,9 @@ body.dark-mode details:not([open]) {
              renderElementList(); drawPreview();
         }
         function addElement(type) {
-    const defaultColor = getAvailableColors().find(c => c.toLowerCase() === 'white') || 'white';
+    const defaultColor = einkMode
+        ? (getAvailableColors().find(c => c.toLowerCase() === 'black') || 'black')
+        : (getAvailableColors().find(c => c.toLowerCase() === 'white') || 'white');
     
     // Calculate Y position based on existing elements
     let maxY = 10;
@@ -963,10 +1070,7 @@ body.dark-mode details:not([open]) {
             initializeConfig();
             saveToCache();
         });
-        addCustomResolutionBtn.addEventListener('click', () => {
-            addCustomResolution();
-            saveToCache(); 
-        });
+
         
         // REMOVED common font selector listener
         addTextBtn.addEventListener('click', () => {
@@ -1147,7 +1251,7 @@ body.dark-mode details:not([open]) {
         // Setup Clear Cache Button explicitly
         document.getElementById('clearCacheBtn').addEventListener('click', () => {
             if (confirm('Are you sure you want to clear all saved elements and configuration?')) {
-                localStorage.removeItem('esphomeDisplayDesignerCache');
+                localStorage.removeItem('esphomeDisplayDesignerCache'); localStorage.removeItem('ddConfigConfirmed');
                 location.reload();
             }
         });
@@ -1318,6 +1422,9 @@ body.dark-mode details:not([open]) {
         }
         configSection += `ScaleToFit: ${scaleToFitValue}\n`;
         configSection += `DarkMode: ${darkModeValue}\n`;
+        configSection += `EInk: ${einkMode}\n`;
+        configSection += `Border: ${screenBorder}\n`;
+        if (colorPalette.length) configSection += `Palette: ${colorPalette.map(c => c.name + '=' + c.hex).join(',')}\n`;
         configSection += "// --- End Configuration ---\n\n";
 
         // Combine the codes into one string with headers
@@ -1389,7 +1496,7 @@ body.dark-mode details:not([open]) {
                 if (parts.length >= 2) {
                     const key = parts[0].trim();
                     const value = parts.slice(1).join(':').trim(); // Handle colons in value
-                    if (key === "ScaleToFit" || key === "DarkMode") {
+                    if (key === "ScaleToFit" || key === "DarkMode" || key === "EInk") {
                         config[key] = value === 'true';
                     } else {
                         config[key] = value;
@@ -1650,6 +1757,14 @@ body.dark-mode details:not([open]) {
             if (scaleToFitBtn) scaleToFitBtn.title = isScaleToFit ? "Restore Original Size" : "Scale to Fit";
             localStorage.setItem('previewScaleToFit', isScaleToFit.toString());
         }
+        if (config.Palette !== undefined) {
+            colorPalette = config.Palette.split(',').map(t => t.trim().split('=')).filter(a => a.length === 2 && /^#[0-9a-f]{6}$/i.test(a[1])).map(a => ({ name: a[0], hex: a[1].toUpperCase() }));
+            if (window.paletteRender) window.paletteRender();
+        }
+        if (config.EInk !== undefined) { einkMode = config.EInk; }
+        if (config.Border !== undefined) { screenBorder = Math.max(0, parseInt(config.Border) || 0); }
+        syncDisplayOptionsUI(); updateScreenSize();
+        if (config.Resolution && window.setWorkflowConfirmed) window.setWorkflowConfirmed(true);
         if (config.DarkMode !== undefined) {
             const body = document.body;
             const darkModeBtn = document.getElementById('darkModeBtn');
@@ -1775,6 +1890,800 @@ if (localStorage.getItem('darkMode') === 'true') {
     </script>
 
     <!-- Google tag (gtag.js) -->
+<script>
+// ===== Properties panel: always visible (never auto-hide / auto-show) =====
+(function () {
+    const orig = updateEditorForm;
+    updateEditorForm = function () {
+        const r = orig.apply(this, arguments);
+        editorDetails.open = true; // original code collapsed it when nothing was selected
+        return r;
+    };
+    editorDetails.open = true;
+    document.body.classList.remove('props-hidden');
+})();
+
+// ===== Visual Color ID creator =====
+(function () {
+    const $ = id => document.getElementById(id);
+    const colorIn = $('paletteColor'), nameIn = $('paletteName'), listEl = $('paletteList');
+    const msg = $('paletteMsg');
+
+    const sanitizeId = raw => {
+        let n = (raw || '').toLowerCase().trim().replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '');
+        if (/^[0-9]/.test(n)) n = 'c_' + n;
+        return n;
+    };
+    const say = (t, bad) => { msg.textContent = t || ''; msg.classList.toggle('bad', !!bad); };
+    const hexUp = h => h.toUpperCase();
+
+    function colorTokens() { return getAvailableColors(); }
+    function setColorTokens(arr) { configColorsInput.value = arr.join(', '); initializeConfig(); }
+
+    function persistAndRefresh() {
+        paletteRender();
+        try { updateEditorForm(); } catch (e) {}
+        renderElementList(); drawPreview(); saveToCache();
+    }
+
+    function paletteAdd(name, hex) {
+        name = sanitizeId(name);
+        if (!name) { say('Enter a Color ID (letters, numbers, underscore).', true); return false; }
+        if (colorPalette.some(c => c.name === name)) { say(`"${name}" already exists.`, true); return false; }
+        colorPalette.push({ name, hex: hexUp(hex) });
+        const toks = colorTokens(), ref = `id(${name})`;
+        if (!toks.includes(ref)) { toks.push(ref); setColorTokens(toks); }
+        say(`Added ${ref}`);
+        persistAndRefresh();
+        return true;
+    }
+    function paletteRemove(name) {
+        colorPalette = colorPalette.filter(c => c.name !== name);
+        const ref = `id(${name})`;
+        // elements using it fall back to their resolved colour so nothing silently disappears
+        const gone = colorPalette; // (already removed)
+        elements.forEach(el => { if (el.colorId === ref) el.colorId = 'white'; });
+        setColorTokens(colorTokens().filter(t => t !== ref));
+        say(`Removed ${ref}`);
+        persistAndRefresh();
+    }
+    window.paletteRemove = paletteRemove;
+
+    function paletteRender() {
+        listEl.innerHTML = '';
+        if (!colorPalette.length) { listEl.innerHTML = '<div class="palette-empty">No custom Color IDs yet. Pick a color, name it, press Add.</div>'; return; }
+        colorPalette.forEach(c => {
+            const chip = document.createElement('div'); chip.className = 'palette-chip';
+            chip.innerHTML = `<span class="palette-swatch" style="background:${c.hex}"></span>
+                <span class="palette-meta"><b>id(${c.name})</b><i>${c.hex}</i></span>
+                <button type="button" class="palette-del" title="Remove"><span class="material-symbols-outlined">close</span></button>`;
+            chip.querySelector('.palette-swatch').addEventListener('click', () => { colorIn.value = c.hex.toLowerCase(); nameIn.value = c.name; });
+            chip.querySelector('.palette-del').addEventListener('click', () => paletteRemove(c.name));
+            listEl.appendChild(chip);
+        });
+    }
+    window.paletteRender = paletteRender;
+
+    $('paletteAddBtn').addEventListener('click', () => { if (paletteAdd(nameIn.value, colorIn.value)) { nameIn.value = ''; } });
+    nameIn.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('paletteAddBtn').click(); } });
+    colorIn.addEventListener('input', () => { $('paletteHex').textContent = hexUp(colorIn.value); });
+
+    // Convert every ad-hoc Color(r,g,b) used in the design into a named Color ID
+    $('paletteConvertBtn').addEventListener('click', () => {
+        let converted = 0, created = 0;
+        elements.forEach(el => {
+            if (!/^Color\(/i.test(el.colorId || '')) return;
+            const hex = hexUp(rgbColorStringToHex(el.colorId) || '');
+            if (!hex) return;
+            let p = colorPalette.find(c => c.hex === hex);
+            if (!p) {
+                let base = 'color_' + hex.slice(1).toLowerCase(), n = base, i = 2;
+                while (colorPalette.some(c => c.name === n)) n = base + '_' + i++;
+                p = { name: n, hex }; colorPalette.push(p); created++;
+                const toks = colorTokens(); toks.push(`id(${n})`); setColorTokens(toks);
+            }
+            el.colorId = `id(${p.name})`; converted++;
+        });
+        say(converted ? `Converted ${converted} element color${converted > 1 ? 's' : ''} → ${created} new Color ID${created === 1 ? '' : 's'}.` : 'No custom (picker) colors found in the design.', !converted);
+        persistAndRefresh();
+    });
+
+    // ESPHome color: block
+    window.generateColorYaml = function () {
+        const defined = new Set(colorPalette.map(c => c.name));
+        const missing = colorTokens().map(t => (t.match(/^id\(\s*(\w+)\s*\)$/) || [])[1]).filter(n => n && !defined.has(n));
+        let y = '';
+        if (colorPalette.length) {
+            y += 'color:\n';
+            colorPalette.forEach(c => { y += `  - id: ${c.name}\n    hex: "${c.hex.replace('#', '')}"\n`; });
+        } else y += '# No custom Color IDs defined yet. Use the Color ID creator in Configuration.\n';
+        if (missing.length) y += `\n# Referenced in the Colors list but not defined above (define them in your own YAML):\n# ${missing.join(', ')}\n`;
+        $('generatedColorCodeOutput').value = y;
+        return y;
+    };
+    $('generateColorCodeBtn').addEventListener('click', generateColorYaml);
+    $('copyColorCodeBtn').addEventListener('click', () => {
+        navigator.clipboard.writeText($('generatedColorCodeOutput').value).then(() => {
+            const b = $('copyColorCodeBtn'), t = b.innerHTML; b.innerHTML = '<span class="material-symbols-outlined">done</span>Copied!'; b.classList.add('success');
+            setTimeout(() => { b.innerHTML = t; b.classList.remove('success'); }, 1500);
+        });
+    });
+
+    paletteRender();
+})();
+</script>
+<script>
+// ===== Workflow gate: choose size + fonts -> Confirm -> Elements =====
+(function () {
+    const KEY = 'ddConfigConfirmed';
+    const cfgDetails = document.getElementById('configDetailsElement');
+    const elDetails = document.getElementById('elementsDetails');
+    const confirmBtn = document.getElementById('confirmConfigBtn');
+    const errBox = document.getElementById('configError');
+    const hint = document.getElementById('firstHint');
+    const hintText = document.getElementById('firstHintText');
+    const resSel = document.getElementById('configResolution');
+    const validRes = () => /^\d+x\d+$/.test(resSel.value);
+    const customBox = document.getElementById('customSizeBox');
+    const syncCustomBox = () => { customBox.hidden = resSel.value !== '__custom__'; };
+    resSel.addEventListener('change', syncCustomBox);
+    // 'Use' button / Enter in the custom fields select the new size programmatically
+    document.getElementById('addCustomResolution').addEventListener('click', () => setTimeout(() => { syncCustomBox(); resSel.dispatchEvent(new Event('change')); }, 0));
+    ['customWidth', 'customHeight'].forEach(id => document.getElementById(id).addEventListener('keypress', e => { if (e.key === 'Enter') setTimeout(() => { syncCustomBox(); resSel.dispatchEvent(new Event('change')); }, 0); }));
+    if (resSel.value === '__custom__') resSel.value = '';
+    syncCustomBox();
+
+    function setConfirmed(collapse) {
+        try { localStorage.setItem(KEY, 'true'); } catch (e) {}
+        elDetails.classList.remove('workflow-locked');
+        hint.hidden = true;
+        errBox.textContent = '';
+        confirmBtn.classList.remove('pulse');
+        if (collapse) {
+            if (window.settingsUI && window.settingsUI.inPopover()) window.settingsUI.close();
+            else cfgDetails.open = false;
+            elDetails.open = true;
+            elDetails.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        if (typeof initializeConfig === 'function') initializeConfig();
+        updateScreenSize(); saveToCache();
+    }
+    window.setWorkflowConfirmed = setConfirmed;
+
+    function tryConfirm() {
+        const problems = [];
+        if (!validRes()) problems.push(resSel.value === '__custom__' ? 'enter a custom width and height, then press Use' : 'choose a screen size');
+        if (getAvailableFonts().length === 0) problems.push('add at least one font ID');
+        if (problems.length) {
+            errBox.textContent = 'Please ' + problems.join(' and ') + ' first.';
+            confirmBtn.classList.remove('shake'); void confirmBtn.offsetWidth; confirmBtn.classList.add('shake');
+            if (!validRes()) resSel.focus();
+            return;
+        }
+        setConfirmed(true);
+    }
+    confirmBtn.addEventListener('click', tryConfirm);
+
+    resSel.addEventListener('change', () => {
+        errBox.textContent = '';
+        if (!hint.hidden && validRes()) {
+            hintText.textContent = 'Great! Review the fonts below, then press Confirm to continue.';
+            confirmBtn.classList.add('pulse');
+        }
+    });
+
+    // Initial state
+    let confirmed = false;
+    try { confirmed = localStorage.getItem(KEY) === 'true'; } catch (e) {}
+    if (!confirmed && typeof hasLoadedCache !== 'undefined' && hasLoadedCache && validRes()) confirmed = true; // returning user
+    if (confirmed && validRes()) {
+        elDetails.classList.remove('workflow-locked');
+        cfgDetails.open = false; elDetails.open = true;
+        hint.hidden = true;
+    } else {
+        elDetails.classList.add('workflow-locked');
+        cfgDetails.open = true;
+        let seen = false; try { seen = localStorage.getItem('ddHintSeen') === 'true'; } catch (e) {}
+        hint.hidden = false;
+        if (!seen) { try { localStorage.setItem('ddHintSeen', 'true'); } catch (e) {} hint.classList.add('first-time'); }
+    }
+    // Keep Config toggle icon in sync with programmatic open/close
+    cfgDetails.dispatchEvent(new Event('toggle'));
+})();
+
+// ===== Icon suggestions: float above all panels =====
+(function () {
+    const box = document.getElementById('iconSuggestions');
+    const input = document.getElementById('editIconLigature');
+    if (!box || !input) return;
+    document.body.appendChild(box); // escape panel overflow / backdrop-filter containing block
+    box.style.position = 'fixed';
+    function place() {
+        const r = input.getBoundingClientRect();
+        const below = window.innerHeight - r.bottom - 16, above = r.top - 16;
+        const useAbove = below < 140 && above > below;
+        const maxH = Math.max(100, Math.min(260, useAbove ? above : below));
+        box.style.left = r.left + 'px';
+        box.style.width = r.width + 'px';
+        box.style.maxWidth = 'none';
+        box.style.maxHeight = maxH + 'px';
+        if (useAbove) { box.style.top = 'auto'; box.style.bottom = (window.innerHeight - r.top + 4) + 'px'; }
+        else { box.style.bottom = 'auto'; box.style.top = (r.bottom + 4) + 'px'; }
+    }
+    ['input', 'focus'].forEach(ev => input.addEventListener(ev, () => requestAnimationFrame(place)));
+    window.addEventListener('resize', place);
+    document.addEventListener('scroll', place, true);
+})();
+
+// ===== Markdown export (humans + agents) =====
+(function () {
+    function fontPx(fontId) { const m = mapFontPreview(fontId).match(/(\d+)px/); return m ? parseInt(m[1], 10) : 12; }
+    function displayText(el) {
+        let t = el.content || '';
+        if (el.args) t = t.replace(/%[.\d]*[fdis]/, '{' + el.args.split('.')[0].replace('id(', '').replace(')', '') + '}');
+        return t;
+    }
+    function bbox(el) {
+        const x = parseInt(el.x || 0), y = parseInt(el.y || 0);
+        if (el.type === 'text' || el.type === 'icon') {
+            const px = fontPx(el.fontId); previewCtx.font = mapFontPreview(el.fontId);
+            const w = el.type === 'text' ? Math.round(previewCtx.measureText(displayText(el)).width) : px;
+            const h = Math.round(px * 1.2); let bx = x;
+            if (el.type === 'text') { if (el.align === 'CENTER') bx = x - Math.round(w / 2); else if (el.align === 'RIGHT') bx = x - w; }
+            return { x: bx, y, w: Math.max(1, w), h };
+        }
+        if (el.type === 'circle') { const r = parseInt(el.radius || 10); return { x: x - r, y: y - r, w: 2 * r, h: 2 * r }; }
+        return { x, y, w: parseInt(el.width || 10), h: parseInt(el.height || (el.type === 'bar' ? 1 : 10)) };
+    }
+    function colorName(el) { return el.colorId || 'white'; }
+    function describe(el) {
+        const b = bbox(el), c = colorName(el);
+        if (el.type === 'text') return `Text "${displayText(el)}"` + (el.args ? ` (live value from \`${el.args}\`)` : '') + `, font \`${el.fontId || 'default'}\`, color \`${c}\`, ${(el.align || 'LEFT').toLowerCase()}-aligned`;
+        if (el.type === 'icon') return `Icon \`${el.iconLigature}\`, font \`${el.fontId || 'default'}\`, color \`${c}\``;
+        if (el.type === 'bar') return `Horizontal bar ${b.w}x${b.h}px, color \`${c}\``;
+        if (el.type === 'rectangle') return `${el.fill ? 'Filled' : 'Outlined'} rectangle ${b.w}x${b.h}px, color \`${c}\``;
+        if (el.type === 'circle') return `${el.fill ? 'Filled' : 'Outlined'} circle radius ${el.radius ?? 10}px, color \`${c}\``;
+        return el.type;
+    }
+    function region(b, W, H) {
+        const cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+        const v = cy < H / 3 ? 'top' : cy < 2 * H / 3 ? 'middle' : 'bottom';
+        const h = cx < W / 3 ? 'left' : cx < 2 * W / 3 ? 'center' : 'right';
+        return v === 'middle' && h === 'center' ? 'center' : `${v}-${h}`;
+    }
+    function asciiScreen(W, H, border, list) {
+        const cols = Math.min(72, Math.max(16, W)), sx = cols / W;
+        const rows = Math.max(6, Math.round(H * sx / 2)), sy = rows / H;
+        const g = Array.from({ length: rows }, () => Array(cols).fill(' '));
+        const put = (c, r, ch) => { if (r >= 0 && r < rows && c >= 0 && c < cols) g[r][c] = ch; };
+        const box = (c0, r0, c1, r1, ch) => { for (let c = c0; c <= c1; c++) { put(c, r0, ch.h); put(c, r1, ch.h); } for (let r = r0; r <= r1; r++) { put(c0, r, ch.v); put(c1, r, ch.v); } put(c0, r0, '+'); put(c1, r0, '+'); put(c0, r1, '+'); put(c1, r1, '+'); };
+        if (border > 0) { const bc = Math.round(border * sx), br = Math.round(border * sy); box(bc, br, cols - 1 - bc, rows - 1 - br, { h: '.', v: '.' }); }
+        [...list].reverse().forEach(el => {
+            const n = list.indexOf(el) + 1, b = bbox(el);
+            let c0 = Math.round(b.x * sx), r0 = Math.round(b.y * sy);
+            let c1 = Math.max(c0, Math.round((b.x + b.w) * sx) - 1), r1 = Math.max(r0, Math.round((b.y + b.h) * sy) - 1);
+            if (el.type === 'text') { const t = displayText(el); for (let i = 0; i < t.length; i++) put(c0 + i, r0, t[i]); }
+            else if (el.type === 'icon') { put(c0, r0, '@'); put(c0 + 1, r0, String(n).slice(-1)); }
+            else if (el.type === 'bar') { for (let c = c0; c <= c1; c++) for (let r = r0; r <= r1; r++) put(c, r, '='); }
+            else if (el.type === 'rectangle') {
+                if (el.fill) for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) put(c, r, '#');
+                else box(c0, r0, c1, r1, { h: '-', v: '|' });
+                const tag = '[' + n + ']'; for (let i = 0; i < tag.length; i++) put(c0 + 1 + i, r0, tag[i]);
+            } else if (el.type === 'circle') {
+                const cx = (c0 + c1) / 2, cy = (r0 + r1) / 2, rx = Math.max(1, (c1 - c0) / 2), ry = Math.max(0.5, (r1 - r0) / 2);
+                for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
+                    const d = Math.pow((c - cx) / rx, 2) + Math.pow((r - cy) / ry, 2);
+                    if (el.fill ? d <= 1.05 : (d <= 1.15 && d >= 0.55)) put(c, r, el.fill ? '0' : 'o');
+                }
+                put(Math.round(cx), Math.round(cy), String(n).slice(-1));
+            }
+        });
+        const frame = '+' + '-'.repeat(cols) + '+';
+        return [frame, ...g.map(r => '|' + r.join('') + '|'), frame].join('\n');
+    }
+
+    function buildMarkdown() {
+        generateLambdaCode(); generateFontYaml();
+        const lambda = generatedCodeOutput.value, fontYaml = generatedFontCodeOutput.value;
+        const [W, H] = (/^\d+x\d+$/.test(configResolutionSelect.value) ? configResolutionSelect.value : '128x160').split('x').map(Number);
+        const border = screenBorder, uw = W - 2 * border, uh = H - 2 * border;
+        const orient = W === H ? 'square' : W > H ? 'landscape' : 'portrait';
+        const fonts = getAvailableFonts(), colors = getAvailableColors();
+        const list = elements;
+        const sorted = [...list].sort((a, b) => (bbox(a).y - bbox(b).y) || (bbox(a).x - bbox(b).x));
+        const now = new Date().toISOString().slice(0, 10);
+        const L = [];
+        L.push('# ESPHome Display Design', '', `> Exported from **Display Designer by JDNx Tools** on ${now}. Contains a human-readable description, an approximate ASCII rendering, the generated ESPHome code, and a machine-readable spec for AI agents.`, '');
+
+        L.push('## 1. Overview (for humans)', '');
+        L.push(`This is a **${W} x ${H} px ${orient}** ${einkMode ? '**E-Ink** (white paper, black ink by default)' : 'color/LCD'} display layout with **${list.length}** element${list.length === 1 ? '' : 's'}.` + (border ? ` The outer **${border}px** edge is treated as unusable, leaving a **${uw} x ${uh} px** usable area.` : ''), '');
+        L.push('| Property | Value |', '|---|---|',
+            `| Resolution | ${W} x ${H} px |`, `| Orientation | ${orient} (aspect ${(W / H).toFixed(2)}:1) |`,
+            `| Screen type | ${einkMode ? 'E-Ink (white background)' : 'Color / dark background'} |`,
+            `| Border (unusable) | ${border} px |`, `| Usable area | ${uw} x ${uh} px |`,
+            `| Fonts | ${fonts.map(f => '`' + f + '`').join(', ') || '_none_'} |`, `| Colors | ${colors.map(f => '`' + f + '`').join(', ') || '_none_'} |`, '');
+        L.push('Coordinates: origin `(0,0)` is the **top-left** pixel; X grows right, Y grows down. Text and icons are positioned by their top (and left/center/right anchor for text); circles by their **center**; rectangles and bars by their top-left corner.', '');
+        if (list.length) {
+            L.push('### What you would see, top to bottom', '');
+            sorted.forEach(el => { const b = bbox(el); L.push(`- **#${list.indexOf(el) + 1}** (${region(b, W, H)}, at ${el.x},${el.y}): ${describe(el)}.`); });
+            L.push('');
+        } else L.push('_No elements have been added yet._', '');
+
+        L.push('## 2. Approximate screen', '', 'Rough ASCII rendering (not to scale in aspect for fonts). `.` dotted line = usable-area boundary, `[n]`/digits = element numbers, `=` bar, `#` filled shape, `o`/`0` circle, `@` icon.', '', '```text', asciiScreen(W, H, border, list), '```', '');
+
+        L.push('## 3. Element table', '');
+        if (list.length) {
+            L.push('| # | Type | Position (x,y) | Size / bbox | Color | Details |', '|---|---|---|---|---|---|');
+            list.forEach((el, i) => { const b = bbox(el); L.push(`| ${i + 1} | ${el.type} | ${el.x},${el.y} | ${b.w}x${b.h} | \`${colorName(el)}\` | ${describe(el).replace(/\|/g, '\\|')} |`); });
+            L.push('', '_Element #1 is drawn on top; the last element is drawn first (bottom)._', '');
+        } else L.push('_None._', '');
+
+        L.push('## 4. Generated ESPHome code', '', '### Display lambda', '', '```yaml', lambda.trimEnd(), '```', '', '### Font definitions', '', '```yaml', fontYaml.trimEnd(), '```', '', '### Color IDs', '', '```yaml', generateColorYaml().trimEnd(), '```', '',
+            'What it does: the `lambda` runs on every display refresh. Each line draws one element, in order, from the bottom-most element to the top-most. `it.printf` draws text/icons, `it.rectangle`/`it.filled_rectangle` draw boxes and bars, and `it.circle`/`it.filled_circle` draw circles. Font paths in the font block are templates - verify them.', '');
+
+        L.push('## 5. Agent section (machine-readable)', '');
+        L.push('### Instructions for AI agents', '',
+            '- Treat the JSON below as the source of truth for this layout; the ASCII art is only a sketch.',
+            '- Units are pixels, origin top-left. `zOrder` 0 = drawn last = on top. The generated lambda draws in **reverse list order**.',
+            '- `bbox` is an estimate from browser font metrics; real ESPHome font rendering may differ by a few pixels.',
+            '- `cornerRadius` and `thickness` are preview-only; ESPHome `it.rectangle` ignores them.',
+            `- Keep elements inside the usable area (${border}..${W - border} x ${border}..${H - border}).`,
+            '- To change the design, edit the JSON elements and regenerate lambda using this mapping:',
+            '  - `text` -> `it.printf(x, y, font, color, [TextAlign::CENTER|RIGHT,] "format"[, args]);`',
+            '  - `icon` -> `it.printf(x, y, font, color, "<codepoint char>");` (Material Symbols font)',
+            '  - `bar` / filled `rectangle` -> `it.filled_rectangle(x, y, w, h, color);`',
+            '  - outlined `rectangle` -> `it.rectangle(x, y, w, h, color);`',
+            '  - `circle` -> `it.circle(x, y, r, color);` or `it.filled_circle(...)` when `fill` is true.',
+            '- Color IDs, font IDs and `id(sensor).state` arguments must exist in the user\'s ESPHome YAML.', '');
+        const spec = {
+            display: { width: W, height: H, orientation: orient, origin: 'top-left', units: 'px', eink: einkMode, borderPx: border, usableArea: { x: border, y: border, width: uw, height: uh } },
+            fonts, colors,
+            elements: list.map((el, i) => {
+                const o = { index: i + 1, zOrder: i, type: el.type, x: el.x, y: el.y, color: colorName(el), bbox: bbox(el), region: region(bbox(el), W, H) };
+                ['fontId', 'content', 'args', 'align', 'iconLigature', 'width', 'height', 'radius', 'fill', 'thickness', 'cornerRadius'].forEach(k => { if (el[k] !== undefined && el[k] !== '') o[k] = el[k]; });
+                return o;
+            })
+        };
+        L.push('### Layout spec', '', '```json', JSON.stringify(spec, null, 2), '```', '');
+        L.push('---', '_Generated by Display Designer by JDNx Tools. Re-import the TXT export (download icon) into the tool to continue editing._', '');
+        return L.join('\n');
+    }
+
+    document.getElementById('export-md-btn').addEventListener('click', () => {
+        const md = buildMarkdown();
+        const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = 'display-design.md';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    });
+    window.buildDisplayMarkdown = buildMarkdown;
+})();
+</script>
+<script>
+// ===== Layout tools: drag on canvas, snap to grid, multi-select, align / center / spacing / match size =====
+(function () {
+    const canvas = previewCanvas, host = screenPreviewDiv;
+    const LS = (k, d) => { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } };
+    const LSset = (k, v) => { try { localStorage.setItem(k, String(v)); } catch (e) {} };
+    const S = { snap: LS('ddSnap', 'false') === 'true', grid: parseInt(LS('ddGrid', '8')) || 8, showGrid: LS('ddShowGrid', 'false') === 'true' };
+    let selectedIds = [];
+    let drag = null, marquee = null, guides = null;
+
+    const elById = id => elements.find(e => e.id === id);
+    const mctx = document.createElement('canvas').getContext('2d');
+    const fontPx = f => { const m = mapFontPreview(f).match(/(\d+)px/); return m ? parseInt(m[1], 10) : 12; };
+    function dText(el) {
+        let t = el.content || '';
+        if (el.args) t = t.replace(/%[.\d]*[fdis]/, '[' + el.args.split('.')[0].replace('id(', '').replace(')', '') + ']');
+        return t;
+    }
+    function bboxOf(el) {
+        const x = parseInt(el.x || 0), y = parseInt(el.y || 0);
+        if (el.type === 'text' || el.type === 'icon') {
+            const px = fontPx(el.fontId); mctx.font = mapFontPreview(el.fontId);
+            const w = el.type === 'text' ? Math.round(mctx.measureText(dText(el)).width) : px;
+            let bx = x;
+            if (el.type === 'text') { if (el.align === 'CENTER') bx = x - Math.round(w / 2); else if (el.align === 'RIGHT') bx = x - w; }
+            return { x: bx, y, w: Math.max(2, w), h: Math.round(px * 1.2) };
+        }
+        if (el.type === 'circle') { const r = parseInt(el.radius || 10); return { x: x - r, y: y - r, w: 2 * r, h: 2 * r }; }
+        return { x, y, w: parseInt(el.width || 10), h: parseInt(el.height || (el.type === 'bar' ? 1 : 10)) };
+    }
+    const snapV = v => S.snap ? Math.round(v / S.grid) * S.grid : v;
+
+    // ---------- Overlay canvas (selection, grid, guides) — separate from the exported canvas ----------
+    const ov = document.createElement('canvas'); ov.className = 'layout-overlay'; host.appendChild(ov);
+    const oc = ov.getContext('2d');
+    function drawOverlay() {
+        const r = canvas.getBoundingClientRect(); if (!r.width || !canvas.width) return;
+        const dpr = window.devicePixelRatio || 1, pw = Math.round(r.width * dpr), ph = Math.round(r.height * dpr);
+        if (ov.width !== pw || ov.height !== ph) { ov.width = pw; ov.height = ph; }
+        const k = pw / canvas.width; oc.clearRect(0, 0, pw, ph);
+        if (S.showGrid || (drag && drag.moved && S.snap)) {
+            const step = S.grid * k;
+            if (step >= 4 * dpr) {
+                oc.lineWidth = 1; let i = 0;
+                for (let gx = 0; gx <= canvas.width; gx += S.grid, i++) { oc.strokeStyle = (i % 5 === 0) ? 'rgba(110,120,255,0.38)' : 'rgba(110,120,255,0.18)'; oc.beginPath(); oc.moveTo(Math.round(gx * k) + 0.5, 0); oc.lineTo(Math.round(gx * k) + 0.5, ph); oc.stroke(); }
+                i = 0;
+                for (let gy = 0; gy <= canvas.height; gy += S.grid, i++) { oc.strokeStyle = (i % 5 === 0) ? 'rgba(110,120,255,0.38)' : 'rgba(110,120,255,0.18)'; oc.beginPath(); oc.moveTo(0, Math.round(gy * k) + 0.5); oc.lineTo(pw, Math.round(gy * k) + 0.5); oc.stroke(); }
+            }
+        }
+        if (guides) {
+            oc.strokeStyle = 'rgba(244,63,142,0.9)'; oc.lineWidth = dpr; oc.setLineDash([4 * dpr, 3 * dpr]);
+            if (guides.v) { oc.beginPath(); oc.moveTo(pw / 2, 0); oc.lineTo(pw / 2, ph); oc.stroke(); }
+            if (guides.h) { oc.beginPath(); oc.moveTo(0, ph / 2); oc.lineTo(pw, ph / 2); oc.stroke(); }
+            oc.setLineDash([]);
+        }
+        selectedIds.forEach(id => {
+            const el = elById(id); if (!el) return;
+            const b = bboxOf(el), primary = id === selectedElementId;
+            const x = b.x * k, y = b.y * k, w = Math.max(b.w * k, 3), h = Math.max(b.h * k, 3);
+            oc.setLineDash([]); oc.lineWidth = 3 * dpr; oc.strokeStyle = 'rgba(255,255,255,0.85)'; oc.strokeRect(x, y, w, h);
+            oc.lineWidth = 1.5 * dpr; oc.strokeStyle = primary ? '#6366f1' : '#a78bfa';
+            if (!primary) oc.setLineDash([5 * dpr, 3 * dpr]);
+            oc.strokeRect(x, y, w, h); oc.setLineDash([]);
+        });
+        if (marquee) {
+            const x = Math.min(marquee.x0, marquee.x1) * k, y = Math.min(marquee.y0, marquee.y1) * k, w = Math.abs(marquee.x1 - marquee.x0) * k, h = Math.abs(marquee.y1 - marquee.y0) * k;
+            oc.fillStyle = 'rgba(99,102,241,0.14)'; oc.fillRect(x, y, w, h); oc.lineWidth = dpr; oc.strokeStyle = '#6366f1'; oc.strokeRect(x, y, w, h);
+        }
+    }
+    const origDraw = drawPreview;
+    drawPreview = function () { const r = origDraw.apply(this, arguments); drawOverlay(); return r; };
+    if (window.ResizeObserver) new ResizeObserver(drawOverlay).observe(host);
+
+    // ---------- Selection state (wraps existing single-select functions) ----------
+    const origSelect = selectElement;
+    selectElement = function (id) { selectedIds = (id === null || id === undefined) ? [] : [id]; origSelect(id); };
+    const origRemove = removeElement;
+    removeElement = function (id) {
+        origRemove(id);
+        selectedIds = selectedIds.filter(i => elById(i));
+        if (selectedElementId === null && selectedIds.length) origSelect(selectedIds[selectedIds.length - 1]);
+        else { renderElementList(); }
+    };
+    const origRender = renderElementList;
+    renderElementList = function () { const r = origRender.apply(this, arguments); markMulti(); updateToolbar(); drawOverlay(); return r; };
+    function markMulti() {
+        document.querySelectorAll('#elementList li, #popupElementList li').forEach(li => li.classList.toggle('multi', selectedIds.length > 1 && selectedIds.includes(Number(li.dataset.id))));
+    }
+    function toggleSel(id) {
+        if (selectedIds.includes(id)) selectedIds = selectedIds.filter(i => i !== id); else selectedIds.push(id);
+        origSelect(selectedIds.length ? (selectedIds.includes(selectedElementId) && selectedElementId !== null && selectedIds.indexOf(id) === -1 ? selectedElementId : selectedIds[selectedIds.length - 1]) : null);
+    }
+    [document.getElementById('elementList'), document.getElementById('popupElementList')].forEach(ul => ul && ul.addEventListener('click', e => {
+        if (!(e.shiftKey || e.ctrlKey || e.metaKey)) return;
+        const li = e.target.closest('li'); if (!li || e.target.closest('.element-controls')) return;
+        e.stopImmediatePropagation(); e.preventDefault(); toggleSel(Number(li.dataset.id));
+    }, true));
+
+    // ---------- Canvas pointer interaction ----------
+    function toCanvas(e) { const r = canvas.getBoundingClientRect(); const s = canvas.width / r.width; return { x: (e.clientX - r.left) * s, y: (e.clientY - r.top) * s, s }; }
+    function hit(px, py, s) {
+        const tol = Math.max(1.5, 4 * s);
+        for (const el of elements) { const b = bboxOf(el); if (px >= b.x - tol && px <= b.x + b.w + tol && py >= b.y - tol && py <= b.y + b.h + tol) return el; }
+        return null;
+    }
+    function groupBox(list) {
+        let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+        list.forEach(el => { const b = bboxOf(el); x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y); x1 = Math.max(x1, b.x + b.w); y1 = Math.max(y1, b.y + b.h); });
+        return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+    }
+    function syncEditorCoords() {
+        const el = elById(selectedElementId); if (!el) return;
+        editXInput.value = el.x; editXSlider.value = el.x; editXValueSpan.textContent = el.x;
+        editYInput.value = el.y; editYSlider.value = el.y; editYValueSpan.textContent = el.y;
+    }
+    canvas.style.touchAction = 'none';
+    canvas.addEventListener('pointerdown', e => {
+        if (e.button !== 0) return;
+        const p = toCanvas(e), el = hit(p.x, p.y, p.s), add = e.shiftKey || e.ctrlKey || e.metaKey;
+        if (el) {
+            if (add) { toggleSel(el.id); if (!selectedIds.includes(el.id)) return; }
+            else if (!selectedIds.includes(el.id)) selectElement(el.id);
+            else if (selectedElementId !== el.id) origSelect(el.id);
+            const targets = selectedIds.map(elById).filter(Boolean);
+            drag = { cx: e.clientX, cy: e.clientY, anchor: { x: el.x, y: el.y }, starts: targets.map(t => ({ el: t, x: t.x, y: t.y })), gb: groupBox(targets), moved: false, scale: p.s };
+            canvas.setPointerCapture(e.pointerId); canvas.style.cursor = 'grabbing';
+        } else {
+            const base = add ? selectedIds.slice() : [];
+            if (!add && selectedIds.length) selectElement(null);
+            marquee = { x0: p.x, y0: p.y, x1: p.x, y1: p.y, base, add };
+            canvas.setPointerCapture(e.pointerId); drawOverlay();
+        }
+    });
+    canvas.addEventListener('pointermove', e => {
+        if (drag) {
+            const dxs = (e.clientX - drag.cx) * drag.scale, dys = (e.clientY - drag.cy) * drag.scale;
+            if (!drag.moved && Math.hypot(e.clientX - drag.cx, e.clientY - drag.cy) < 3) return;
+            drag.moved = true;
+            let dx = Math.round(dxs), dy = Math.round(dys);
+            if (S.snap) { dx = snapV(drag.anchor.x + dx) - drag.anchor.x; dy = snapV(drag.anchor.y + dy) - drag.anchor.y; }
+            const gb = drag.gb, W = canvas.width, H = canvas.height;
+            if (gb.w <= W) dx = Math.max(-gb.x, Math.min(W - gb.x - gb.w, dx));
+            if (gb.h <= H) dy = Math.max(-gb.y, Math.min(H - gb.y - gb.h, dy));
+            drag.starts.forEach(s => { s.el.x = s.x + dx; s.el.y = s.y + dy; });
+            const gcx = gb.x + dx + gb.w / 2, gcy = gb.y + dy + gb.h / 2;
+            guides = { v: Math.abs(gcx - W / 2) < 0.75, h: Math.abs(gcy - H / 2) < 0.75 };
+            syncEditorCoords(); drawPreview();
+        } else if (marquee) {
+            const p = toCanvas(e); marquee.x1 = p.x; marquee.y1 = p.y; drawOverlay();
+        } else {
+            const p = toCanvas(e); canvas.style.cursor = hit(p.x, p.y, p.s) ? 'move' : 'default';
+        }
+    });
+    function endPointer(e) {
+        if (drag) {
+            const moved = drag.moved; drag = null; guides = null; canvas.style.cursor = 'default';
+            if (moved) { renderElementList(); updateEditorForm(); saveToCache(); }
+            drawPreview();
+        } else if (marquee) {
+            const m = marquee; marquee = null;
+            const x0 = Math.min(m.x0, m.x1), x1 = Math.max(m.x0, m.x1), y0 = Math.min(m.y0, m.y1), y1 = Math.max(m.y0, m.y1);
+            if (x1 - x0 > 2 || y1 - y0 > 2) {
+                const inside = elements.filter(el => { const b = bboxOf(el); return b.x < x1 && b.x + b.w > x0 && b.y < y1 && b.y + b.h > y0; }).map(el => el.id);
+                const ids = m.add ? Array.from(new Set(m.base.concat(inside))) : inside;
+                selectedIds = ids; origSelect(ids.length ? ids[ids.length - 1] : null);
+            }
+            drawPreview();
+        }
+    }
+    canvas.addEventListener('pointerup', endPointer);
+    canvas.addEventListener('pointercancel', endPointer);
+
+    // Arrow-key nudge
+    document.addEventListener('keydown', e => {
+        if (!selectedIds.length || !/^Arrow/.test(e.key)) return;
+        const t = e.target; if (t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
+        const st = e.shiftKey ? S.grid : 1;
+        const dx = e.key === 'ArrowLeft' ? -st : e.key === 'ArrowRight' ? st : 0, dy = e.key === 'ArrowUp' ? -st : e.key === 'ArrowDown' ? st : 0;
+        e.preventDefault(); selectedIds.map(elById).filter(Boolean).forEach(el => { el.x += dx; el.y += dy; });
+        syncEditorCoords(); drawPreview(); renderElementList(); saveToCache();
+    });
+
+    // ---------- Toolbar ----------
+    const bar = document.createElement('div'); bar.className = 'layout-toolbar'; bar.id = 'layoutToolbar';
+    const ic = n => `<span class="material-symbols-outlined">${n}</span>`;
+    bar.innerHTML = `
+      <div class="lt-group">
+        <button type="button" class="lt-btn lt-toggle" id="ltSnap" title="Snap to grid">${ic('grid_on')}<span>Snap</span></button>
+        <select id="ltGrid" class="lt-select" title="Grid size (px)">${[1, 2, 4, 5, 8, 10, 16, 20, 32].map(v => `<option value="${v}">${v}px</option>`).join('')}</select>
+        <button type="button" class="lt-btn lt-toggle" id="ltShowGrid" title="Show grid">${ic('grid_4x4')}</button>
+      </div>
+      <div class="lt-sep"></div>
+      <div class="lt-group" data-need="2">
+        <button type="button" class="lt-btn" data-act="align-left" title="Align left edges">${ic('align_horizontal_left')}</button>
+        <button type="button" class="lt-btn" data-act="align-hcenter" title="Align horizontal centers">${ic('align_horizontal_center')}</button>
+        <button type="button" class="lt-btn" data-act="align-right" title="Align right edges">${ic('align_horizontal_right')}</button>
+        <button type="button" class="lt-btn" data-act="align-top" title="Align top edges">${ic('align_vertical_top')}</button>
+        <button type="button" class="lt-btn" data-act="align-vcenter" title="Align vertical centers">${ic('align_vertical_center')}</button>
+        <button type="button" class="lt-btn" data-act="align-bottom" title="Align bottom edges">${ic('align_vertical_bottom')}</button>
+      </div>
+      <div class="lt-sep"></div>
+      <div class="lt-group" data-need="1">
+        <button type="button" class="lt-btn lt-text" data-act="center-h" title="Center each selected element horizontally on the screen">${ic('swap_horiz')}<span>Center H</span></button>
+        <button type="button" class="lt-btn lt-text" data-act="center-v" title="Center each selected element vertically on the screen">${ic('swap_vert')}<span>Center V</span></button>
+      </div>
+      <div class="lt-sep"></div>
+      <div class="lt-group" data-need="2" title="Spacing: leave the gap empty to distribute evenly (3+ elements), or type a gap in px">
+        <input type="number" id="ltGap" class="lt-gap" min="0" step="1" placeholder="auto" title="Gap in px (empty = even distribution)">
+        <button type="button" class="lt-btn" data-act="dist-h" title="Horizontal spacing">${ic('horizontal_distribute')}</button>
+        <button type="button" class="lt-btn" data-act="dist-v" title="Vertical spacing">${ic('vertical_distribute')}</button>
+      </div>
+      <div class="lt-sep"></div>
+      <div class="lt-group" data-need="2" title="Make the selection match the active (last selected) element">
+        <button type="button" class="lt-btn lt-text" data-act="match-w" title="Same width as the active element">${ic('width')}<span>W</span></button>
+        <button type="button" class="lt-btn lt-text" data-act="match-h" title="Same height as the active element">${ic('height')}<span>H</span></button>
+        <button type="button" class="lt-btn lt-text" data-act="match-both" title="Same width and height as the active element">${ic('aspect_ratio')}<span>Both</span></button>
+      </div>
+      <div class="lt-info"><span id="ltCount" title="Drag on the screen to move. Shift/Ctrl-click or drag a box to select several. Arrow keys nudge (Shift = grid step)."></span><span id="ltMsg"></span></div>`;
+    const rightPanel = document.querySelector('.right-panel');
+    rightPanel.insertBefore(bar, document.getElementById('previewSection'));
+
+    const $ = id => document.getElementById(id), gridSel = $('ltGrid');
+    gridSel.value = String(S.grid); if (gridSel.value !== String(S.grid)) { gridSel.value = '8'; S.grid = 8; }
+    const reflectToggles = () => { $('ltSnap').classList.toggle('on', S.snap); $('ltShowGrid').classList.toggle('on', S.showGrid); };
+    $('ltSnap').addEventListener('click', () => { S.snap = !S.snap; LSset('ddSnap', S.snap); reflectToggles(); drawOverlay(); });
+    $('ltShowGrid').addEventListener('click', () => { S.showGrid = !S.showGrid; LSset('ddShowGrid', S.showGrid); reflectToggles(); drawOverlay(); });
+    gridSel.addEventListener('change', () => { S.grid = parseInt(gridSel.value) || 8; LSset('ddGrid', S.grid); drawOverlay(); });
+    reflectToggles();
+
+    let msgT;
+    function say(t) { const m = $('ltMsg'); m.textContent = t || ''; clearTimeout(msgT); if (t) msgT = setTimeout(() => { m.textContent = ''; }, 3500); }
+    function updateToolbar() {
+        const n = selectedIds.length;
+        $('ltCount').textContent = n > 1 ? `${n} selected` : n === 1 ? '1 selected' : 'Click or drag elements';
+        bar.querySelectorAll('.lt-group[data-need]').forEach(g => { const need = Number(g.dataset.need); g.classList.toggle('disabled', n < need); g.querySelectorAll('button,input').forEach(b => { b.disabled = n < need; }); });
+    }
+    const targets = () => selectedIds.map(elById).filter(Boolean);
+    function commit() { renderElementList(); updateEditorForm(); drawPreview(); saveToCache(); }
+
+    function align(kind) {
+        const t = targets(), bs = t.map(bboxOf);
+        const L = Math.min(...bs.map(b => b.x)), R = Math.max(...bs.map(b => b.x + b.w)), T = Math.min(...bs.map(b => b.y)), B = Math.max(...bs.map(b => b.y + b.h));
+        t.forEach((el, i) => { const b = bs[i];
+            if (kind === 'align-left') el.x += L - b.x;
+            else if (kind === 'align-right') el.x += R - (b.x + b.w);
+            else if (kind === 'align-hcenter') el.x += Math.round((L + R) / 2 - (b.x + b.w / 2));
+            else if (kind === 'align-top') el.y += T - b.y;
+            else if (kind === 'align-bottom') el.y += B - (b.y + b.h);
+            else if (kind === 'align-vcenter') el.y += Math.round((T + B) / 2 - (b.y + b.h / 2));
+        });
+    }
+    function centerOnScreen(axis) {
+        targets().forEach(el => { const b = bboxOf(el);
+            if (axis === 'h') el.x += Math.round(canvas.width / 2 - (b.x + b.w / 2));
+            else el.y += Math.round(canvas.height / 2 - (b.y + b.h / 2));
+        });
+    }
+    function distribute(axis) {
+        const t = targets(), gapRaw = $('ltGap').value.trim(), hasGap = gapRaw !== '';
+        const pos = axis === 'h' ? 'x' : 'y', size = axis === 'h' ? 'w' : 'h';
+        if (!hasGap && t.length < 3) { say('Select 3+ elements for even spacing, or type a gap in px.'); return false; }
+        const items = t.map(el => ({ el, b: bboxOf(el) })).sort((a, b) => a.b[pos] - b.b[pos]);
+        let gap;
+        if (hasGap) gap = Math.max(0, parseInt(gapRaw) || 0);
+        else { const span = items[items.length - 1].b[pos] + items[items.length - 1].b[size] - items[0].b[pos]; const total = items.reduce((s, i) => s + i.b[size], 0); gap = (span - total) / (items.length - 1); }
+        let cursor = items[0].b[pos];
+        items.forEach((it, i) => { if (i > 0) { const target = Math.round(cursor); it.el[axis === 'h' ? 'x' : 'y'] += target - it.b[pos]; } cursor = (i === 0 ? it.b[pos] : Math.round(cursor)) + it.b[size] + gap; });
+        say(hasGap ? `Set ${gap}px ${axis === 'h' ? 'horizontal' : 'vertical'} gaps` : `Distributed evenly (${gap.toFixed(1)}px gaps)`);
+        return true;
+    }
+    function matchSize(mode) {
+        const ref = elById(selectedElementId); if (!ref) return false;
+        const rb = bboxOf(ref); let changed = 0, skipped = 0;
+        targets().forEach(el => {
+            if (el === ref) return;
+            if (el.type === 'bar' || el.type === 'rectangle') {
+                if (mode !== 'h') el.width = rb.w;
+                if (mode !== 'w') el.height = rb.h; changed++;
+            } else if (el.type === 'circle') {
+                el.radius = Math.max(1, Math.round((mode === 'w' ? rb.w : mode === 'h' ? rb.h : Math.min(rb.w, rb.h)) / 2)); changed++;
+            } else skipped++;
+        });
+        say(`Matched ${changed} element${changed === 1 ? '' : 's'}` + (skipped ? ` (${skipped} text/icon skipped: size comes from the font)` : ''));
+        return changed > 0;
+    }
+    bar.addEventListener('click', e => {
+        const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
+        const a = b.dataset.act; let ok = true;
+        if (a.startsWith('align-')) align(a);
+        else if (a === 'center-h') centerOnScreen('h');
+        else if (a === 'center-v') centerOnScreen('v');
+        else if (a === 'dist-h') ok = distribute('h');
+        else if (a === 'dist-v') ok = distribute('v');
+        else if (a.startsWith('match-')) ok = matchSize(a.slice(6) === 'both' ? 'both' : a.slice(6));
+        if (ok) commit();
+    });
+    updateToolbar();
+})();
+</script>
+<script>
+// ===== High-resolution view: re-renders the scene at device resolution (no pixelation) =====
+(function () {
+    const host = screenPreviewDiv, base = previewCanvas, btn = document.getElementById('hiResToggle'), sw = document.getElementById('hiResSwitch');
+    const hc = document.createElement('canvas'); hc.className = 'hires-canvas'; host.insertBefore(hc, host.querySelector('.layout-overlay'));
+    const hctx = hc.getContext('2d');
+    let on = false; try { on = localStorage.getItem('ddHiRes') === 'true'; } catch (e) {}
+    window.__hiRes = on;
+
+    function drawHiRes() {
+        if (!on) return;
+        const r = base.getBoundingClientRect(); if (!r.width || !base.width) return;
+        const dpr = window.devicePixelRatio || 1;
+        let pw = Math.round(r.width * dpr), ph = Math.round(r.height * dpr);
+        const cap = 4096; if (pw > cap) { ph = Math.round(ph * cap / pw); pw = cap; }
+        if (hc.width !== pw || hc.height !== ph) { hc.width = pw; hc.height = ph; }
+        const k = pw / base.width;
+        hctx.setTransform(1, 0, 0, 1, 0, 0); hctx.clearRect(0, 0, pw, ph);
+        hctx.setTransform(k, 0, 0, k, 0, 0);
+        hctx.imageSmoothingEnabled = true; hctx.imageSmoothingQuality = 'high';
+        renderScene(hctx, base.width, base.height);
+        hctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+    const prev = drawPreview;
+    drawPreview = function () { const r = prev.apply(this, arguments); drawHiRes(); return r; };
+    if (window.ResizeObserver) new ResizeObserver(drawHiRes).observe(host);
+
+    function apply() {
+        window.__hiRes = on;
+        host.classList.toggle('hires', on);
+        btn.checked = on; sw.classList.toggle('on', on);
+        sw.title = on ? 'High resolution view: on' : 'High resolution view (smooth, no pixelation)';
+        try { localStorage.setItem('ddHiRes', String(on)); } catch (e) {}
+        updateScreenSize();   // re-fit scale (fractional scaling allowed in HD)
+        drawPreview();
+    }
+    btn.addEventListener('click', e => e.stopPropagation());
+    btn.addEventListener('change', () => { on = btn.checked; apply(); });
+    btn.checked = on; sw.classList.toggle('on', on); host.classList.toggle('hires', on);
+    if (on) updateScreenSize();
+})();
+</script>
+<script>
+// ===== Settings popover (Config panel pin / unpin) =====
+(function () {
+    const cfg = document.getElementById('configDetailsElement');
+    const leftPanel = document.querySelector('.left-panel');
+    const pop = document.getElementById('settingsPopover');
+    const body = document.getElementById('settingsBody');
+    const fab = document.getElementById('settingsFab');
+    const pinBtn = document.getElementById('pinConfigBtn');
+    const pinSide = document.getElementById('pinConfigBtnSide');
+    const KEY = 'ddConfigPinned';
+    let pinned = false; // default: popover; user can pin to sidebar
+    try { pinned = localStorage.getItem(KEY) === 'true'; } catch (e) {}
+
+    const inPopover = () => cfg.parentElement === body;
+    const isOpen = () => pop.classList.contains('visible');
+
+    function moveToSidebar() {
+        if (cfg.parentElement !== leftPanel) leftPanel.insertBefore(cfg, leftPanel.firstChild);
+        cfg.classList.remove('in-popover');
+        let confirmed = false; try { confirmed = localStorage.getItem('ddConfigConfirmed') === 'true'; } catch (e) {}
+        cfg.open = !confirmed;
+    }
+    function moveToPopover() {
+        if (!inPopover()) body.appendChild(cfg);
+        cfg.classList.add('in-popover');
+        cfg.open = true;
+    }
+    function open() {
+        if (pinned) return;
+        moveToPopover();
+        pop.classList.add('visible'); pop.setAttribute('aria-hidden', 'false'); fab.classList.add('active');
+    }
+    function close() {
+        pop.classList.remove('visible'); pop.setAttribute('aria-hidden', 'true'); fab.classList.remove('active');
+    }
+    function reflect() {
+        const label = pinned ? 'Unpin to popover' : 'Pin to sidebar';
+        pinBtn.querySelector('.pin-label').textContent = pinned ? 'Unpin' : 'Pin to sidebar';
+        pinBtn.classList.toggle('is-pinned', pinned); pinSide.classList.toggle('is-pinned', pinned);
+        pinBtn.title = label; pinSide.title = 'Unpin to a popover';
+        fab.title = pinned ? 'Settings (pinned in sidebar)' : 'Settings';
+    }
+    function setPinned(v, reopen) {
+        pinned = v;
+        try { localStorage.setItem(KEY, String(v)); } catch (e) {}
+        if (pinned) { close(); moveToSidebar(); if (document.body.classList.contains('left-panel-collapsed')) { const h = document.getElementById('hamburgerBtn'); h && h.click(); } }
+        else { moveToPopover(); if (reopen) open(); }
+        reflect();
+    }
+
+    fab.addEventListener('click', () => {
+        if (pinned) {
+            // Config lives in the sidebar: reveal it
+            const h = document.getElementById('hamburgerBtn');
+            if (document.body.classList.contains('left-panel-collapsed') && h) h.click();
+            cfg.open = true;
+            cfg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            cfg.classList.remove('flash'); void cfg.offsetWidth; cfg.classList.add('flash');
+        } else (isOpen() ? close() : open());
+    });
+    pinBtn.addEventListener('click', () => setPinned(!pinned, true));
+    pinSide.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); setPinned(false, true); });
+    document.getElementById('settingsClose').addEventListener('click', close);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen()) close(); });
+    document.addEventListener('mousedown', e => {
+        if (!isOpen()) return;
+        if (pop.contains(e.target) || fab.contains(e.target)) return;
+        if (e.target.closest && e.target.closest('#iconSuggestions')) return;
+        close();
+    });
+
+    // Initial placement (workflow script has already decided confirmed / open state)
+    if (!pinned) {
+        moveToPopover();
+        let confirmed = false; try { confirmed = localStorage.getItem('ddConfigConfirmed') === 'true'; } catch (e) {}
+        if (!confirmed) open();
+    }
+    reflect();
+    document.getElementById('leftEmptyOpen').addEventListener('click', () => fab.click());
+    window.settingsUI = { inPopover, open, close, isPinned: () => pinned };
+})();
+</script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-7P5YFV6K4E"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
