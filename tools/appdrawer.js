@@ -1,3 +1,4 @@
+/* DISCLAIMER: ESPHome and LVGL are trademarks or property of their respective copyright owners. This project is independent and is not affiliated with, endorsed by, or sponsored by them. */
 /* ==========================================================================
    appdrawer.js — shared app launcher for HomeAssistant Tools
    Usage: <script src="../appdrawer.js" defer></script>
@@ -23,8 +24,8 @@
 
     var HOME = { name: 'All tools', path: '', icon: 'home' };
     var APPS = [
-        { name: 'Displaysim', path: 'displaysim/', icon: 'dashboard' },
-        { name: 'ESPHOME LVGL SIM', path: 'esphomelvglsim/', icon: 'widgets' },
+        { name: 'ESPHome Display Designer', path: 'esphome-display/', icon: 'dashboard' },
+        { name: 'ESPHome LVGL Designer', path: 'esphome-lvgl/', icon: 'widgets' },
         { name: 'MMWAVE Creator', path: 'mmwave/', icon: 'sensors' }
     ];
 

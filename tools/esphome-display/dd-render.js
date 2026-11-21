@@ -53,8 +53,9 @@
         return { id, size, bpp: ov.bpp || 1, icon: !!(spec && spec.icon), key: spec ? ttfKey(spec) : null, css: mapFontPreview(fontId) };
     };
     // text bitmap measure/draw through the rasteriser. Returns null when the font is not loaded (caller falls back).
-    function rasterText(info, text) {
-        if (FE.smooth || !FE.ready || info.icon || !info.key) return null;
+    let curPixel = true;   // Actual view: exact device bitmaps. Design view: smooth vector text, widths matched to the device.
+    function rasterText(info, text, force) {
+        if ((!force && (FE.smooth || !curPixel)) || !FE.ready || info.icon || !info.key) return null;
         if (!FE.loaded.has(info.key)) { FE.ensure(info.key); return null; }
         const k = `${info.key}|${info.size}|${info.bpp}|${text}`; let r = FE.cache.get(k);
         if (!r) { const out = window.ddFontText(info.key, info.size, info.bpp, text, 0); if (!out) return null; r = { w: out.width, h: out.height, ascent: out.ascent, data: out.data }; if (FE.cache.size > 400) FE.cache.clear(); FE.cache.set(k, r); }
@@ -67,7 +68,7 @@
         return c;
     }
     DD.textBox = function (el) {
-        const info = DD.fontInfo(el.fontId), text = DD.textOf(el), r = rasterText(info, text);
+        const info = DD.fontInfo(el.fontId), text = DD.textOf(el), r = rasterText(info, text, true);
         if (r) return { w: r.w, h: r.h, exact: true };
         const c = mk(1, 1).getContext('2d'); c.font = info.css; return { w: Math.round(c.measureText(text).width), h: Math.round(info.size * 1.2), exact: false };
     };
@@ -87,8 +88,12 @@
         const align = el.align || 'LEFT', fx = ALIGN_X[align] ?? 0;
         const r = rasterText(info, text), x = R.x, y = R.y;
         if (r && r.w) { const rgb = hexRgb(col) || [255, 255, 255]; ctx.drawImage(tinted(r, rgb, `${info.key}|${info.size}|${info.bpp}|${text}`), Math.round(x - fx * r.w), y); return; }
+        // smooth (browser) text, squeezed/stretched a hair so it is as wide as the device's glyphs
+        const ex = rasterText(info, text, true);
         ctx.font = info.css; ctx.fillStyle = col; ctx.textAlign = align.toLowerCase();
-        ctx.fillText(text, x, y + Math.round(info.size * .8)); ctx.textAlign = 'start';
+        const mw = ex && !info.icon ? ctx.measureText(text).width : 0, sx = mw > 0 ? ex.w / mw : 1, base = y + (ex ? ex.ascent : Math.round(info.size * .8));
+        if (sx !== 1) { ctx.save(); ctx.translate(x, base); ctx.scale(sx, 1); ctx.fillText(text, 0, 0); ctx.restore(); } else ctx.fillText(text, x, base);
+        ctx.textAlign = 'start';
     }
     T.text = { draw: drawText };
     T.clock = { draw: drawText };
@@ -217,6 +222,7 @@
     DD.currentScene = () => ({ elements, page: DD.page, profile: DD.profile(), pixel: !window.__hiRes, border: screenBorder });
     DD.render = function (ctx, cw, ch, scene) {
         scene = scene || DD.currentScene();
+        curPixel = scene.pixel !== false;
         const prof = scene.profile, mode = prof.mode;
         const paper = mode === 'epaper';
         const bg = mode === 'color' ? (document.documentElement && getComputedStyle(document.documentElement).getPropertyValue('--md-canvas-background').trim() || '#000') : (paper ? PAPER : '#000');

@@ -1,0 +1,211 @@
+/* Displaysim additions: same final glass look (flat blue, soft shadows, capsule controls). Uses glass.css tokens. */
+.dd-folded { display: none !important; }
+html body:not(.x) #ddFileBtn, html body:not(.x) #ddSamplesBtn, html body:not(.x) #ddInstallBtn { cursor: pointer; margin-left: 10px; }
+html body:not(.x) .top-nav .nav-icons > #ddFileBtn, html body:not(.x) .top-nav .nav-icons > #ddSamplesBtn, html body:not(.x) .top-nav .nav-icons > #ddInstallBtn { margin: 0 !important; }
+html body:not(.x) #ddSamplesBtn { color: var(--g-accent); }
+#ddToastRoot { position: fixed; left: 50%; bottom: 70px; transform: translateX(-50%); z-index: 3000; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
+.dd-toast { pointer-events: auto; display: flex; align-items: center; gap: 10px; max-width: min(560px, 92vw); padding: 9px 14px; border-radius: 999px; background: var(--g-glass-strong); color: var(--g-text); border: 1px solid var(--g-edge); box-shadow: var(--g-shadow); font-size: .86rem; transition: opacity .3s, transform .3s; }
+.dd-toast .material-symbols-outlined { color: var(--g-accent); font-size: 20px; }
+.dd-toast.out { opacity: 0; transform: translateY(6px); }
+.dd-toast-btn { height: 26px; padding: 0 12px !important; box-shadow: none !important; }
+.dd-pop { position: fixed; z-index: 2500; background: var(--g-glass-strong); border: 1px solid var(--g-edge); border-radius: 16px; box-shadow: var(--g-shadow); padding: 6px; max-height: 76vh; overflow: auto; color: var(--g-text); -webkit-backdrop-filter: var(--g-blur); backdrop-filter: var(--g-blur); }
+.dd-menu { display: flex; flex-direction: column; min-width: 250px; }
+.dd-menu-h { font-size: .68rem; text-transform: uppercase; letter-spacing: .07em; color: var(--g-text-2); font-weight: 700; padding: 8px 10px 3px; }
+.dd-menu-item { display: flex; align-items: center; gap: 10px; text-align: left; padding: 7px 10px; border-radius: 10px; background: transparent !important; color: var(--g-text) !important; border: 0; box-shadow: none !important; font-weight: 500; }
+.dd-menu-item .material-symbols-outlined { color: var(--g-accent); font-size: 20px; }
+.dd-menu-item small { display: block; color: var(--g-text-2); font-size: .74rem; font-weight: 400; }
+.dd-menu-item:hover { background: var(--g-hover) !important; filter: none; }
+.dd-more { min-width: 300px; }
+.dd-more-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 4px 6px 8px; }
+.dd-more-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; height: 62px; padding: 4px; border-radius: 11px; background: var(--g-field) !important; color: var(--g-text) !important; border: 1px solid var(--g-line); box-shadow: none !important; font-size: .76rem; font-weight: 600; }
+.dd-more-item .material-symbols-outlined { color: var(--g-accent); font-size: 22px; }
+.dd-more-item:hover { background: var(--g-accent-grad) !important; color: #fff !important; border-color: transparent; }
+.dd-more-item:hover .material-symbols-outlined { color: #fff; }
+
+/* display type picker */
+.dd-profile { display: flex; flex-direction: column; gap: 6px; margin: 4px 0 10px; }
+.dd-profile select { width: 100%; }
+.dd-mode-note { margin: 0; padding: 8px 10px; border-radius: 11px; background: var(--g-accent-soft); color: var(--g-text-2); font-size: .78rem; line-height: 1.45; }
+.dd-mode-note b { color: var(--g-text); }
+.dd-check { display: flex; align-items: center; gap: 8px; font-size: .8rem; color: var(--g-text-2); cursor: pointer; }
+.dd-check input { width: auto; margin: 0; }
+
+/* pages + live data */
+.dd-pagebar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 0 0 10px; }
+.dd-page { display: inline-flex; align-items: center; gap: 4px; height: 30px; padding: 0 12px !important; border-radius: 999px !important; background: var(--g-field) !important; color: var(--g-text-2) !important; border: 1px solid var(--g-line) !important; box-shadow: none !important; font-size: .78rem; font-weight: 600; }
+.dd-page .material-symbols-outlined { font-size: 16px; }
+.dd-page.on { background: var(--g-accent-grad) !important; color: #fff !important; border-color: transparent !important; box-shadow: 0 2px 8px var(--g-accent-ring) !important; }
+.dd-page.add { border-style: dashed !important; padding: 0 8px !important; }
+.dd-page-x { font-size: 14px !important; margin-left: 2px; opacity: .65; border-radius: 50%; }
+.dd-page-x:hover { opacity: 1; background: rgba(0,0,0,.18); }
+.dd-page-hint { color: var(--g-text-2); font-size: .74rem; }
+.dd-live { margin-top: 10px; border-radius: 14px; }
+.dd-live > summary { cursor: pointer; font-weight: 600; font-size: .86rem; display: flex; align-items: center; gap: 6px; padding: 8px 10px; }
+.dd-live > summary .material-symbols-outlined { color: var(--g-accent); font-size: 20px; }
+.dd-live-body { padding: 4px 12px 12px; }
+.dd-live-row, .dd-field { display: grid; grid-template-columns: 120px 1fr; gap: 8px; align-items: center; margin: 5px 0; font-size: .8rem; color: var(--g-text-2); }
+.dd-live-row input, .dd-field input[type=text], .dd-field input[type=number], .dd-field select, .dd-live-time select, .dd-live-time input { width: 100%; min-width: 0; }
+.dd-field input[type=checkbox] { width: auto; justify-self: start; }
+.dd-live-time { display: grid; grid-template-columns: 70px 1fr 1fr; gap: 8px; align-items: center; margin-top: 10px; font-size: .8rem; }
+.dd-hint { color: var(--g-text-2); font-size: .78rem; margin: 6px 0; line-height: 1.45; }
+.dd-lead { color: var(--g-text-2); margin: 0 0 10px; }
+
+/* element editor fields */
+.dd-fields { margin-top: 8px; }
+.dd-field-h { display: flex; align-items: center; gap: 6px; font-weight: 650; font-size: .8rem; color: var(--g-text); margin: 10px 0 4px; padding-top: 8px; border-top: 1px solid var(--g-line); }
+.dd-field-h .material-symbols-outlined { color: var(--g-accent); font-size: 18px; }
+.dd-field-h.sub { border-top: 0; font-weight: 600; color: var(--g-text-2); }
+.dd-trace { display: grid; grid-template-columns: 1fr 1fr 78px auto; gap: 4px; margin: 4px 0; }
+.dd-x { width: 26px; height: 26px; padding: 0 !important; border-radius: 50% !important; background: transparent !important; color: var(--g-text-2) !important; box-shadow: none !important; }
+.dd-x:hover { background: rgba(220,38,38,.12) !important; color: #dc2626 !important; }
+.dd-btn-sm { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 12px !important; font-size: .78rem; border-radius: 11px !important; background: var(--g-field) !important; color: var(--g-text) !important; border: 1px solid var(--g-line) !important; box-shadow: none !important; margin: 6px 6px 0 0; }
+.dd-btn-sm .material-symbols-outlined { font-size: 18px; color: var(--g-accent); }
+.dd-btn-sm:hover { background: var(--g-accent-grad) !important; color: #fff !important; border-color: transparent !important; }
+.dd-btn-sm:hover .material-symbols-outlined { color: #fff; }
+.dd-btn-sm.primary { background: var(--g-accent-grad) !important; color: #fff !important; border-color: transparent !important; }
+.dd-btn-sm.primary .material-symbols-outlined { color: #fff; }
+.dd-btn-sm.danger:hover { background: #dc2626 !important; }
+.dd-images-row { margin-top: 10px; }
+
+/* modals built by dd-ui.js reuse .info-overlay / .deploy-modal */
+.dd-modal.dd-wide { max-width: 1060px; }
+.dd-modal.dd-tall { height: min(92vh, 900px); }
+.dd-modal-body { padding-bottom: 20px; }
+.dd-modal-foot { display: flex; align-items: center; gap: 10px; padding: 12px 22px; border-top: 1px solid var(--g-line); }
+.dd-grow { flex: 1; }
+.dd-samples { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+.dd-sample { display: flex; flex-direction: column; border: 1px solid var(--g-line); border-radius: 18px; background: var(--g-inner); overflow: hidden; }
+.dd-sample-thumb { display: grid; place-items: center; height: 190px; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: var(--g-hover) !important; box-shadow: none !important; }
+.dd-sample-canvas { border-radius: 4px; box-shadow: 0 0 0 5px #11141b, 0 10px 26px rgba(20, 30, 60, .28); flex: none; }
+.dd-sample-thumb:hover .dd-sample-canvas { box-shadow: 0 0 0 5px var(--g-accent), 0 12px 30px rgba(20, 30, 60, .35); }
+.dd-sample-info { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.dd-sample-info p { margin: 0; color: var(--g-text-2); font-size: .82rem; flex: 1; }
+.dd-sample-title { display: flex; flex-direction: column; }
+.dd-sample-title small { color: var(--g-text-2); }
+.dd-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.dd-tag { padding: 2px 9px; border-radius: 999px; background: var(--g-accent-soft); color: var(--g-text-2); font-size: .7rem; font-weight: 600; }
+.dd-drop { border: 2px dashed var(--g-line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; color: var(--g-text-2); margin-bottom: 14px; }
+.dd-drop .material-symbols-outlined { font-size: 30px; color: var(--g-accent); }
+.dd-drop.over { border-color: var(--g-accent); background: var(--g-accent-soft); }
+.dd-img-card { display: grid; grid-template-columns: 150px 1fr; gap: 14px; border: 1px solid var(--g-line); border-radius: 16px; padding: 10px; margin-bottom: 10px; background: var(--g-inner); }
+.dd-thumb { border-radius: 10px; min-height: 120px; display: grid; place-items: center; overflow: hidden; background: repeating-conic-gradient(#d9dce5 0 25%, #f3f4f8 0 50%) 0 0 / 14px 14px; }
+body.dark-mode .dd-thumb { background: repeating-conic-gradient(#2a2f40 0 25%, #1c2030 0 50%) 0 0 / 14px 14px; }
+.dd-thumb canvas { max-width: 100%; max-height: 150px; image-rendering: pixelated; }
+.dd-missing { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--g-text-2); font-size: .74rem; }
+.dd-two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
+.dd-two .dd-field { grid-template-columns: 1fr; gap: 2px; }
+.dd-row { display: flex; gap: 6px; flex-wrap: wrap; }
+@media (max-width: 760px) { .dd-img-card { grid-template-columns: 1fr; } .dd-pagebar { gap: 4px; } }
+
+/* ---- preview header: page tabs, Design / Actual, zoom (matches the Displaysim header + dock styles) ---------- */
+html body:not(.x) #previewSection > summary { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+html body:not(.x) #previewSection > summary .dd-grow { flex: 1; min-width: 4px; }
+html body:not(.x) #previewSection > summary .dd-info { font-size: 17px; color: var(--g-text-2); cursor: help; margin-left: -2px; }
+/* page tabs: compact capsule, active pill = dock active style */
+html body:not(.x) #previewSection > summary .dd-pagebar { margin: 0 0 0 6px; flex: 0 1 auto; min-width: 0; max-width: 46%; display: inline-flex; flex-wrap: nowrap; gap: 2px; padding: 3px; border-radius: 999px; background: var(--g-inner); border: 1px solid var(--g-line); overflow-x: auto; scrollbar-width: none; }
+html body:not(.x) #previewSection > summary .dd-pagebar::-webkit-scrollbar { display: none; }
+html body:not(.x) #previewSection > summary .dd-page { flex: none; display: inline-flex; align-items: center; gap: 4px; height: 26px; padding: 0 10px; border: 0; border-radius: 999px; background: transparent; color: var(--g-text-2); box-shadow: none; font-size: .76rem; font-weight: 600; filter: none; transform: none; }
+html body:not(.x) #previewSection > summary .dd-page .material-symbols-outlined { font-size: 15px; color: inherit; }
+html body:not(.x) #previewSection > summary .dd-page:hover { background: var(--g-hover); color: var(--g-text); }
+html body:not(.x) #previewSection > summary .dd-page.on { background: var(--g-accent-grad); color: #fff; box-shadow: 0 3px 10px var(--g-accent-ring); }
+html body:not(.x) #previewSection > summary .dd-page.add { width: 26px; padding: 0; justify-content: center; border: 0; }
+html body:not(.x) #previewSection > summary .dd-page-x { font-size: 13px !important; margin-left: 2px; opacity: .7; border-radius: 50%; }
+/* Design / Actual: same capsule + active pill as the dock */
+html body:not(.x) #previewSection > summary .dd-seg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: var(--g-inner); border: 1px solid var(--g-line); flex: none; }
+html body:not(.x) #previewSection > summary .dd-seg > button { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 12px 0 9px; border: 0; border-radius: 999px; background: transparent; color: var(--g-text-2); box-shadow: none; font-size: .76rem; font-weight: 600; filter: none; transform: none; }
+html body:not(.x) #previewSection > summary .dd-seg > button .material-symbols-outlined { font-size: 16px; color: inherit; }
+html body:not(.x) #previewSection > summary .dd-seg > button:hover { background: var(--g-hover); color: var(--g-text); }
+html body:not(.x) #previewSection > summary .dd-seg > button.on { background: var(--g-accent-grad); color: #fff; box-shadow: 0 3px 10px var(--g-accent-ring); }
+/* zoom: plain icon buttons like the header's Fit button */
+html body:not(.x) #previewSection > summary .dd-zoom { display: inline-flex; align-items: center; gap: 0; flex: none; }
+html body:not(.x) #previewSection > summary .dd-zoom > button { width: 30px; height: 30px; padding: 0; display: grid; place-items: center; border: 0; border-radius: 50%; background: none; color: var(--g-text-2); box-shadow: none; filter: none; transform: none; }
+html body:not(.x) #previewSection > summary .dd-zoom > button:hover { background: var(--g-hover); color: var(--g-accent); }
+html body:not(.x) #previewSection > summary .dd-zoom > button .material-symbols-outlined { font-size: 19px; color: inherit; }
+html body:not(.x) #previewSection > summary .dd-zoom-val { min-width: 42px; text-align: center; font-size: .76rem; font-weight: 600; color: var(--g-text-2); font-variant-numeric: tabular-nums; }
+html body:not(.x) #previewSection > summary .scale-button.on .material-symbols-outlined { color: var(--g-accent); }
+html body:not(.x) .hd-switch.disabled { opacity: .45; pointer-events: none; }
+/* the long note moved into the header (i) tooltip to give the canvas the space */
+html body:not(.x) #previewSection > .details-content > p.dd-note-moved { display: none; }
+/* Actual view: crisp device pixels + faint pixel grid when big enough */
+html body.dd-actual #previewCanvas { image-rendering: pixelated; image-rendering: crisp-edges; }
+.dd-pixel-grid { position: absolute; inset: 0; pointer-events: none; z-index: 2; display: none; }
+body.dd-actual .dd-pixel-grid.on { display: block; }
+@media (max-width: 1100px) { html body:not(.x) #previewSection > summary .dd-pagebar { max-width: 100%; order: 5; flex-basis: 100%; } }
+
+/* ---- page tabs: stay one tidy capsule however many pages there are -------------------------------------- */
+html body:not(.x) #previewSection > summary { flex-wrap: nowrap; min-width: 0; }
+html body:not(.x) #previewSection > summary > * { flex-shrink: 0; }
+html body:not(.x) #previewSection > summary .dd-pagebar { flex: 0 1 auto; min-width: 60px; max-width: none; height: 34px; box-sizing: border-box; align-items: center; flex-wrap: nowrap !important; overflow-x: auto; overflow-y: hidden; border-radius: 999px; scroll-snap-type: x proximity; }
+html body:not(.x) #previewSection > summary .dd-page { height: 26px; line-height: 1; white-space: nowrap; scroll-snap-align: center; }
+html body:not(.x) #previewSection > summary .dd-page.on { scroll-margin: 0 24px; }
+html body:not(.x) #previewSection > summary .dd-grow { flex: 1 1 4px; min-width: 4px; flex-shrink: 1; }
+html body:not(.x) #previewSection > summary .dd-info { flex: none; }
+@media (max-width: 1180px) {
+    html body:not(.x) #previewSection > summary { flex-wrap: wrap; row-gap: 6px; }
+    html body:not(.x) #previewSection > summary .dd-pagebar { order: 9; flex: 1 1 100%; max-width: 100%; }
+    html body:not(.x) #previewSection > summary .dd-grow { display: none; }
+    html body:not(.x) #previewSection > summary .dd-seg { margin-left: auto; }
+}
+
+/* ---- no stray scrollbars: overlay scrollbars flashed on containers with sub-pixel horizontal overflow ----- */
+html, html body:not(.x) { overflow-x: hidden; }
+html body:not(.x) .top-nav, html body:not(.x) .nav-left-section, html body:not(.x) .nav-icons, html body:not(.x) .panel, html body:not(.x) .info-content,
+.dd-modal, .dd-modal-body, .deploy-body, .dd-samples, .dd-img-card, .code-drawer, .code-drawer-body { overflow-x: hidden; }
+html body:not(.x) *:not(textarea):not(pre):not(.dd-pagebar)::-webkit-scrollbar:horizontal { height: 0; display: none; }
+html body:not(.x) textarea::-webkit-scrollbar:horizontal { height: 8px; }
+
+/* ---- custom dialogs ---------------------------------------------------------------------------------------- */
+.dd-dlg-back { position: fixed; inset: 0; z-index: 4000; display: flex; align-items: center; justify-content: center; padding: 18px; background: rgba(10, 14, 28, .42); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); animation: ddfade .14s ease-out; }
+.dd-dlg { width: min(430px, 100%); border-radius: 22px; background: var(--g-glass-strong); border: 1px solid var(--g-edge); box-shadow: 0 28px 70px rgba(10, 14, 40, .35); color: var(--g-text); overflow: hidden; animation: ddpop .16s ease-out; }
+.dd-dlg-head { display: flex; align-items: center; gap: 12px; padding: 18px 20px 4px; }
+.dd-dlg-head h3 { margin: 0; font-size: 1.02rem; font-weight: 650; color: var(--g-text); }
+.dd-dlg-icon { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: var(--g-accent-soft); color: var(--g-accent); flex: none; }
+.dd-dlg-icon.danger { background: rgba(220, 38, 38, .12); color: #dc2626; }
+.dd-dlg-icon .material-symbols-outlined { font-size: 22px; color: inherit; }
+.dd-dlg-body { padding: 8px 20px 4px; color: var(--g-text-2); font-size: .9rem; line-height: 1.5; }
+.dd-dlg-body p { margin: 4px 0 10px; }
+.dd-dlg-input { width: 100%; box-sizing: border-box; margin-bottom: 10px; }
+.dd-dlg-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 20px 18px; }
+.dd-dlg-btn { height: 36px; padding: 0 18px; border-radius: 11px; font-size: .84rem; font-weight: 600; border: 1px solid var(--g-line); background: var(--g-field); color: var(--g-text); box-shadow: none; cursor: pointer; }
+.dd-dlg-btn:hover { background: var(--g-hover); filter: none; }
+.dd-dlg-btn.primary { background: var(--g-accent-grad); color: #fff; border-color: transparent; box-shadow: 0 2px 8px var(--g-accent-ring); }
+.dd-dlg-btn.primary:hover { filter: brightness(1.08); background: var(--g-accent-grad); }
+.dd-dlg-btn.primary.danger { background: #dc2626; box-shadow: 0 2px 8px rgba(220, 38, 38, .3); }
+@keyframes ddfade { from { opacity: 0; } }
+@keyframes ddpop { from { opacity: 0; transform: translateY(8px) scale(.98); } }
+
+/* ---- custom dropdowns (replace native <select>) ----------------------------------------------------------- */
+.dd-native-hidden { display: none !important; }
+button.dd-select { display: inline-flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-width: 0; box-sizing: border-box; min-height: 36px; padding: 7px 10px 7px 12px; text-align: left; font: inherit; font-size: .9em; font-weight: 500; color: var(--g-text); background: var(--g-field); border: 1px solid var(--g-line); border-radius: var(--g-radius-sm, 11px); box-shadow: none; cursor: pointer; text-transform: none; letter-spacing: 0; filter: none; transform: none; }
+button.dd-select:hover:not(:disabled) { border-color: var(--g-accent); background: var(--g-field); filter: none; box-shadow: none; }
+button.dd-select.open, button.dd-select:focus-visible { border-color: var(--g-accent); box-shadow: 0 0 0 3px var(--g-accent-ring); outline: none; }
+button.dd-select:disabled { opacity: .5; cursor: not-allowed; }
+button.dd-select .dd-select-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+button.dd-select .dd-select-label.placeholder { color: var(--g-text-2); }
+button.dd-select .material-symbols-outlined { font-size: 20px; color: var(--g-text-2); flex: none; transition: transform .15s; }
+button.dd-select.open .material-symbols-outlined { transform: rotate(180deg); color: var(--g-accent); }
+button.dd-select.lt-select { width: 76px; min-height: 32px; height: 32px; padding: 0 6px 0 10px; font-size: .8em; }
+.dd-list { position: fixed; z-index: 3500; max-height: 320px; display: flex; flex-direction: column; background: var(--g-glass-strong); border: 1px solid var(--g-edge); border-radius: 14px; box-shadow: var(--g-shadow), 0 14px 36px rgba(20, 30, 60, .2); padding: 5px; color: var(--g-text); -webkit-backdrop-filter: var(--g-blur); backdrop-filter: var(--g-blur); animation: ddfade .1s ease-out; }
+.dd-list-q { margin: 2px 2px 6px; width: calc(100% - 4px); box-sizing: border-box; flex: none; }
+.dd-list-body { overflow-y: auto; overflow-x: hidden; min-height: 0; }
+.dd-opt { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 7px 10px; border-radius: 9px; font-size: .86rem; cursor: pointer; white-space: nowrap; }
+.dd-opt .material-symbols-outlined { font-size: 18px; color: var(--g-accent); }
+.dd-opt.hot, .dd-opt:hover { background: var(--g-hover); }
+.dd-opt.on { color: var(--g-accent); font-weight: 600; }
+.dd-opt.off { opacity: .4; cursor: not-allowed; }
+.dd-opt-group { padding: 8px 10px 3px; font-size: .68rem; text-transform: uppercase; letter-spacing: .07em; color: var(--g-text-2); font-weight: 700; }
+
+/* the icon-search suggestion box is a fixed glass panel: never show it while it has no suggestions (it flashed as an empty white bar) */
+html body:not(.x) #iconSuggestions:empty { display: none !important; }
+
+/* ---- Live data popover ------------------------------------------------------------------------------------ */
+html body:not(.x) #previewSection > summary .dd-live-btn { width: 30px; height: 30px; padding: 0; display: grid; place-items: center; border: 0; border-radius: 50%; background: none; color: var(--g-text-2); box-shadow: none; filter: none; transform: none; flex: none; }
+html body:not(.x) #previewSection > summary .dd-live-btn:hover, html body:not(.x) #previewSection > summary .dd-live-btn[aria-expanded=true] { background: var(--g-accent-soft); color: var(--g-accent); }
+html body:not(.x) #previewSection > summary .dd-live-btn .material-symbols-outlined { font-size: 20px; color: inherit; }
+.dd-live-pop { width: min(420px, 92vw); padding: 14px 16px 16px; }
+.dd-live-title { display: flex; align-items: center; gap: 8px; font-weight: 650; margin-bottom: 4px; }
+.dd-live-title .material-symbols-outlined { color: var(--g-accent); font-size: 20px; }
+.dd-live-title small { margin-left: 4px; color: var(--g-text-2); font-weight: 500; }
+.dd-live-pop .dd-live-body { padding: 0; }
+
+.dd-sample-canvas { max-width: none !important; max-height: none !important; }

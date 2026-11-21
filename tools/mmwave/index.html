@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- DISCLAIMER: ESPHome and LVGL are trademarks or property of their respective copyright owners. This project is independent and is not affiliated with, endorsed by, or sponsored by them. -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -212,11 +213,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../shared/jdnx-theme.css">
     <link rel="stylesheet" href="mmwave-skin.css">
-    <link rel="icon" href="../displaysim/favicon.png">
+    <link rel="icon" href="../esphome-display/favicon.png">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7P5YFV6K4E"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-7P5YFV6K4E');
+    </script>
 </head>
 <body>
     <header class="jd-nav">
-        <a class="jd-logo" href="../" title="JDNx Tools"><img src="../displaysim/favicon.png" alt=""></a>
+        <a class="jd-logo" href="../" title="JDNx Tools"><img src="../esphome-display/favicon.png" alt=""></a>
         <div class="jd-capsule title"><span class="material-symbols-outlined">sensors</span> LD2410 Config Generator</div>
         <span class="grow"></span>
         <div class="jd-capsule"><button class="jd-iconbtn" id="darkToggle" title="Toggle dark mode" aria-label="Toggle dark mode"><span class="material-symbols-outlined">dark_mode</span></button></div>
@@ -767,7 +776,7 @@ select:
         });
 
     </script>
-<script src="../appdrawer.js" defer></script>
+<script src="../appdrawer.js?v=20261121" defer></script>
 <script>
 (function () {
     var b = document.body, btn = document.getElementById('darkToggle');

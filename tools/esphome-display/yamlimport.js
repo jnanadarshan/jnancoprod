@@ -121,7 +121,7 @@ display:
             const weight = parseInt(unquote(keyVal(it, 'weight') || '0'), 10) || 0;
             const icon = /\\u[eEfF][0-9a-fA-F]{3}|\\U000[0-9a-fA-F]{5}|[-]/.test(glyphs) || /material|symbol|icon|mdi/i.test(id + ' ' + file);
             const bold = /bold|black|heavy/i.test(id + ' ' + file) || weight >= 600 || /@(6|7|8|9)00/.test(file);
-            return { id, file: file || 'fonts/' + id + '.ttf', size, icon, bold };
+            return { id, file: file || 'fonts/' + id + '.ttf', size, icon, bold, bpp: parseInt(unquote(keyVal(it, 'bpp') || '1'), 10) || 1 };
         }).filter(Boolean);
     }
     function parseColors(lines) {
@@ -145,7 +145,7 @@ display:
     function detectDisplay(item) {
         const text = item.join('\n');
         const platform = unquote(keyVal(item, 'platform') || '');
-        const out = { platform, eink: /epd|e-?paper|inkplate|gdey|gdew|waveshare|eink/i.test(platform + ' ' + (keyVal(item, 'model') || '')), w: 0, h: 0 };
+        const out = { model: unquote(keyVal(item, 'model') || ''), platform, eink: /epd|e-?paper|inkplate|gdey|gdew|waveshare|eink/i.test(platform + ' ' + (keyVal(item, 'model') || '')), w: 0, h: 0 };
         const w = keyVal(item, 'width'), h = keyVal(item, 'height');
         if (w && h && /^\d+$/.test(unquote(w)) && /^\d+$/.test(unquote(h))) { out.w = +unquote(w); out.h = +unquote(h); }
         if (!out.w) { const m = text.match(/model:\s*["']?[^\n"']*?(\d{2,4})x(\d{2,4})/i); if (m) { out.w = +m[1]; out.h = +m[2]; } }
@@ -453,7 +453,7 @@ display:
         const sv = { elements, colorPalette, einkMode, screenBorder, fontOverrides };
         try {
             elements = includedElements(); colorPalette = state.colors.slice(); einkMode = state.eink; screenBorder = 0;
-            fontOverrides = {}; state.fonts.forEach(f => { fontOverrides[f.id] = { file: f.file, size: f.size, icon: f.icon, bold: f.bold }; });
+            fontOverrides = {}; state.fonts.forEach(f => { fontOverrides[f.id] = { file: f.file, size: f.size, icon: f.icon, bold: f.bold, bpp: f.bpp || 1 }; });
             renderScene(ctx, W, H);
         } catch (e) { console.error('YAML preview failed', e); }
         finally { ({ elements, colorPalette, einkMode, screenBorder, fontOverrides } = sv); }
@@ -529,7 +529,7 @@ display:
         const fontIds = state.fonts.map(f => 'id(' + f.id + ')');
         const colorTokens = ['white', 'black', 'red', 'green', 'blue', ...state.colors.map(c => 'id(' + c.name + ')')];
         els.forEach(e => { const m = String(e.colorId).match(/^id\(\s*(\w+)\s*\)$/); if (m && !colorTokens.includes(e.colorId)) colorTokens.push(e.colorId); });
-        fontOverrides = {}; state.fonts.forEach(f => { fontOverrides[f.id] = { file: f.file, size: f.size, icon: f.icon, bold: f.bold }; });
+        fontOverrides = {}; state.fonts.forEach(f => { fontOverrides[f.id] = { file: f.file, size: f.size, icon: f.icon, bold: f.bold, bpp: f.bpp || 1 }; });
         applyImportedData({
             config: {
                 Resolution: `${state.W}x${state.H}`, CustomFonts: fontIds.join(', '), Colors: colorTokens.join(', '),
@@ -545,7 +545,7 @@ display:
             DD.images = (state.images || []).map(m => ({ ...m })); DD.imgCache.clear(); DD.rawImages.clear();
             if (state.profileId) DD.profileId = state.profileId;
             DD.saveMeta(); saveToCache(); if (DD.onPages) DD.onPages(); if (DD.onProfile) DD.onProfile(DD.profile());
-            renderElementList(); drawPreview();
+            renderElementList(); window.drawPreview();
         }
         close();
         toast(`Imported ${els.length} element${els.length === 1 ? '' : 's'} at ${state.W}×${state.H}.`, () => {

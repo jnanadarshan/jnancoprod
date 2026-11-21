@@ -49,7 +49,7 @@
         return getFontSpecs().map(s => {
             const ov = fontOverrides[s.id] || {};
             const kind = kindOf(s.file);
-            return { id: s.id, size: s.size, file: s.file, icon: !!s.icon, bold: ov.bold !== undefined ? !!ov.bold : /bold/i.test(s.id + ' ' + s.file), kind };
+            return { id: s.id, size: s.size, file: s.file, icon: !!s.icon, bold: ov.bold !== undefined ? !!ov.bold : /bold/i.test(s.id + ' ' + s.file), bpp: ov.bpp || 1, kind };
         });
     }
     function usage() {
@@ -60,7 +60,7 @@
     function commit(entries, renames) {
         if (renames) elements.forEach(el => { const id = bareId(el.fontId); if (renames[id]) el.fontId = `id(${renames[id]})`; });
         const ov = {};
-        entries.forEach(e => { ov[e.id] = { file: e.file, size: e.size, icon: e.icon, bold: e.bold }; });
+        entries.forEach(e => { ov[e.id] = { file: e.file, size: e.size, icon: e.icon, bold: e.bold, bpp: e.bpp || 1 }; });
         fontOverrides = ov;
         ta.value = entries.map(e => `id(${e.id})`).join(', ');
         ta.dispatchEvent(new Event('input', { bubbles: true })); // refreshes dropdowns + saves cache
@@ -88,6 +88,8 @@
                 ${extra}
                 <label class="fm-f">Size (px)<input type="number" data-f="size" min="4" max="200" value="${e.size}"></label>
                 <label class="fm-f fm-grow">ID in your YAML<input type="text" data-f="id" value="${esc(e.id)}" spellcheck="false" autocomplete="off"></label>
+                ${e.icon ? '' : `<label class="fm-f" title="Bits per pixel: 1 = jagged (default), 4 = smooth anti-aliasing. Changes flash size and the preview.">Bits / px<select data-f="bpp">${[1, 2, 4, 8].map(b => `<option${b === (e.bpp || 1) ? ' selected' : ''}>${b}</option>`).join('')}</select></label>`}
+                ${e.icon ? '' : `<div class="fm-f fm-wide"><button type="button" class="dd-btn-sm" data-act="ttf" title="The preview rasterises text with this exact font file, like ESPHome does at compile time"><span class="material-symbols-outlined">upload_file</span>Use my .ttf for the exact preview</button></div>`}
             </div>
             <div class="fm-meta"><span>${n ? `Used by ${n} element${n === 1 ? '' : 's'}` : 'Not used yet'}</span><span class="fm-file" title="${esc(e.file)}">${esc(e.file)}</span></div>
             <div class="fm-err" role="alert"></div>
@@ -113,6 +115,8 @@
             if (!validId(v)) return fail('Use letters, digits and underscores; do not start with a digit.');
             if (entries.some(x => x !== e && x.id === v)) return fail('Another font already uses this ID.');
             e.id = v;
+        } else if (f === 'bpp') {
+            e.bpp = parseInt(t.value, 10) || 1;
         } else if (f === 'size') {
             const v = parseInt(t.value, 10);
             if (!(v >= 4 && v <= 200)) return fail('Size must be between 4 and 200.');
@@ -137,6 +141,11 @@
     function onVisualClick(ev) {
         const b = ev.target.closest('[data-act]'); if (!b) return;
         const act = b.dataset.act, entries = readEntries();
+        if (act === 'ttf') {
+            const e = entries[+b.closest('.fm-card').dataset.i], inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.ttf,.otf';
+            inp.addEventListener('change', async () => { const file = inp.files[0]; if (!file || !window.DD) return; const name = (String(e.file).split('/').pop() || file.name).replace(/^gfonts:\/\//, '') || file.name; const key = /\.(ttf|otf)$/i.test(name) ? name : file.name; await DD.fontEngine.addFile(key, await file.arrayBuffer()); if (!/\.(ttf|otf)$/i.test(String(e.file))) { e.file = 'fonts/' + file.name; e.kind = 'custom'; commit(entries); } DD.toast('Exact preview enabled for <b>' + e.id + '</b>.'); drawPreview(); });
+            inp.click(); return;
+        }
         if (act === 'add-text' || act === 'add-icon') {
             const kind = act === 'add-icon' ? 'symbols' : 'roboto', cat = byKey(kind);
             const e = { kind, file: cat.file, size: act === 'add-icon' ? 24 : 16, icon: !!cat.icon, bold: false };
@@ -144,8 +153,8 @@
             entries.push(e); commit(entries);
         } else if (act === 'del') {
             const i = +b.closest('.fm-card').dataset.i, e = entries[i], n = usage()[e.id] || 0;
-            if (n && !confirm(`"${e.id}" is used by ${n} element${n === 1 ? '' : 's'}. They will keep pointing at it until you pick another font. Remove it anyway?`)) return;
-            entries.splice(i, 1); commit(entries);
+            const go = () => { entries.splice(i, 1); commit(entries); };
+            if (!n) go(); else DD.confirm(`"${e.id}" is used by ${n} element${n === 1 ? '' : 's'}. They will keep pointing at it until you pick another font.`, { title: 'Remove font?', confirmLabel: 'Remove', danger: true }).then(ok => { if (ok) go(); });
         }
     }
 
@@ -164,7 +173,7 @@
         if (dup) { setMsg(`ID "${dup.id}" appears twice.`, true); return; }
         const bad = parsed.find(p => !validId(p.id));
         if (bad) { setMsg(`"${bad.id}" is not a valid ID.`, true); return; }
-        commit(parsed.map(p => ({ id: p.id, size: p.size, file: p.file, icon: p.icon, bold: p.bold, kind: kindOf(p.file) })));
+        commit(parsed.map(p => ({ id: p.id, size: p.size, file: p.file, icon: p.icon, bold: p.bold, bpp: p.bpp || 1, kind: kindOf(p.file) })));
         fillCode(); setMsg(`Applied ${parsed.length} font${parsed.length === 1 ? '' : 's'}.`);
     }
 

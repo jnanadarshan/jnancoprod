@@ -16,6 +16,7 @@
         if (mode === 'mono') return black ? 'Color::BLACK' : 'Color::WHITE';
         if (mode === 'gray') { if (black) return 'Color::BLACK'; const w = Math.round(lum(rgb)); return w >= 250 ? 'Color::WHITE' : `Color(0, 0, 0, ${w})`; }
         if (mode === 'epaper') { if (prof.ink === 'bwr' && rgb[0] > 140 && rgb[1] < 110 && rgb[2] < 110) return 'Color(255, 0, 0)'; if (prof.ink === 'bwy' && rgb[0] > 150 && rgb[1] > 130 && rgb[2] < 110) return 'Color(255, 255, 0)'; return lum(rgb) < 128 ? 'Color::BLACK' : 'Color::WHITE'; }
+        if (k.toLowerCase() === 'white') return 'Color::WHITE'; if (k.toLowerCase() === 'black') return 'Color::BLACK';
         return espColor(k);
     };
     const C = el => DD.espColor(el.colorId);

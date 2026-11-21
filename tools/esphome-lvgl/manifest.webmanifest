@@ -1,6 +1,6 @@
 {
-  "name": "LVGL Studio for ESPHome",
-  "short_name": "LVGL Studio",
+  "name": "ESPHome LVGL Designer",
+  "short_name": "ESPHome LVGL",
   "description": "Design ESPHome LVGL touchscreen UIs visually with a realistic preview, then export the YAML.",
   "start_url": "./",
   "scope": "./",

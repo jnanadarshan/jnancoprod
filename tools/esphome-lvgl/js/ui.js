@@ -42,6 +42,9 @@ export function modal({ title, iconName, wide, tall, body, foot, onClose, cls })
 export const anyModalOpen = () => openModals.length > 0;
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && openModals.length) { openModals[openModals.length - 1].close(); e.stopPropagation(); } }, true);
 
+// Escape closes an open popover first (before any modal underneath)
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { const ps = document.querySelectorAll('.popover'); if (ps.length) { ps.forEach(p => p.remove()); e.stopPropagation(); } } }, true);
+
 export function popover(anchor, content, opts = {}) {
     closePopovers();
     const p = h('div', { class: 'popover' + (opts.cls ? ' ' + opts.cls : '') }); p.append(content);

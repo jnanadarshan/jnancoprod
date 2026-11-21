@@ -42,12 +42,12 @@
           build: () => project({ title: 'OLED status screen', profile: 'ssd1306_64', fonts: ['roboto_10', 'roboto_bold_16', 'roboto_bold_24', 'material_symbols_16'], bpp: 1, live: { temp: 23.4, humidity: 48 }, elements: [
             E('hline', { x: 0, y: 14, width: 128 }), txt(2, 1, 'Kitchen', 'roboto_10'), ico(110, -1, 'wifi', 'material_symbols_16'),
             txt(2, 18, '%.1f', 'roboto_bold_24', { content: '%.1f°C', args: 'id(temp).state' }), ico(100, 22, 'thermostat', 'material_symbols_16'),
-            txt(2, 48, 'Hum', 'roboto_10'), E('rectangle', { x: 24, y: 49, width: 80, height: 9, fill: false, thickness: 1 }), E('bar', { x: 26, y: 51, width: 38, height: 5 }), txt(108, 48, '48%', 'roboto_10')] }) },
+            txt(2, 48, 'Hum', 'roboto_10'), E('rectangle', { x: 30, y: 49, width: 70, height: 9, fill: false, thickness: 1 }), E('bar', { x: 32, y: 51, width: 33, height: 5 }), txt(104, 48, '48%', 'roboto_10')] }) },
         { id: 'gray', title: 'Grayscale OLED dashboard', tags: ['16 gray', 'SSD1322', 'bars'], desc: '256×64 grayscale OLED. Colours become shades of gray; the generator writes Color(0, 0, 0, W) so they really show.',
           build: () => project({ title: 'Grayscale OLED dashboard', profile: 'ssd1322', fonts: ['roboto_10', 'roboto_bold_16', 'roboto_bold_24'], bpp: 4, palette: [{ name: 'dim', hex: '#555555' }, { name: 'mid', hex: '#aaaaaa' }], elements: [
-            E('hline', { x: 0, y: 16, width: 256, colorId: 'id(dim)' }), txt(4, 2, 'POWER', 'roboto_bold_16', { colorId: 'id(mid)' }), txt(252, 2, '14:32', 'roboto_bold_16', { align: 'RIGHT' }),
-            txt(4, 20, '1.84 kW', 'roboto_bold_24'), E('rectangle', { x: 130, y: 22, width: 120, height: 10, fill: false }), E('bar', { x: 132, y: 24, width: 80, height: 6, colorId: 'id(mid)' }),
-            E('rectangle', { x: 130, y: 38, width: 120, height: 10, fill: false }), E('bar', { x: 132, y: 40, width: 40, height: 6, colorId: 'id(dim)' }), txt(4, 50, 'Solar 72%   Grid 28%', 'roboto_10', { colorId: 'id(mid)' })] }) },
+            E('hline', { x: 0, y: 20, width: 256, colorId: 'id(dim)' }), txt(4, 0, 'POWER', 'roboto_bold_16', { colorId: 'id(mid)' }), txt(252, 0, '14:32', 'roboto_bold_16', { align: 'RIGHT' }),
+            txt(4, 24, '1.84 kW', 'roboto_bold_24'), E('rectangle', { x: 130, y: 26, width: 120, height: 10, fill: false }), E('bar', { x: 132, y: 28, width: 80, height: 6, colorId: 'id(mid)' }),
+            E('rectangle', { x: 130, y: 41, width: 120, height: 10, fill: false }), E('bar', { x: 132, y: 43, width: 40, height: 6, colorId: 'id(dim)' }), txt(4, 52, 'Solar 72%   Grid 28%', 'roboto_10', { colorId: 'id(mid)' })] }) },
         { id: 'sensors', title: 'Sensor dashboard (2 pages)', tags: ['colour', 'ILI9341', 'graph', 'pages'], desc: '240×320 colour TFT: header, big readings, a gauge and a live graph on page 1, device info on page 2.',
           build: () => project({ title: 'Sensor dashboard', profile: 'ili9341', fonts: ['roboto_12', 'roboto_16', 'roboto_bold_24', 'roboto_bold_40', 'material_symbols_24'], bpp: 4, palette: [{ name: 'primary_color', hex: '#3d6df2' }, { name: 'accent_color', hex: '#22c55e' }], live: { temp: 21.6, humidity: 47, co2: 62 },
             pages: [{ id: 'overview' }, { id: 'device' }], elements: [
@@ -124,12 +124,13 @@
         SAMPLES.forEach(s => {
             const p = s.build(); const prof = DD.PROFILES.find(x => x.id === p.profileId);
             const thumb = document.createElement('canvas'); thumb.className = 'dd-sample-canvas';
-            const open = async () => { if (!opts.welcome && elements.length && !confirm('Replace the current design with this sample?')) return; await DD.loadProject(p); m.close(); DD.toast(`Opened <b>${s.title}</b>. Select anything to edit it.`); };
+            const open = async () => { if (!opts.welcome && elements.length && !(await DD.confirm('Your current design will be replaced. Save it first (File \u2192 Save project) if you want to keep it.', { title: 'Open this sample?', confirmLabel: 'Open sample' }))) return; await DD.loadProject(p); m.close(); DD.toast(`Opened <b>${s.title}</b>. Select anything to edit it.`); };
             const card = h('div', { class: 'dd-sample' }, h('button', { class: 'dd-sample-thumb', title: 'Open ' + s.title, onclick: open }, thumb),
                 h('div', { class: 'dd-sample-info' }, h('div', { class: 'dd-sample-title' }, h('b', null, s.title), h('small', null, `${prof.w}×${prof.h} · ${prof.mode === 'epaper' ? 'e-paper' : prof.mode === 'mono' ? '1-bit' : prof.mode === 'gray' ? 'grayscale' : 'colour'} · ${p.pages.length} page${p.pages.length === 1 ? '' : 's'}`)),
                     h('p', null, s.desc), h('div', { class: 'dd-tags' }, ...s.tags.map(t => h('span', { class: 'dd-tag' }, t))), h('button', { class: 'dd-btn-sm primary', onclick: open }, ic('open_in_new'), 'Open')));
             grid.append(card);
-            prepare(p).then(() => { const sc = Math.max(1, Math.min(4, Math.floor(280 / Math.max(prof.w, prof.h * 1.4)))); DD.renderProjectTo(p, thumb, sc); thumb.style.imageRendering = 'pixelated'; });
+            prepare(p).then(() => { const fit = Math.min(262 / prof.w, 150 / prof.h), sc = fit >= 1 ? Math.floor(fit * 4) / 4 : fit;   // one uniform scale: aspect ratio is never distorted
+                DD.renderProjectTo(p, thumb, sc); thumb.style.imageRendering = 'pixelated'; });
         });
     };
     // first visit: offer the samples

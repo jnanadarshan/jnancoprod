@@ -1,0 +1,116 @@
+/* ==========================================================================
+   Displaysim: LVGL Studio-style layout (three columns)
+   left = widgets + layers · middle = screen · right = properties
+   Everything is scoped to body.ui-lvgl; legacy.html does not load this file.
+   ========================================================================== */
+html body.ui-lvgl:not(.x) {
+    --g-accent: #3d6df2; --g-accent-2: #3d6df2; --g-accent-grad: #3d6df2;
+    --g-accent-soft: rgba(61,109,242,.10); --g-accent-ring: rgba(61,109,242,.22);
+    --g-glass: rgba(255,255,255,.92); --g-glass-strong: rgba(255,255,255,.97);
+    --g-inner: #f6f8fc; --g-field: #fff; --g-hover: rgba(30,50,100,.05);
+    --g-edge: rgba(30,50,100,.07); --g-line: rgba(30,50,100,.09); --g-line-2: rgba(30,50,100,.16);
+    --g-text: #1c2333; --g-text-2: #6b7487; --g-text-3: #98a1b3;
+    --g-shadow: 0 6px 24px rgba(31,45,90,.07); --g-blur: blur(14px) saturate(140%);
+    --g-radius: 22px; --g-radius-sm: 11px; --g-stage: #eef1f8;
+    --g-font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background: #f4f6fb; font-family: var(--g-font);
+}
+html body.ui-lvgl.dark-mode:not(.x) {
+    --g-accent: #6b93ff; --g-accent-2: #6b93ff; --g-accent-grad: #4b78f5;
+    --g-accent-soft: rgba(107,147,255,.14); --g-accent-ring: rgba(107,147,255,.28);
+    --g-glass: rgba(24,28,38,.92); --g-glass-strong: rgba(26,30,42,.97);
+    --g-inner: rgba(255,255,255,.04); --g-field: rgba(255,255,255,.05); --g-hover: rgba(255,255,255,.07);
+    --g-edge: rgba(255,255,255,.07); --g-line: rgba(255,255,255,.09); --g-line-2: rgba(255,255,255,.16);
+    --g-text: rgba(255,255,255,.92); --g-text-2: rgba(255,255,255,.55); --g-text-3: rgba(255,255,255,.38);
+    --g-shadow: 0 8px 28px rgba(0,0,0,.35); --g-stage: #0b0d13; background: #0e1118;
+}
+
+/* ---- grid: flush three columns under a floating navbar ------------------ */
+html body.ui-lvgl:not(.x) {
+    padding: 0; gap: 0; height: 100vh;
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-columns: 264px minmax(0, 1fr) 340px;
+}
+html body.ui-lvgl.left-panel-collapsed:not(.x) { grid-template-columns: 0px minmax(0, 1fr) 340px; }
+html body.ui-lvgl:not(.x) .left-panel   { grid-row: 2; grid-column: 1; }
+html body.ui-lvgl:not(.x) .right-panel  { grid-row: 2; grid-column: 2; }   /* the screen */
+html body.ui-lvgl:not(.x) .center-panel { grid-row: 2; grid-column: 3; }   /* properties */
+html body.ui-lvgl:not(.x) .panel {
+    height: auto; min-height: 0; margin: 0; padding: 0; gap: 0; border-radius: 0; box-shadow: none;
+    -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--g-glass);
+}
+html body.ui-lvgl:not(.x) .left-panel   { border: 0; border-right: 1px solid var(--g-line); overflow-y: auto; }
+html body.ui-lvgl:not(.x) .center-panel { border: 0; border-left: 1px solid var(--g-line); overflow-y: auto; }
+html body.ui-lvgl:not(.x) .right-panel  { border: 0; background: var(--g-stage); }
+html body.ui-lvgl.left-panel-collapsed:not(.x) .left-panel { border-right-width: 0; }
+@media (max-width: 1000px) {
+    html body.ui-lvgl:not(.x) { grid-template-columns: 1fr; grid-template-rows: auto auto auto auto; height: auto; overflow: auto; }
+    html body.ui-lvgl:not(.x) .left-panel, html body.ui-lvgl:not(.x) .right-panel, html body.ui-lvgl:not(.x) .center-panel { grid-column: 1; grid-row: auto; }
+    html body.ui-lvgl:not(.x) .right-panel { min-height: 70vh; }
+}
+
+/* sections: no card chrome, just headed blocks separated by lines */
+html body.ui-lvgl:not(.x) .left-panel details, html body.ui-lvgl:not(.x) .center-panel details, html body.ui-lvgl:not(.x) .right-panel details {
+    background: transparent; border: 0; border-radius: 0; margin: 0; box-shadow: none;
+}
+html body.ui-lvgl:not(.x) #editorDetails > summary, html body.ui-lvgl:not(.x) #elementsDetails > summary {
+    background: transparent; border: 0; border-bottom: 1px solid var(--g-line); border-radius: 0; padding: 12px 14px; pointer-events: none;
+    font-weight: 700; font-size: 14px; color: var(--g-text);
+}
+html body.ui-lvgl:not(.x) #editorDetails > summary::after, html body.ui-lvgl:not(.x) #elementsDetails > summary::after { display: none; }
+html body.ui-lvgl:not(.x) #editorDetails > summary .material-symbols-outlined,
+html body.ui-lvgl:not(.x) #elementsDetails > summary .material-symbols-outlined { color: var(--g-accent); background: var(--g-accent-soft); border-radius: 9px; padding: 6px; font-size: 20px; }
+html body.ui-lvgl:not(.x) #editorDetails > .details-content, html body.ui-lvgl:not(.x) #elementsDetails > .details-content { padding: 12px 14px 24px; opacity: 1; }
+
+/* ---- left: widget palette (3-up grid) + layers --------------------------- */
+html body.ui-lvgl:not(.x) .lv-h { margin: 14px 2px 8px; font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--g-text-3); font-weight: 700; }
+html body.ui-lvgl:not(.x) .lv-h:first-child { margin-top: 2px; }
+html body.ui-lvgl:not(.x) .add-elements-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 0; margin: 0; }
+html body.ui-lvgl:not(.x) .add-elements-container > button {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 64px; margin: 0; padding: 4px; width: auto;
+    border-radius: 9px; border: 1px solid var(--g-line); background: var(--g-inner); color: var(--g-text-2); box-shadow: none; font-size: 11px; font-weight: 600; line-height: 1.15;
+}
+html body.ui-lvgl:not(.x) .add-elements-container > button .material-symbols-outlined { font-size: 22px; color: var(--g-accent); }
+html body.ui-lvgl:not(.x) .add-elements-container > button:hover { border-color: var(--g-accent); background: var(--g-accent-soft); color: var(--g-text); filter: none; transform: none; box-shadow: none; }
+html body.ui-lvgl:not(.x) #elementList { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; }
+html body.ui-lvgl:not(.x) #elementList li { border: 1px solid transparent; border-radius: 7px; background: transparent; box-shadow: none; padding: 4px 6px; min-height: 30px; }
+html body.ui-lvgl:not(.x) #elementList li:hover { background: var(--g-inner); }
+html body.ui-lvgl:not(.x) #elementList li.selected { background: var(--g-accent-soft); border-color: var(--g-accent-ring); }
+html body.ui-lvgl:not(.x) #elementList .material-symbols-outlined:not(.drag-handle) { color: var(--g-accent); }
+
+/* ---- middle: the screen ------------------------------------------------- */
+html body.ui-lvgl:not(.x) .right-panel { display: flex; flex-direction: column; }
+html body.ui-lvgl:not(.x) .right-panel > details { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+html body.ui-lvgl:not(.x) .layout-toolbar { border-radius: 0; border: 0; border-top: 1px solid var(--g-line); background: var(--g-glass); padding: 8px 12px; }
+html body.ui-lvgl:not(.x) #previewSection > summary {
+    pointer-events: auto; background: var(--g-glass); border: 0; border-bottom: 1px solid var(--g-line); border-radius: 0; padding: 8px 12px; min-height: 48px; box-sizing: border-box;
+}
+html body.ui-lvgl:not(.x) #previewSection > summary::after { display: none; }
+html body.ui-lvgl:not(.x) #previewSection > .details-content { flex: 1; min-height: 0; background: var(--g-stage); opacity: 1; }
+
+/* ---- right: properties (inspector) -------------------------------------- */
+html body.ui-lvgl:not(.x) #editor-placeholder { color: var(--g-text-3); text-align: center; padding: 28px 10px; }
+html body.ui-lvgl:not(.x) .center-panel label { font-size: 11.5px; font-weight: 600; color: var(--g-text-2); }
+html body.ui-lvgl:not(.x) .center-panel input[type=text], html body.ui-lvgl:not(.x) .center-panel input[type=number], html body.ui-lvgl:not(.x) .center-panel select, html body.ui-lvgl:not(.x) .center-panel textarea {
+    font-size: 12.5px; border-radius: 7px; padding: 5px 8px; background: var(--g-inner); border: 1px solid var(--g-line);
+}
+html body.ui-lvgl:not(.x) .center-panel input:focus, html body.ui-lvgl:not(.x) .center-panel select:focus { border-color: var(--g-accent); box-shadow: 0 0 0 3px var(--g-accent-ring); outline: none; }
+
+/* ---- navbar: logo + capsules -------------------------------------------- */
+html body.ui-lvgl:not(.x) .top-nav {
+    background: transparent; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; border-radius: 0;
+    padding: 12px 12px 10px; height: auto; display: flex; align-items: center; gap: 10px;
+}
+html body.ui-lvgl:not(.x) .top-nav .nav-logo { flex: none; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; border-radius: 15px; background: var(--g-glass-strong); border: 1px solid var(--g-edge); box-shadow: var(--g-shadow); }
+html body.ui-lvgl:not(.x) .top-nav .nav-logo img { width: 26px; height: 26px; border-radius: 6px; }
+html body.ui-lvgl:not(.x) .lv-capsule, html body.ui-lvgl:not(.x) .top-nav .nav-icons {
+    height: 46px; box-sizing: border-box; padding: 0 10px; display: flex; align-items: center; gap: 4px; border-radius: 999px;
+    background: var(--g-glass-strong); border: 1px solid var(--g-edge); box-shadow: var(--g-shadow); -webkit-backdrop-filter: var(--g-blur); backdrop-filter: var(--g-blur);
+}
+html body.ui-lvgl:not(.x) .top-nav .nav-left-section { gap: 6px; }
+html body.ui-lvgl:not(.x) .top-nav .title { font-size: 14px; font-weight: 700; display: flex; align-items: baseline; gap: 8px; }
+html body.ui-lvgl:not(.x) .top-nav .title .material-symbols-outlined { display: none; }
+html body.ui-lvgl:not(.x) .top-nav .title small { color: var(--g-text-3); font-size: 11.5px; font-weight: 500; }
+html body.ui-lvgl:not(.x) .top-nav .lv-grow { flex: 1; }
+html body.ui-lvgl:not(.x) .top-nav .nav-icons { margin-left: 0; }
+@media (max-width: 1100px) { html body.ui-lvgl:not(.x) .legacy-btn span:last-child, html body.ui-lvgl:not(.x) .deploy-label { display: none; } }

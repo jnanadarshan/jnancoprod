@@ -34,11 +34,12 @@
         const api = { close, body: bodyEl, box }; modals.push(api); return api;
     };
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && modals.length) { modals[modals.length - 1].close(); e.stopImmediatePropagation(); } }, true);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modals.length) { const ps = document.querySelectorAll('.dd-pop'); if (ps.length) { ps.forEach(p => p.remove()); e.stopPropagation(); } } }, true);
     DD.popover = function (anchor, content, align) {
         document.querySelectorAll('.dd-pop').forEach(p => p.remove());
         const p = h('div', { class: 'dd-pop' }, content); document.body.append(p);
         const r = anchor.getBoundingClientRect(), pw = p.offsetWidth; let x = align === 'right' ? r.right - pw : r.left; x = Math.max(8, Math.min(x, innerWidth - pw - 8)); p.style.left = x + 'px'; p.style.top = (r.bottom + 8) + 'px';
-        setTimeout(() => document.addEventListener('mousedown', function off(e) { if (!p.contains(e.target) && !anchor.contains(e.target)) { p.remove(); document.removeEventListener('mousedown', off); } }), 0);
+        setTimeout(() => document.addEventListener('mousedown', function off(e) { if (!p.contains(e.target) && !anchor.contains(e.target) && !e.target.closest('.dd-list, .dd-dlg-back')) { p.remove(); document.removeEventListener('mousedown', off); } }), 0);
         return p;
     };
     const closePop = () => document.querySelectorAll('.dd-pop').forEach(p => p.remove());
@@ -95,7 +96,7 @@
         const head = screenGroup.querySelector('.cfg-heading');
         const box = h('div', { class: 'dd-profile' }, h('label', { for: 'ddProfile' }, 'Display type:'), profSel, profNote,
             h('label', { class: 'dd-check', title: 'Draw text with the browser instead of the exact ESPHome-style rasteriser' }, smooth, 'Smooth text preview (ignore font bpp)'));
-        head.after(box);
+        if ($('ddProfileSlot')) $('ddProfileSlot').append(box); else head.after(box);
         fillProfiles(); syncProfileUI();
         profSel.addEventListener('change', () => DD.setProfile(profSel.value, {}));
         smooth.checked = DD.LS.get('dd.smooth', 'false') === 'true'; DD.fontEngine.smooth = smooth.checked;
@@ -113,8 +114,8 @@
         pageBar.innerHTML = '';
         DD.pages.forEach(p => {
             const b = h('button', { class: 'dd-page' + (p.id === DD.page ? ' on' : ''), role: 'tab', title: 'Click to open · double-click to rename', onclick: () => DD.setPage(p.id) }, ic('crop_landscape'), p.id);
-            b.addEventListener('dblclick', () => { const v = prompt('Page id (letters, digits, underscore):', p.id); if (v && !DD.renamePage(p.id, v)) DD.toast('That page id is invalid or already exists.'); });
-            if (DD.pages.length > 1) b.append(h('span', { class: 'material-symbols-outlined dd-page-x', title: 'Delete page', onclick: e => { e.stopPropagation(); const n = DD.pageEls(p.id).length; if (n && !confirm(`Delete page "${p.id}" and its ${n} element${n === 1 ? '' : 's'}?`)) return; DD.deletePage(p.id); } }, 'close'));
+            b.addEventListener('dblclick', async () => { const v = await DD.prompt('Letters, digits and underscore only. It is used as the page id in display: pages:.', p.id, { title: 'Rename page', icon: 'edit' }); if (v && !DD.renamePage(p.id, v)) DD.toast('That page id is invalid or already exists.'); });
+            if (DD.pages.length > 1) b.append(h('span', { class: 'material-symbols-outlined dd-page-x', title: 'Delete page', onclick: async e => { e.stopPropagation(); const n = DD.pageEls(p.id).length; if (n && !(await DD.confirm(`Page "${p.id}" and its ${n} element${n === 1 ? '' : 's'} will be removed.`, { title: 'Delete page?', confirmLabel: 'Delete', danger: true }))) return; DD.deletePage(p.id); } }, 'close'));
             pageBar.append(b);
         });
         pageBar.append(h('button', { class: 'dd-page add', title: 'Add a display page', onclick: () => DD.addPage() }, ic('add')));
@@ -124,10 +125,8 @@
 
     // ------------------------------------------------------------------ Live data panel
     const note = prevHost.parentElement.querySelector('p');
-    const live = h('details', { id: 'ddLive', class: 'dd-live' }, h('summary', null, ic('sensors'), ' Live data (simulated sensors & clock)'), h('div', { class: 'dd-live-body', id: 'ddLiveBody' }));
-    (note || prevHost).after(live);
     function renderLive() {
-        const body = $('ddLiveBody'); if (!body) return; body.innerHTML = '';
+        const body = renderLive.body; if (!body) return; body.innerHTML = '';
         const ids = DD.sensorIds();
         body.append(h('p', { class: 'dd-hint' }, 'Values used by text like ', h('code', null, 'id(temp).state'), ', gauges and graph traces. Preview only: nothing is exported.'));
         if (!ids.length) body.append(h('p', { class: 'dd-hint' }, 'No sensors used yet. Add text with an argument such as id(temp).state, a gauge percent, or a graph trace.'));
@@ -142,7 +141,16 @@
         dt.addEventListener('input', () => { if (dt.value) tm.iso = dt.value; DD.saveMeta(); drawPreview(); });
         body.append(h('div', { class: 'dd-live-time' }, h('b', null, 'Clock'), mode, dt));
     }
-    live.addEventListener('toggle', () => { if (live.open) renderLive(); });
+    // Live data lives in a popover opened from the preview header (see dd-view.js)
+    DD.openLive = function (anchor) {
+        if (document.querySelector('.dd-pop.dd-live-pop')) { document.querySelectorAll('.dd-pop').forEach(p => p.remove()); return; }
+        const body = h('div', { class: 'dd-live-body' }); renderLive.body = body; renderLive();
+        const panel = h('div', { class: 'dd-live-panel' }, h('div', { class: 'dd-live-title' }, ic('sensors'), 'Live data', h('small', null, 'simulated sensors & clock')), body);
+        const pop = DD.popover(anchor, panel, 'right'); pop.classList.add('dd-live-pop');
+        // centre the popover under the button (it is positioned before it gets its width, so redo it), kept inside the window
+        const r = anchor.getBoundingClientRect(), pw = pop.offsetWidth;
+        pop.style.left = Math.max(8, Math.min(r.left + r.width / 2 - pw / 2, innerWidth - pw - 8)) + 'px';
+    };
     setInterval(() => { if (DD.live.time.mode === 'now' && elements.some(e => e.type === 'clock' && DD.pageOf(e) === DD.page)) drawPreview(); }, 1000);
 
     // ------------------------------------------------------------------ new element types: palette ("More") + list + editor fields
@@ -292,7 +300,7 @@
                     h('label', { class: 'dd-check' }, (() => { const c = h('input', { type: 'checkbox' }); c.checked = !!m.invert_alpha; c.addEventListener('change', () => upd('invert_alpha', c.checked)); return c; })(), 'invert_alpha (swap black and white)'),
                     h('p', { class: 'dd-hint' }, proc ? `${proc.width}×${proc.height} px · ≈ ${(bytes / 1024).toFixed(1)} KB in flash` : 'Upload the file to preview it.'),
                     h('div', { class: 'dd-row' }, h('button', { class: 'dd-btn-sm', onclick: () => { const el = DD.addElement('image'); if (el) { el.imageId = m.id; refresh(); } } }, ic('add_photo_alternate'), 'Add to screen'),
-                        h('button', { class: 'dd-btn-sm danger', onclick: () => { if (elements.some(e => e.imageId === m.id) && !confirm(`${m.id} is used on screen. Remove anyway?`)) return; DD.images.splice(idx, 1); DD.idb.del('img:' + m.id); DD.imgCache.delete(m.id); DD.saveMeta(); refresh(); render(); } }, ic('delete'), 'Remove')))));
+                        h('button', { class: 'dd-btn-sm danger', onclick: async () => { if (elements.some(e => e.imageId === m.id) && !(await DD.confirm(`${m.id} is used on screen. Elements using it will show an empty placeholder.`, { title: 'Remove image?', confirmLabel: 'Remove', danger: true }))) return; DD.images.splice(idx, 1); DD.idb.del('img:' + m.id); DD.imgCache.delete(m.id); DD.saveMeta(); refresh(); render(); } }, ic('delete'), 'Remove')))));
             });
         };
         render(); DD.modal({ title: 'Images', icon: 'image', wide: true, tall: true, body });
@@ -332,6 +340,6 @@
     // ------------------------------------------------------------------ boot
     DD.loadImages(); renderPages(); syncProfileUI(); syncAssetsPill();
     DD.ensureFontFiles = function () { try { getFontSpecs().forEach(s => { const f = String(s.file || ''); const k = /^gfonts:\/\//i.test(f) ? (/roboto/i.test(f) ? 'Roboto-Regular.ttf' : null) : f.split('/').pop(); if (k && DD.fontEngine.ensure) DD.fontEngine.ensure(k); }); } catch (e) { /* ignore */ } };
-    DD.renderPages = renderPages; DD.renderLive = renderLive;
+    DD.renderPages = renderPages; DD.renderLive = () => { if (renderLive.body && renderLive.body.isConnected) renderLive(); };
     window.DD_UI_READY = true;
 })();

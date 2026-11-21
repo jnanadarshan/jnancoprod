@@ -1,173 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- DISCLAIMER: ESPHome and LVGL are trademarks or property of their respective copyright owners. This project is independent and is not affiliated with, endorsed by, or sponsored by them. -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HomeAssistant Tools</title>
-    <link rel="icon" type="image/png" href="displaysim/favicon.png">
+    <link rel="icon" type="image/png" href="esphome-display/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared/jdnx-theme.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <script src="appdrawer.js" defer></script>
+    <script src="appdrawer.js?v=20261121" defer></script>
     <style>
-        /* Same glass design tokens as displaysim/glass.css */
-        body {
-            --g-accent: #6366f1;
-            --g-accent-grad: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            --g-accent-soft: rgba(99, 102, 241, 0.14);
-            --g-accent-ring: rgba(99, 102, 241, 0.28);
-            --g-glass: rgba(255, 255, 255, 0.52);
-            --g-glass-strong: rgba(255, 255, 255, 0.82);
-            --g-hover: rgba(99, 102, 241, 0.09);
-            --g-edge: rgba(255, 255, 255, 0.75);
-            --g-line: rgba(30, 32, 80, 0.09);
-            --g-text: #1b1d3a;
-            --g-text-2: rgba(27, 29, 58, 0.62);
-            --g-shadow: 0 10px 40px rgba(60, 60, 140, 0.14), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
-            --g-blur: blur(22px) saturate(170%);
-            --g-radius: 18px;
-            --g-radius-sm: 11px;
-            --g-bg:
-                radial-gradient(900px 620px at 8% -5%, rgba(129, 140, 248, 0.55), transparent 60%),
-                radial-gradient(780px 560px at 100% 15%, rgba(244, 114, 182, 0.38), transparent 58%),
-                radial-gradient(900px 700px at 55% 115%, rgba(34, 211, 238, 0.38), transparent 58%),
-                #eef1fb;
-        }
-        body.dark-mode {
-            --g-accent: #8b93ff;
-            --g-accent-grad: linear-gradient(135deg, #6d73f5 0%, #9b6cf7 100%);
-            --g-accent-soft: rgba(139, 147, 255, 0.18);
-            --g-accent-ring: rgba(139, 147, 255, 0.35);
-            --g-glass: rgba(24, 27, 52, 0.5);
-            --g-glass-strong: rgba(22, 25, 48, 0.88);
-            --g-hover: rgba(255, 255, 255, 0.07);
-            --g-edge: rgba(255, 255, 255, 0.11);
-            --g-line: rgba(255, 255, 255, 0.09);
-            --g-text: rgba(255, 255, 255, 0.92);
-            --g-text-2: rgba(255, 255, 255, 0.58);
-            --g-shadow: 0 14px 48px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.07) inset;
-            --g-bg:
-                radial-gradient(900px 620px at 8% -5%, rgba(79, 70, 229, 0.42), transparent 60%),
-                radial-gradient(780px 560px at 100% 15%, rgba(190, 24, 93, 0.28), transparent 58%),
-                radial-gradient(900px 700px at 55% 115%, rgba(8, 145, 178, 0.3), transparent 58%),
-                #0b0d1f;
-        }
-
+        /* Shared JDNx design tokens come from shared/jdnx-theme.css (same as the apps) */
         * { box-sizing: border-box; }
         html, body { margin: 0; min-height: 100%; }
-        body {
-            font-family: 'Inter', 'Roboto', system-ui, sans-serif;
-            color: var(--g-text);
-            background: var(--g-bg);
-            background-attachment: fixed;
-            letter-spacing: -0.003em;
-            -webkit-font-smoothing: antialiased;
-            padding: 16px;
-            transition: color .2s ease;
-        }
+        body { font-family: var(--g-font); color: var(--g-text); background: var(--g-bg); -webkit-font-smoothing: antialiased; letter-spacing: -0.003em; padding: 0 16px 16px; }
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-
-        .glass {
-            background: var(--g-glass);
-            backdrop-filter: var(--g-blur);
-            -webkit-backdrop-filter: var(--g-blur);
-            border: 1px solid var(--g-edge);
-            border-radius: var(--g-radius);
-            box-shadow: var(--g-shadow);
-        }
-
         .wrap { max-width: 1080px; margin: 0 auto; }
-
-        /* Top bar */
-        .top-nav {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 12px 16px; gap: 12px;
-        }
-        .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
-        .brand-mark {
-            width: 38px; height: 38px; flex: none; border-radius: var(--g-radius-sm);
-            display: grid; place-items: center;
-            background: var(--g-accent-grad); color: #fff;
-            box-shadow: 0 6px 18px var(--g-accent-ring);
-        }
-        .brand h1 { font-size: 18px; font-weight: 700; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .brand small { display: block; font-size: 12px; color: var(--g-text-2); font-weight: 500; }
-        .icon-btn {
-            width: 38px; height: 38px; flex: none; border-radius: 50%;
-            border: 1px solid var(--g-line); background: var(--g-glass-strong);
-            color: var(--g-text); cursor: pointer; display: grid; place-items: center;
-            transition: background .15s ease, transform .15s ease;
-        }
-        .icon-btn:hover { background: var(--g-hover); }
-        .icon-btn:active { transform: scale(.94); }
-        .icon-btn:focus-visible, .app-card:focus-visible { outline: 3px solid var(--g-accent-ring); outline-offset: 2px; }
-
-        /* Hero */
+        .jd-nav { padding: 12px 0 0; justify-content: space-between; }
+        .nav-l { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .brand { display: flex; flex-direction: column; line-height: 1.15; padding: 0 8px; }
+        .brand b { font-size: 14px; font-weight: 700; white-space: nowrap; }
+        .brand span { font-size: 11px; color: var(--g-text-2); }
         .hero { padding: 40px 8px 24px; }
-        .hero h2 { font-size: clamp(26px, 5vw, 38px); font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+        .hero h2 { font-size: clamp(26px, 5vw, 36px); font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
         .hero p { margin: 0; color: var(--g-text-2); font-size: 15px; max-width: 620px; line-height: 1.55; }
-
-        /* App grid */
-        .grid {
-            display: grid; gap: 16px;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        }
-        .app-card {
-            display: flex; flex-direction: column; gap: 14px;
-            padding: 22px; text-decoration: none; color: inherit;
-            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-        }
-        .app-card:hover { transform: translateY(-3px); border-color: var(--g-accent-ring); }
-        .app-icon {
-            width: 52px; height: 52px; border-radius: 14px;
-            display: grid; place-items: center;
-            background: var(--g-accent-soft); color: var(--g-accent);
-        }
+        .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+        .app-card { display: flex; flex-direction: column; gap: 14px; padding: 22px; text-decoration: none; color: inherit; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+        .app-card:hover { transform: translateY(-3px); border-color: var(--g-accent-ring); box-shadow: 0 12px 32px var(--g-accent-ring); }
+        .app-card:focus-visible { outline: 2px solid var(--g-accent-ring); outline-offset: 2px; }
+        .app-icon { width: 52px; height: 52px; border-radius: var(--g-radius-md); display: grid; place-items: center; background: var(--g-accent-soft); color: var(--g-accent); }
         .app-icon .material-symbols-outlined { font-size: 28px; }
         .app-card h3 { margin: 0; font-size: 17px; font-weight: 600; }
         .app-card p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--g-text-2); flex: 1; }
-        .open {
-            display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
-            padding: 8px 14px; border-radius: 999px;
-            background: var(--g-accent-grad); color: #fff;
-            font-size: 13px; font-weight: 600;
-            box-shadow: 0 4px 14px var(--g-accent-ring);
-        }
-        .open .material-symbols-outlined { font-size: 18px; transition: transform .18s ease; }
-        .app-card:hover .open .material-symbols-outlined { transform: translateX(3px); }
-
+        .app-card .jd-btn { align-self: flex-start; }
+        .app-card .jd-btn .material-symbols-outlined { font-size: 18px; transition: transform .18s ease; }
+        .app-card:hover .jd-btn .material-symbols-outlined { transform: translateX(3px); }
         footer { text-align: center; padding: 32px 8px 12px; font-size: 12px; color: var(--g-text-2); }
-
-        @media (max-width: 520px) {
-            .brand small { display: none; }
-            .hero { padding: 28px 4px 18px; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-            * { transition: none !important; }
-        }
+        @media (max-width: 520px) { .brand span { display: none; } .hero { padding: 28px 4px 18px; } }
+        @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
     </style>
     <script>
         // Shares the "darkMode" preference with the apps (same origin, same key)
         try { if (localStorage.getItem('darkMode') === 'true') document.documentElement.classList.add('pre-dark'); } catch (e) {}
     </script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7P5YFV6K4E"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-7P5YFV6K4E');
+    </script>
 </head>
 <body>
     <script>if (document.documentElement.classList.contains('pre-dark')) document.body.classList.add('dark-mode');</script>
     <div class="wrap">
-        <header class="top-nav glass">
-            <div class="brand">
-                <div class="brand-mark"><span class="material-symbols-outlined">home_iot_device</span></div>
-                <div>
-                    <h1>HomeAssistant Tools</h1>
-                    <small>by JDNx Tools</small>
-                </div>
+        <header class="jd-nav">
+            <div class="nav-l">
+                <a class="jd-logo" href="./" title="JDNx Tools"><img src="esphome-display/favicon.png" alt=""></a>
+                <div class="jd-capsule"><div class="brand"><b>HomeAssistant Tools</b><span>by JDNx Tools</span></div></div>
             </div>
-            <div style="display:flex;align-items:center;gap:8px">
-            <button class="icon-btn" id="darkModeBtn" title="Toggle dark mode" aria-label="Toggle dark mode">
-                <span class="material-symbols-outlined" id="darkModeIcon">dark_mode</span>
-            </button>
-            <span data-app-drawer style="display:inline-flex"></span>
+            <div class="jd-capsule">
+                <button class="jd-iconbtn" id="darkModeBtn" title="Toggle dark mode" aria-label="Toggle dark mode"><span class="material-symbols-outlined" id="darkModeIcon">dark_mode</span></button>
+                <span class="jd-sep"></span>
+                <span data-app-drawer style="display:inline-flex"></span>
             </div>
         </header>
 
@@ -177,27 +76,29 @@
         </section>
 
         <main class="grid">
-            <a class="app-card glass" href="displaysim/">
+            <a class="app-card jd-panel" href="esphome-display/">
                 <div class="app-icon"><span class="material-symbols-outlined">dashboard_customize</span></div>
-                <h3>Displaysim</h3>
+                <h3>ESPHome Display Designer</h3>
                 <p>Design display layouts visually and export ESPHome display code. Includes font management and YAML import.</p>
-                <span class="open">Open <span class="material-symbols-outlined">arrow_forward</span></span>
+                <span class="jd-btn">Open <span class="material-symbols-outlined">arrow_forward</span></span>
             </a>
-            <a class="app-card glass" href="esphomelvglsim/">
+            <a class="app-card jd-panel" href="esphome-lvgl/">
                 <div class="app-icon"><span class="material-symbols-outlined">widgets</span></div>
-                <h3>ESPHOME LVGL SIM</h3>
+                <h3>ESPHome LVGL Designer</h3>
                 <p>Simulate ESPHome LVGL screens in the browser. Preview widgets, layouts and styles before you flash.</p>
-                <span class="open">Open <span class="material-symbols-outlined">arrow_forward</span></span>
+                <span class="jd-btn">Open <span class="material-symbols-outlined">arrow_forward</span></span>
             </a>
-            <a class="app-card glass" href="mmwave/">
+            <a class="app-card jd-panel" href="mmwave/">
                 <div class="app-icon"><span class="material-symbols-outlined">sensors</span></div>
                 <h3>MMWAVE Creator</h3>
                 <p>Generate ESPHome configuration for LD2410 mmWave presence sensors.</p>
-                <span class="open">Open <span class="material-symbols-outlined">arrow_forward</span></span>
+                <span class="jd-btn">Open <span class="material-symbols-outlined">arrow_forward</span></span>
             </a>
         </main>
 
-        <footer>This page is only accessible within Sanctity Domain &lt;servername.sanctity.jnan.co&gt;</footer>
+        <footer>
+            <p style="max-width:640px;margin:0 auto 10px;line-height:1.5">Disclaimer: ESPHome and LVGL are trademarks or property of their respective copyright owners. This project is independent and is not affiliated with, endorsed by, or sponsored by them.</p>
+        </footer>
     </div>
 
     <script>

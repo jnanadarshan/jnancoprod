@@ -1,6 +1,6 @@
 {
   "name": "ESPHome Display Designer",
-  "short_name": "Display Designer",
+  "short_name": "ESPHome Display",
   "description": "Design ESPHome display layouts visually (OLED, TFT, e-paper), preview them as the panel will draw them, and export lambda, font, color and asset code.",
   "start_url": "./",
   "scope": "./",

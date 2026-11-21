@@ -99,6 +99,33 @@
         return { seg, plain: seg.map(s => s.t).join('\n'), m, P };
     }
 
+    // ---------- rendering ----------
+    function fontRows(fonts) {
+        if (!fonts.length) return '<tr><td colspan="3">No fonts listed yet. Add font IDs in Settings.</td></tr>';
+        const seen = new Set();
+        return fonts.filter(f => !/:\/\//.test(f.file) && !seen.has(f.file) && seen.add(f.file)).map(f => {
+            const base = f.file.split('/').pop();
+            let link, hint;
+            if (/^Roboto/i.test(base)) { link = LINKS.roboto; hint = 'Bundled with the designer preview; for ESPHome download the family and use <b>' + esc(base) + '</b> from the <i>static</i> folder'; }
+            else if (/^OpenSans/i.test(base)) { link = LINKS.opensans; hint = 'Download family, use <b>' + esc(base) + '</b> from the <i>static</i> folder'; }
+            else if (/MaterialSymbols/i.test(base)) { link = LINKS.symbols; hint = 'Take <code>MaterialSymbolsOutlined[\u2026].ttf</code> and <b>rename it to ' + esc(base) + '</b>'; }
+            else if (/materialdesignicons/i.test(base)) { link = LINKS.mdi; hint = 'Direct download (note: different icon set than this tool\'s preview)'; }
+            else { link = 'https://fonts.google.com/?query=' + encodeURIComponent(base.replace(/\.ttf$/i, '')); hint = 'Search Google Fonts, save the file as <b>' + esc(base) + '</b>'; }
+            return `<tr><td><code>${esc(base)}</code></td><td>${hint}</td><td><a class="dl-link" href="${link}" target="_blank" rel="noopener"><span class="material-symbols-outlined">open_in_new</span>Get</a></td></tr>`;
+        }).join('');
+    }
+
+    function folderTree(fonts) {
+        const files = [...new Set(fonts.filter(f => !/:\/\//.test(f.file)).map(f => f.file.split('/').pop()))];
+        let t = 'esphome/                  \u2190 your ESPHome config folder\n\u251c\u2500 my-display.yaml       \u2190 the file you edit\n\u2514\u2500 fonts/                \u2190 create this folder\n';
+        files.forEach((f, i) => { t += `   ${i === files.length - 1 ? '\u2514\u2500' : '\u251c\u2500'} ${f}\n`; });
+        return t;
+    }
+
+    function segHtml(seg) {
+        return seg.map(s => `<div class="seg seg-${s.k}" data-label="${esc(s.label)}">${esc(s.t.replace(/\n$/, ''))}</div>`).join('');
+    }
+
     function guideHtml(platformKey) {
         const { seg, m } = compose(platformKey);
         const [W, H] = (/^\d+x\d+$/.test(configResolutionSelect.value) ? configResolutionSelect.value : '—x—').split('x');
