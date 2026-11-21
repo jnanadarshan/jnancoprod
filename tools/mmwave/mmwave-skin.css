@@ -1,0 +1,26 @@
+/* Re-skin of the LD2410 generator in the shared JDNx look (see ../shared/jdnx-theme.css) */
+html body { background: var(--g-bg); color: var(--g-text); font-family: var(--g-font); padding: 0 0 40px; line-height: 1.55; }
+.material-symbols-outlined { font-family: 'Material Symbols Outlined'; font-style: normal; font-weight: normal; font-size: 20px; line-height: 1; display: inline-block; vertical-align: middle; -webkit-font-feature-settings: 'liga'; font-feature-settings: 'liga'; }
+.jd-nav .title { display: flex; align-items: center; gap: 8px; font-weight: 600; letter-spacing: -.01em; color: var(--g-text); }
+.jd-nav .title .material-symbols-outlined { color: var(--g-accent); }
+.jd-nav .grow { flex: 1; }
+html body .container { background: var(--g-glass); border: 1px solid var(--g-edge); border-radius: var(--g-radius); box-shadow: var(--g-shadow); max-width: 860px; margin: 14px auto; padding: 24px 28px; -webkit-backdrop-filter: var(--g-blur); backdrop-filter: var(--g-blur); }
+html body h1 { color: var(--g-text); border-bottom: 1px solid var(--g-line); font-weight: 650; font-size: 1.35em; letter-spacing: -.01em; padding-bottom: 12px; }
+html body h2 { color: var(--g-text); font-size: 1em; font-weight: 600; }
+html body p, html body .note { color: var(--g-text-2); }
+html body fieldset { border: 1px solid var(--g-line); border-radius: var(--g-radius-md); background: var(--g-inner); }
+html body legend { background: transparent; color: var(--g-text); border-bottom: 1px solid var(--g-line); font-weight: 600; padding: 12px 16px; }
+html body legend:hover { background: var(--g-hover); }
+html body .fieldset-content { background: transparent; }
+html body label { color: var(--g-text-2); font-weight: 600; font-size: .85em; }
+html body input[type="text"], html body input[type="password"] { background: var(--g-field); color: var(--g-text); border: 1px solid var(--g-line); border-radius: var(--g-radius-sm); }
+html body input[type="text"]:focus, html body input[type="password"]:focus { border-color: var(--g-accent); box-shadow: 0 0 0 3px var(--g-accent-ring); }
+html body .arrow { border-top-color: var(--g-text-2); }
+html body button#generateButton { background: var(--g-accent-grad); color: #fff; border-radius: var(--g-radius-sm); text-transform: none; font-weight: 600; font-size: 13.5px; padding: 10px 20px; box-shadow: 0 2px 8px var(--g-accent-ring); }
+html body button#generateButton:hover { background: var(--g-accent-grad); filter: brightness(1.08); box-shadow: 0 6px 18px var(--g-accent-ring); }
+html body button#copyButton { background: var(--g-field); color: var(--g-text); border: 1px solid var(--g-line); border-radius: var(--g-radius-sm); font-weight: 600; padding: 6px 12px; }
+html body button#copyButton:hover { background: var(--g-accent-grad); color: #fff; border-color: transparent; }
+html body button#copyButton.copied { background: var(--g-ok); color: #fff; border-color: transparent; }
+html body pre { background: var(--g-field); color: var(--g-text); border: 1px solid var(--g-line); border-radius: var(--g-radius-md); }
+html body.dark-mode pre { background: rgba(0, 0, 0, .3); }
+html body code { background: none; }
