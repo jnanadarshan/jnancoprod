@@ -151,7 +151,8 @@
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Monospace&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@400;500;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="lvgl.css">
 </head>
 <body class="bg-gray-50 text-gray-900">
 
@@ -166,17 +167,18 @@
                         <span class="font-bold text-lg text-gray-800">LVGL Designer</span>
                     </div>
                 </div>
-                <div class="flex items-center space-x-2">
-                    <!-- New Keyboard Shortcuts Button -->
-                    <button id="keyboard-shortcuts-button" type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        <i class="material-icons-outlined text-base mr-1 -ml-1">keyboard</i> Shortcuts
-                    </button>
-                    <button id="import-yaml-button" type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        <i class="material-icons-outlined text-base mr-1 -ml-1">file_upload</i> Import YAML
-                    </button>
-                    <button id="generate-yaml-button" type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        <i class="material-icons-outlined text-base mr-1 -ml-1">code</i> Generate YAML
-                    </button>
+                <div class="flex items-center gap-1.5 hdr-actions">
+                    <button id="undo-button" type="button" class="hb hb-icon" title="Undo (Ctrl+Z)" disabled><i class="material-icons-outlined">undo</i></button>
+                    <button id="redo-button" type="button" class="hb hb-icon" title="Redo (Ctrl+Y)" disabled><i class="material-icons-outlined">redo</i></button>
+                    <span class="hb-sep"></span>
+                    <button id="fonts-button" type="button" class="hb" title="Fonts"><i class="material-icons-outlined">font_download</i><span class="hb-label">Fonts</span></button>
+                    <button id="import-yaml-button" type="button" class="hb hb-accent" title="Import an existing ESPHome YAML"><i class="material-icons-outlined">file_upload</i><span class="hb-label">Import YAML</span></button>
+                    <button id="generate-yaml-button" type="button" class="hb hb-accent" title="Show the generated YAML"><i class="material-icons-outlined">code</i><span class="hb-label">Generate YAML</span></button>
+                    <button id="deploy-button" type="button" class="hb hb-primary" title="How to use this in ESPHome"><i class="material-icons-outlined">rocket_launch</i><span class="hb-label">Deploy</span></button>
+                    <span class="hb-sep"></span>
+                    <button id="keyboard-shortcuts-button" type="button" class="hb hb-icon" title="Keyboard shortcuts"><i class="material-icons-outlined">keyboard</i></button>
+                    <button id="dark-button" type="button" class="hb hb-icon" title="Toggle dark mode"><i class="material-icons-outlined">dark_mode</i></button>
+                    <button id="help-button" type="button" class="hb hb-icon" title="Help"><i class="material-icons-outlined">help_outline</i></button>
                 </div>
             </div>
         </nav>
@@ -233,12 +235,17 @@
                                     <option value="custom">Custom Size...</option>
                                 </select>
                             </div>
+                            <div class="flex items-center gap-1" id="canvas-tools">
+                                <button id="snap-button" type="button" class="scale-button tool-btn" title="Snap to grid"><i class="material-icons-outlined">grid_on</i> Snap</button>
+                                <button id="fit-button" type="button" class="scale-button tool-btn" title="Fit canvas to the window"><i class="material-icons-outlined">fit_screen</i> Fit</button>
+                            </div>
                             <div class="flex items-center space-x-1" id="scale-controls">
                                 <span class="text-sm font-medium text-gray-600">Scale:</span>
                                 <button type="button" class="scale-button" data-scale="0.5">0.5x</button> <button type="button" class="scale-button active-scale" data-scale="1">1x</button> <button type="button" class="scale-button" data-scale="2">2x</button> <button type="button" class="scale-button" data-scale="3">3x</button>
                             </div>
                         </div>
                     </div>
+                    <div id="page-tabs" class="lvgl-pages" aria-label="Pages"></div>
                     <div class="w-full flex-1 overflow-auto flex items-center justify-center p-2 bg-gray-50 rounded">
                          <div id="canvas">
                              </div>
@@ -339,11 +346,13 @@
         </div>
         <div class="p-4 space-y-4">
             <ul class="list-disc pl-5 text-sm text-gray-700">
-                <li><strong>Delete/Backspace:</strong> Delete selected widget</li>
-                <li><strong>Arrow Keys:</strong> Move selected widget</li>
-                <li><strong>Escape:</strong> Close modals</li>
-                <li><strong>Ctrl + S:</strong> Save state</li>
-                <li><strong>Ctrl + Z:</strong> Undo last action</li>
+                <li><strong>Drag</strong> a widget to move it, drag the handles to resize (hold <strong>Alt</strong> to ignore snapping)</li>
+                <li><strong>Arrow keys:</strong> nudge 1px, <strong>Shift + arrows</strong> 10px</li>
+                <li><strong>Delete / Backspace:</strong> delete selected widget</li>
+                <li><strong>Ctrl + Z / Ctrl + Y:</strong> undo / redo</li>
+                <li><strong>Ctrl + D:</strong> duplicate, <strong>Ctrl + C / V:</strong> copy / paste</li>
+                <li><strong>Ctrl + S:</strong> save in this browser</li>
+                <li><strong>Escape:</strong> deselect, or close a window</li>
             </ul>
         </div>
         <div class="flex items-center justify-end p-4 border-t border-gray-200">
@@ -978,7 +987,7 @@ function updateWidgetSpecificProperties(widgetData, element) {
         }
         function applyCanvasScale() { if (canvas) { canvas.style.transform = `scale(${currentScale})`; } }
         function handleScaleChange(event) { const clickedButton = event.target.closest('.scale-button'); if (!clickedButton) return; const newScale = parseFloat(clickedButton.dataset.scale); if (!isNaN(newScale) && newScale !== currentScale) { currentScale = newScale; applyCanvasScale(); scaleControls.querySelectorAll('.scale-button').forEach(btn => { btn.classList.remove('active-scale'); }); clickedButton.classList.add('active-scale'); } }
-        function updateElementsList() { elementsListItemsContainer.innerHTML = ''; elementCountSpan.textContent = widgetsOnCanvas.length; if (widgetsOnCanvas.length === 0) { elementsListItemsContainer.innerHTML = '<p class="text-xs text-gray-500 italic px-2">No elements added yet.</p>'; return; } widgetsOnCanvas.slice().sort((a,b) => (a.zIndex || 0) - (b.zIndex || 0)).forEach((widgetData) => { const indexInSortedList = widgetsOnCanvas.findIndex(w => w.id === widgetData.id); const listItem = document.createElement('div'); listItem.classList.add('elements-list-item'); listItem.dataset.widgetId = widgetData.id; const widgetInfo = document.createElement('div'); widgetInfo.classList.add('widget-info'); const icon = document.createElement('i'); icon.classList.add('material-icons-outlined'); icon.textContent = widgetIconMap[widgetData.type] || widgetIconMap.default; widgetInfo.appendChild(icon); const text = document.createElement('span'); text.textContent = widgetData.id; widgetInfo.appendChild(text); listItem.appendChild(widgetInfo); const actionsDiv = document.createElement('div'); actionsDiv.classList.add('actions'); const upButton = document.createElement('button'); upButton.classList.add('action-btn', 'move-up'); upButton.title = "Move Up"; upButton.innerHTML = '<i class="material-icons-outlined">keyboard_arrow_up</i>'; upButton.disabled = (widgetData.zIndex >= widgetsOnCanvas.length); upButton.dataset.widgetId = widgetData.id; upButton.addEventListener('click', (e) => { e.stopPropagation(); moveWidget(widgetData.id, 'up'); }); actionsDiv.appendChild(upButton); const downButton = document.createElement('button'); downButton.classList.add('action-btn', 'move-down'); downButton.title = "Move Down"; downButton.innerHTML = '<i class="material-icons-outlined">keyboard_arrow_down</i>'; downButton.disabled = (widgetData.zIndex <= 1); downButton.dataset.widgetId = widgetData.id; downButton.addEventListener('click', (e) => { e.stopPropagation(); moveWidget(widgetData.id, 'down'); }); actionsDiv.appendChild(downButton); const deleteBtn = document.createElement('button'); deleteBtn.classList.add('action-btn', 'delete'); deleteBtn.title = "Delete"; deleteBtn.innerHTML = '<i class="material-icons-outlined">delete_outline</i>'; deleteBtn.dataset.widgetId = widgetData.id; deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteWidgetById(widgetData.id); }); actionsDiv.appendChild(deleteBtn); listItem.appendChild(actionsDiv); if (selectedWidget && selectedWidget.dataset.widgetId === widgetData.id) { listItem.classList.add('selected-element'); } listItem.addEventListener('click', () => { const targetWidgetElement = canvas.querySelector(`.canvas-widget[data-widget-id="${widgetData.id}"]`); if (targetWidgetElement) { selectWidget(targetTargetWidgetElement); } }); elementsListItemsContainer.appendChild(listItem); }); }
+        function updateElementsList() { elementsListItemsContainer.innerHTML = ''; elementCountSpan.textContent = widgetsOnCanvas.length; if (widgetsOnCanvas.length === 0) { elementsListItemsContainer.innerHTML = '<p class="text-xs text-gray-500 italic px-2">No elements added yet.</p>'; return; } widgetsOnCanvas.slice().sort((a,b) => (a.zIndex || 0) - (b.zIndex || 0)).forEach((widgetData) => { const indexInSortedList = widgetsOnCanvas.findIndex(w => w.id === widgetData.id); const listItem = document.createElement('div'); listItem.classList.add('elements-list-item'); listItem.dataset.widgetId = widgetData.id; const widgetInfo = document.createElement('div'); widgetInfo.classList.add('widget-info'); const icon = document.createElement('i'); icon.classList.add('material-icons-outlined'); icon.textContent = widgetIconMap[widgetData.type] || widgetIconMap.default; widgetInfo.appendChild(icon); const text = document.createElement('span'); text.textContent = widgetData.id; widgetInfo.appendChild(text); listItem.appendChild(widgetInfo); const actionsDiv = document.createElement('div'); actionsDiv.classList.add('actions'); const upButton = document.createElement('button'); upButton.classList.add('action-btn', 'move-up'); upButton.title = "Move Up"; upButton.innerHTML = '<i class="material-icons-outlined">keyboard_arrow_up</i>'; upButton.disabled = (widgetData.zIndex >= widgetsOnCanvas.length); upButton.dataset.widgetId = widgetData.id; upButton.addEventListener('click', (e) => { e.stopPropagation(); moveWidget(widgetData.id, 'up'); }); actionsDiv.appendChild(upButton); const downButton = document.createElement('button'); downButton.classList.add('action-btn', 'move-down'); downButton.title = "Move Down"; downButton.innerHTML = '<i class="material-icons-outlined">keyboard_arrow_down</i>'; downButton.disabled = (widgetData.zIndex <= 1); downButton.dataset.widgetId = widgetData.id; downButton.addEventListener('click', (e) => { e.stopPropagation(); moveWidget(widgetData.id, 'down'); }); actionsDiv.appendChild(downButton); const deleteBtn = document.createElement('button'); deleteBtn.classList.add('action-btn', 'delete'); deleteBtn.title = "Delete"; deleteBtn.innerHTML = '<i class="material-icons-outlined">delete_outline</i>'; deleteBtn.dataset.widgetId = widgetData.id; deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteWidgetById(widgetData.id); }); actionsDiv.appendChild(deleteBtn); listItem.appendChild(actionsDiv); if (selectedWidget && selectedWidget.dataset.widgetId === widgetData.id) { listItem.classList.add('selected-element'); } listItem.addEventListener('click', () => { const targetWidgetElement = canvas.querySelector(`.canvas-widget[data-widget-id="${widgetData.id}"]`); if (targetWidgetElement) { selectWidget(targetWidgetElement); } }); elementsListItemsContainer.appendChild(listItem); }); }
         function toggleElementsList() { elementsListItemsContainer.classList.toggle('hidden'); const icon = toggleElementsListButton.querySelector('.material-icons-outlined'); if (icon) { icon.classList.toggle('rotate-180'); } }
         function moveWidget(widgetId, direction) { const currentIndex = widgetsOnCanvas.findIndex(w => w.id === widgetId); if (currentIndex === -1) return; let newIndex = currentIndex; if (direction === 'up' && currentIndex > 0) { newIndex = currentIndex - 1; } else if (direction === 'down' && currentIndex < widgetsOnCanvas.length - 1) { newIndex = currentIndex + 1; } if (newIndex !== currentIndex) { const [movedElement] = widgetsOnCanvas.splice(currentIndex, 1); widgetsOnCanvas.splice(newIndex, 0, movedElement); updateZIndices(); updateElementsList(); } }
         function updateZIndices() { widgetsOnCanvas.forEach((widgetData, index) => { if (widgetData.element) { const zIndex = index + 1; widgetData.zIndex = zIndex; widgetData.element.style.zIndex = zIndex; } }); if (selectedWidget) { selectedWidget.style.zIndex = '50'; } }
@@ -1290,7 +1299,7 @@ function updateWidgetSpecificProperties(widgetData, element) {
         // --- Keyboard Shortcuts ---
         document.addEventListener('keydown', (event) => {
             const activeElement = document.activeElement;
-            const isEditingText = activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA';
+            const isEditingText = /^(INPUT|TEXTAREA|SELECT)$/.test(activeElement.tagName) || activeElement.isContentEditable;
 
             if (selectedWidget) {
                 if (!isEditingText && (event.key === 'Delete' || event.key === 'Backspace')) {
@@ -1443,5 +1452,10 @@ function updateWidgetSpecificProperties(widgetData, element) {
         propertiesHeader.addEventListener('click', toggleProperties);
     </script>
 
+    <script src="lvgl-yaml.js"></script>
+    <script src="lvgl-core.js"></script>
+    <script src="lvgl-fonts.js"></script>
+    <script src="lvgl-import.js"></script>
+    <script src="lvgl-guide.js"></script>
 </body>
 </html>

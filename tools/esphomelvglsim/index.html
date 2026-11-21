@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>LVGL Studio</title>
+    <meta name="description" content="Design ESPHome LVGL touchscreen UIs visually with a realistic preview, then export the YAML.">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../shared/jdnx-theme.css">
+    <link rel="stylesheet" href="app.css">
+    <script src="vendor/js-yaml.min.js"></script>
+    <script src="vendor/qrcode.js"></script>
+    <script type="module" src="js/main.js"></script>
+    <script src="../appdrawer.js" defer></script>
+</head>
+<body>
+    <header id="topbar">
+        <a class="nav-logo" href="./" title="LVGL Studio"><img src="icons/icon.svg" alt=""></a>
+        <div class="nav-capsule nav-left">
+            <div class="brand"><b>LVGL Studio</b><span>for ESPHome</span></div>
+            <span class="nav-sep"></span>
+            <div class="tb-group">
+                <button class="icon-btn" id="btn-undo" title="Undo (Ctrl+Z)"><i class="mi">undo</i></button>
+                <button class="icon-btn" id="btn-redo" title="Redo (Ctrl+Y)"><i class="mi">redo</i></button>
+            </div>
+            <span class="nav-sep"></span>
+            <div class="seg" id="mode-seg" role="tablist" aria-label="Mode">
+                <button data-mode="design" title="Edit the layout"><i class="mi">design_services</i><span>Design</span></button>
+                <button data-mode="interact" title="Use it like the device"><i class="mi">touch_app</i><span>Interact</span></button>
+            </div>
+            <span class="nav-sep"></span>
+            <div class="tb-group zoom">
+                <button class="icon-btn" id="zoom-out" title="Zoom out"><i class="mi">remove</i></button>
+                <span id="zoom-val">200%</span>
+                <button class="icon-btn" id="zoom-in" title="Zoom in"><i class="mi">add</i></button>
+                <button class="icon-btn" id="zoom-fit" title="Fit (Ctrl+0)"><i class="mi">fit_screen</i></button>
+                <button class="icon-btn" id="btn-view" title="View options"><i class="mi">tune</i></button>
+            </div>
+        </div>
+        <span class="grow"></span>
+        <div class="nav-capsule nav-right">
+            <button class="btn ghost" id="btn-samples" title="Finished designs to build on"><i class="mi">auto_awesome</i><span>Samples</span></button>
+            <button class="btn ghost" id="btn-assets" title="Images, colours, fonts, styles, theme"><i class="mi">inventory_2</i><span>Assets</span></button>
+            <button class="btn ghost" id="btn-import" title="Import ESPHome YAML"><i class="mi">file_upload</i><span>Import</span></button>
+            <button class="btn ghost" id="btn-yaml" title="Show the generated YAML"><i class="mi">code</i><span>YAML</span></button>
+            <button class="btn primary" id="btn-deploy" title="How to put it on a device"><i class="mi">rocket_launch</i><span>Deploy</span></button>
+            <button class="btn ghost" id="btn-install" hidden title="Install as an app"><i class="mi">install_desktop</i><span>Install</span></button>
+            <span class="nav-sep"></span>
+            <button class="icon-btn" id="btn-ui-theme" title="Light / dark interface"><i class="mi">dark_mode</i></button>
+            <button class="icon-btn" id="btn-help" title="Help"><i class="mi">help_outline</i></button>
+        </div>
+    </header>
+    <main id="layout">
+        <aside id="left" aria-label="Widgets and layers"></aside>
+        <section id="center">
+            <div id="stage-wrap">
+                <div id="device" class="frame">
+                    <canvas id="screen" aria-label="Screen preview"></canvas>
+                    <canvas id="overlay"></canvas>
+                </div>
+            </div>
+            <footer id="pagebar"></footer>
+        </section>
+        <aside id="right" aria-label="Inspector"></aside>
+    </main>
+    <datalist id="dl-colors"></datalist>
+    <div id="modal-root"></div>
+    <div id="toast-root" aria-live="polite"></div>
+    <noscript>LVGL Studio needs JavaScript.</noscript>
+</body>
+</html>
