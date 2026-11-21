@@ -329,13 +329,9 @@
     const origRL = window.renderElementList; window.renderElementList = function () { const r = origRL.apply(this, arguments); syncAssetsPill(); return r; };
 
     // ------------------------------------------------------------------ PWA install
-    let deferred = null;
-    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; instBtn.hidden = false; });
-    instBtn.addEventListener('click', async () => { if (!deferred) return; deferred.prompt(); await deferred.userChoice; deferred = null; instBtn.hidden = true; });
-    window.addEventListener('appinstalled', () => { instBtn.hidden = true; });
-    if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
-        navigator.serviceWorker.register('sw.js').then(reg => { reg.addEventListener('updatefound', () => { const w = reg.installing; w && w.addEventListener('statechange', () => { if (w.state === 'installed' && navigator.serviceWorker.controller) DD.toast('A new version is ready.', 'Reload', () => location.reload(), 15000); }); }); }).catch(() => { /* offline support unavailable */ });
-    }
+    const syncInstall = ok => { instBtn.hidden = !ok; };
+    window.HATPWA ? HATPWA.onchange(syncInstall) : window.addEventListener('load', () => window.HATPWA && HATPWA.onchange(syncInstall));
+    instBtn.addEventListener('click', () => window.HATPWA && HATPWA.install());
 
     // ------------------------------------------------------------------ boot
     DD.loadImages(); renderPages(); syncProfileUI(); syncAssetsPill();

@@ -16,11 +16,15 @@
 
     var ICONS = {
         apps: 'M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z',
+        install: 'M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z',
         home: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z',
         dashboard: 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z',
         widgets: 'M13 13v8h8v-8h-8zM3 21h8v-8H3v8zM3 3v8h8V3H3zm13.66-1.31L11 7.34 16.66 13l5.66-5.66-5.66-5.65z',
         sensors: 'M12 11c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 2c0-3.31-2.69-6-6-6s-6 2.69-6 6c0 2.22 1.21 4.15 3 5.19l1-1.74c-1.19-.7-2-1.97-2-3.45 0-2.21 1.79-4 4-4s4 1.79 4 4c0 1.48-.81 2.75-2 3.45l1 1.74c1.79-1.04 3-2.97 3-5.19zM12 3C6.48 3 2 7.48 2 13c0 3.7 2.01 6.92 4.99 8.65l1-1.73C5.61 18.53 4 15.96 4 13c0-4.42 3.58-8 8-8s8 3.58 8 8c0 2.96-1.61 5.53-4 6.92l1 1.73c2.99-1.73 5-4.95 5-8.65 0-5.52-4.48-10-10-10z'
     };
+
+    // one shared PWA for every tool: load its registration/install helper on every page
+    if (!window.HATPWA) { var ps = document.createElement('script'); ps.src = BASE + 'pwa.js'; document.head.appendChild(ps); }
 
     var HOME = { name: 'All tools', path: '', icon: 'home' };
     var APPS = [
@@ -55,7 +59,7 @@
         '.hat-tile.hat-current{font-weight:700}',
         '.hat-home{display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 12px;border-radius:12px;text-decoration:none;color:inherit;font-size:13px;font-weight:600;border-top:1px solid rgba(30,32,80,.09);transition:background .15s ease}',
         '.hat-dark .hat-home{border-top-color:rgba(255,255,255,.09)}',
-        '.hat-home:hover{background:rgba(99,102,241,.1)}',
+        '.hat-install{all:unset;box-sizing:border-box;cursor:pointer;width:100%}.hat-install[hidden]{display:none}.hat-home:hover{background:rgba(99,102,241,.1)}',
         '.hat-home:focus-visible{outline:3px solid rgba(99,102,241,.4);outline-offset:-2px}',
         '.hat-home svg{color:#6366f1}.hat-dark .hat-home svg{color:#8b93ff}',
         '@media (prefers-reduced-motion:reduce){.hat-panel,.hat-btn,.hat-tile{transition:none}}'
@@ -99,8 +103,15 @@
                 (cur ? ' aria-current="page"' : '') + '><span class="hat-ico">' + svg(a.icon) + '</span>' + a.name + '</a>';
         });
         html += '</div><a role="menuitem" class="hat-home" href="' + new URL(HOME.path, BASE).href + '">' + svg(HOME.icon) + HOME.name + '</a>';
+        html += '<button type="button" role="menuitem" class="hat-home hat-install" hidden>' + svg('install') + 'Install HomeAssistant Tools</button>';
         panel.innerHTML = html;
         document.body.appendChild(panel);
+        var inst = panel.querySelector('.hat-install');
+        inst.addEventListener('click', function () { close(false); window.HATPWA && window.HATPWA.install(); });
+        (function wait(n) {
+            if (window.HATPWA) window.HATPWA.onchange(function (ok) { inst.hidden = !ok; });
+            else if (n < 50) setTimeout(function () { wait(n + 1); }, 100);
+        })(0);
 
         // Theme follow
         function syncTheme() {

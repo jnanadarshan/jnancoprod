@@ -74,11 +74,6 @@ if (legacy && !hadDoc && !LS.get('lvglStudio.legacyAsked', '')) {
 }
 
 // ---------------------------------------------------------------- PWA
-let deferred = null;
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; $('btn-install').hidden = false; });
-on('btn-install', async () => { if (!deferred) return; deferred.prompt(); await deferred.userChoice; deferred = null; $('btn-install').hidden = true; });
-if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
-    navigator.serviceWorker.register('sw.js').then(reg => {
-        reg.addEventListener('updatefound', () => { const w = reg.installing; w && w.addEventListener('statechange', () => { if (w.state === 'installed' && navigator.serviceWorker.controller) toast('A new version is ready.', 'Reload', () => location.reload(), 15000); }); });
-    }).catch(() => { /* offline support unavailable */ });
-}
+const syncInstall = ok => { $('btn-install').hidden = !ok; };
+window.HATPWA ? HATPWA.onchange(syncInstall) : window.addEventListener('load', () => window.HATPWA && HATPWA.onchange(syncInstall));
+on('btn-install', () => window.HATPWA && HATPWA.install());
