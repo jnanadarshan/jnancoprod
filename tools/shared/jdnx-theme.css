@@ -1,0 +1,60 @@
+/* ==========================================================================
+   JDNx tools design system: the final Displaysim look ("v13 clean redesign").
+   Flat solid blue accent, frosted white surfaces, split floating navbar of capsules,
+   22px panels, ghost buttons that fill blue on hover, dark mode on body.dark-mode.
+   Link this BEFORE an app's own stylesheet; apps then use the tokens below.
+   Displaysim itself keeps its own glass.css; the two are kept visually identical.
+   ========================================================================== */
+:root, html body {
+    --g-accent: #3d6df2; --g-accent-2: #3d6df2; --g-accent-grad: #3d6df2;
+    --g-accent-soft: rgba(61, 109, 242, .10); --g-accent-ring: rgba(61, 109, 242, .22);
+    --g-glass: rgba(255, 255, 255, .92); --g-glass-strong: rgba(255, 255, 255, .97);
+    --g-inner: #f6f8fc; --g-field: #ffffff; --g-hover: rgba(30, 50, 100, .05);
+    --g-edge: rgba(30, 50, 100, .07); --g-line: rgba(30, 50, 100, .09); --g-line-2: rgba(30, 50, 100, .16);
+    --g-text: #1c2333; --g-text-2: #6b7487; --g-text-3: #98a1b3;
+    --g-shadow: 0 6px 24px rgba(31, 45, 90, .07); --g-blur: blur(14px) saturate(140%);
+    --g-radius: 22px; --g-radius-md: 16px; --g-radius-sm: 11px;
+    --g-bg: #f4f6fb; --g-stage: #eef1f8;
+    --g-ok: #16a34a; --g-warn: #d97706; --g-danger: #dc2626;
+    --g-font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    color-scheme: light;
+}
+html body.dark-mode, html body.dark-ui {
+    --g-accent: #6b93ff; --g-accent-2: #6b93ff; --g-accent-grad: #4b78f5;
+    --g-accent-soft: rgba(107, 147, 255, .14); --g-accent-ring: rgba(107, 147, 255, .28);
+    --g-glass: rgba(24, 28, 38, .92); --g-glass-strong: rgba(26, 30, 42, .97);
+    --g-inner: rgba(255, 255, 255, .04); --g-field: rgba(255, 255, 255, .05); --g-hover: rgba(255, 255, 255, .07);
+    --g-edge: rgba(255, 255, 255, .07); --g-line: rgba(255, 255, 255, .09); --g-line-2: rgba(255, 255, 255, .16);
+    --g-text: rgba(255, 255, 255, .92); --g-text-2: rgba(255, 255, 255, .55); --g-text-3: rgba(255, 255, 255, .38);
+    --g-shadow: 0 8px 28px rgba(0, 0, 0, .35); --g-bg: #0e1118; --g-stage: #0b0d13;
+    color-scheme: dark;
+}
+
+/* ---- surfaces ---------------------------------------------------------- */
+.jd-panel { background: var(--g-glass); border: 1px solid var(--g-edge); border-radius: var(--g-radius); box-shadow: var(--g-shadow); -webkit-backdrop-filter: var(--g-blur); backdrop-filter: var(--g-blur); }
+.jd-capsule { height: 46px; box-sizing: border-box; padding: 0 10px; display: flex; align-items: center; gap: 4px; border-radius: 999px; background: var(--g-glass-strong); border: 1px solid var(--g-edge); box-shadow: var(--g-shadow); -webkit-backdrop-filter: var(--g-blur); backdrop-filter: var(--g-blur); }
+.jd-logo { flex: none; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; border-radius: 15px; background: var(--g-glass-strong); border: 1px solid var(--g-edge); box-shadow: var(--g-shadow); }
+.jd-logo img { width: 26px; height: 26px; object-fit: contain; border-radius: 6px; }
+.jd-nav { display: flex; align-items: center; gap: 10px; padding: 12px 12px 0; }
+.jd-sep { width: 1px; height: 22px; background: var(--g-line); margin: 0 4px; flex: none; }
+
+/* ---- buttons (flat blue, soft shadow; ghost fills blue on hover) -------- */
+.jd-btn { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border-radius: var(--g-radius-sm); border: 1px solid transparent; background: var(--g-accent-grad); color: #fff; font: 600 12.5px/1 var(--g-font); cursor: pointer; white-space: nowrap; box-shadow: 0 2px 8px var(--g-accent-ring); transition: filter .15s, box-shadow .2s, background .15s, color .15s; }
+.jd-btn:hover:not(:disabled) { filter: brightness(1.08); box-shadow: 0 6px 18px var(--g-accent-ring); }
+.jd-btn.ghost { background: var(--g-field); color: var(--g-text); border-color: var(--g-line); box-shadow: none; }
+.jd-btn.ghost:hover:not(:disabled) { background: var(--g-accent-grad); color: #fff; border-color: transparent; box-shadow: 0 6px 18px var(--g-accent-ring); filter: none; }
+.jd-btn.sm { height: 28px; padding: 0 10px; font-size: 12px; }
+.jd-btn:disabled { opacity: .45; cursor: not-allowed; }
+.jd-iconbtn { width: 34px; height: 34px; display: inline-grid; place-items: center; border-radius: 50%; border: 0; background: transparent; color: var(--g-text-2); cursor: pointer; box-shadow: none; padding: 0; }
+.jd-iconbtn:hover:not(:disabled) { background: var(--g-hover); color: var(--g-text); }
+.jd-iconbtn:disabled { opacity: .35; cursor: not-allowed; }
+
+/* ---- inputs / tabs / chips -------------------------------------------- */
+.jd-input, .jd-select { font: 500 12.5px var(--g-font); color: var(--g-text); background: var(--g-field); border: 1px solid var(--g-line); border-radius: var(--g-radius-sm); padding: 6px 9px; min-width: 0; }
+.jd-input:focus, .jd-select:focus { outline: none; border-color: var(--g-accent); box-shadow: 0 0 0 3px var(--g-accent-ring); }
+.jd-seg { display: inline-flex; padding: 3px; border-radius: 999px; background: var(--g-inner); border: 1px solid var(--g-line); }
+.jd-seg > button { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: var(--g-text-2); font: 600 12px var(--g-font); cursor: pointer; box-shadow: none; }
+.jd-seg > button.on { background: var(--g-accent-grad); color: #fff; box-shadow: 0 2px 8px var(--g-accent-ring); }
+.jd-chip { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--g-line); background: var(--g-inner); color: var(--g-text-2); font: 600 11.5px var(--g-font); }
+.jd-chip.on { border-color: var(--g-accent); background: var(--g-accent-soft); color: var(--g-text); }
+body { font-family: var(--g-font); }
