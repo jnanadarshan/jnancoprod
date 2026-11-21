@@ -164,6 +164,12 @@ body.dark-mode details:not([open]) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="glass.css">
+    <script src="../appdrawer.js" defer></script>
+    <link rel="stylesheet" href="guide.css">
+    <link rel="stylesheet" href="dd.css">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#3d6df2">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
 </head>
 <body>
 
@@ -178,15 +184,18 @@ body.dark-mode details:not([open]) {
             </div>
         </div>
         <div class="nav-icons">
+            <button type="button" class="deploy-btn" id="deployBtn" title="How to use this code in ESPHome"><span class="material-symbols-outlined">rocket_launch</span><span class="deploy-label">Deploy</span></button>
             <span class="material-symbols-outlined local_cafe" id="buycoffee" title="Buy me a Coffee"><a href="https://buymeacoffee.com/jdnayak" target="_blank" rel="noopener">local_cafe</a></span>
             <span class="material-symbols-outlined export-button" id="exportBtn" title="Export PDF">picture_as_pdf</span>
             <span class="material-symbols-outlined" id="clearCacheBtn" title="Clear Saved Data">delete_sweep</span>
             <span class="material-symbols-outlined" id="export-text-btn" title="Export Lambda and Font Codes (TXT)" style="cursor: pointer; margin-left: 10px; vertical-align: middle;">download</span>
             <span class="material-symbols-outlined" id="export-md-btn" title="Export Markdown (human + AI agent readable)" style="cursor: pointer; margin-left: 10px; vertical-align: middle;">description</span>
+            <span class="material-symbols-outlined" id="import-yaml-btn" title="Import ESPHome YAML (see it in the designer and edit)" style="cursor: pointer; margin-left: 10px; vertical-align: middle;">integration_instructions</span>
             <span class="material-symbols-outlined" id="import-text-btn" title="Import Lambda and Font Codes (TXT)" style="cursor: pointer; margin-left: 10px; vertical-align: middle;">upload</span>
             <input type="file" id="import-file-input" accept=".txt" style="display: none;">
             <span class="material-symbols-outlined" id="darkModeBtn" title="Toggle Dark Mode">dark_mode</span>
-            <span class="material-symbols-outlined" id="showInfoBtn" title="About">help</span>
+            <span class="material-symbols-outlined" id="showInfoBtn" title="Help">help</span>
+            <span data-app-drawer style="display:inline-flex;margin-left:6px;"></span>
         </div>
     </header>
 
@@ -222,7 +231,26 @@ body.dark-mode details:not([open]) {
                  </div>
                  </div>
                  <div class="cfg-group cfg-style"><div class="cfg-heading"><span class="material-symbols-outlined">palette</span>Fonts &amp; colors</div>
-                 <label for="configCustomFonts">Available Font IDs (comma-separated):</label> <textarea id="configCustomFonts" placeholder="id(roboto_12), id(material_symbols_24)" >id(roboto_12), id(roboto_bold_16), id(material_symbols_18), id(material_symbols_24)</textarea>
+                 <div class="fm" id="fontMgr">
+                     <div class="fm-head">
+                         <span class="fm-title"><span class="material-symbols-outlined">font_download</span>Fonts</span>
+                         <div class="fm-toggle" role="tablist" aria-label="Font editor view">
+                             <button type="button" class="on" data-view="visual" role="tab"><span class="material-symbols-outlined">view_agenda</span>Visual</button>
+                             <button type="button" data-view="code" role="tab"><span class="material-symbols-outlined">code</span>Code</button>
+                         </div>
+                     </div>
+                     <div class="fm-visual" id="fmVisual"></div>
+                     <div class="fm-code" id="fmCode" hidden>
+                         <textarea id="fmYaml" spellcheck="false" aria-label="ESPHome font block"></textarea>
+                         <div class="fm-code-actions">
+                             <button type="button" id="fmApply"><span class="material-symbols-outlined">check</span>Apply code</button>
+                             <button type="button" id="fmRevert"><span class="material-symbols-outlined">undo</span>Revert</button>
+                             <span class="fm-msg" id="fmMsg" role="status"></span>
+                         </div>
+                         <p class="fm-hint">This is the ESPHome <code>font:</code> block. Edit it, or paste your own, then press Apply. Icon <code>glyphs:</code> are added automatically from the icons you use.</p>
+                     </div>
+                     <textarea id="configCustomFonts" placeholder="id(roboto_12), id(material_symbols_24)" >id(roboto_12), id(roboto_bold_16), id(material_symbols_18), id(material_symbols_24)</textarea>
+                 </div>
                  <label for="configColors">Available Color IDs (comma-separated):</label> <textarea id="configColors">id(primary_color), id(accent_color), white, black, red, green, blue</textarea>
                  <div class="palette-creator">
                      <div class="custom-size-title">Color ID creator</div>
@@ -373,40 +401,110 @@ body.dark-mode details:not([open]) {
         <button type="button" class="pill-btn primary" id="pillLambda" title="Generate Lambda Code"><span class="material-symbols-outlined">code</span>Generate Lambda</button>
     </div>
 
-    <!-- Add this after the top navigation but before the panels -->
+    <!-- Help -->
     <div class="info-overlay" id="infoOverlay">
-        <div class="info-content">
-            <h2><span class="material-symbols-outlined">info</span> About ESPHome Display Designer</h2>
-            <div class="info-body">
-                <h3>Key Features</h3>
+        <div class="info-content help-modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+            <h2 id="helpTitle"><span class="material-symbols-outlined">help</span> Help &mdash; ESPHome Display Designer</h2>
+            <div class="info-body help-body">
+                <p class="help-lead">Design a screen visually, then copy the generated ESPHome code. No hardware needed to try it.</p>
+
+                <h3>Quick start</h3>
+                <ol class="help-steps">
+                    <li><b>Set up the screen.</b> Open <span class="help-chip"><span class="material-symbols-outlined">settings</span>Settings</span> (bottom-left). Pick your resolution (or add a custom one), switch on <i>E-Ink</i> if you have a paper display, add your <b>fonts</b> in the visual Font manager (or switch it to <i>Code</i>), and list the <b>color IDs</b> you plan to use.</li>
+                    <li><b>Add elements.</b> Use the <span class="help-chip"><span class="material-symbols-outlined">widgets</span>Elements</span> button to add <i>Text, Icon, Bar, Rectangle</i> or <i>Circle</i>. Click one in the list to edit its position, color and font, or drag it directly on the preview.</li>
+                    <li><b>Check the preview.</b> Use <i>HD</i> for a smooth view and <span class="material-symbols-outlined help-inline">zoom_out_map</span> to scale large screens to fit.</li>
+                    <li><b>Generate code.</b> Bottom-right, press <b>Color Code</b>, <b>Font Code</b> and <b>Generate Lambda</b>, then copy each result.</li>
+                    <li><b>Put it on a device.</b> Press <span class="help-chip accent"><span class="material-symbols-outlined">rocket_launch</span>Deploy</span> in the top bar for a step-by-step ESPHome guide with your own code filled in.</li>
+                </ol>
+
+                <h3>The three code buttons</h3>
+                <div class="help-grid">
+                    <div class="help-card"><span class="material-symbols-outlined">palette</span><b>Color Code</b><p>A <code>color:</code> block defining your custom Color IDs. Goes at the top level of your YAML.</p></div>
+                    <div class="help-card"><span class="material-symbols-outlined">font_download</span><b>Font Code</b><p>A <code>font:</code> block, one entry per font ID. Needs the matching <code>.ttf</code> files next to your YAML.</p></div>
+                    <div class="help-card"><span class="material-symbols-outlined">code</span><b>Generate Lambda</b><p>The drawing instructions. Goes under <code>display:</code> &rarr; <code>lambda:</code>.</p></div>
+                </div>
+
+                <h3>Writing good text elements</h3>
                 <ul>
-                    <li>Support for text, icons, shapes, and bars. Triangles - coming soon</li>
-                    <li>Live preview with Material Icons</li>
-                    <li>Export to ESPHome-compatible code</li>
-                    <li>Export and import designs</li>
+                    <li><b>Font IDs carry the size.</b> <code>id(roboto_12)</code> becomes Roboto at 12&nbsp;px; <code>id(roboto_bold_16)</code> is Roboto Bold 16&nbsp;px. Names containing <code>material_symbols</code> are treated as the icon font.</li>
+                    <li><b>Live values.</b> Put a format such as <code>%.1f</code> in the text and the sensor in <i>Args</i>, e.g. <code>id(temp).state</code>.</li>
+                    <li><b>Layering.</b> The first element in the list is drawn on top. Reorder the list to change what covers what.</li>
+                    <li><b>Colors.</b> Use Color IDs for custom colors. Pick a color with the picker, then use the converter in Settings to turn it into a Color ID.</li>
                 </ul>
-                
-                <h3>Known Limitations</h3>
+
+                <h3>Top bar</h3>
+                <table class="help-table">
+                    <tr><td><span class="material-symbols-outlined">rocket_launch</span></td><td><b>Deploy</b></td><td>Step-by-step guide to use your code in ESPHome, with sample YAML and downloads.</td></tr>
+                    <tr><td><span class="material-symbols-outlined">picture_as_pdf</span></td><td>Export PDF</td><td>Preview plus the generated code in one PDF.</td></tr>
+                    <tr><td><span class="material-symbols-outlined">download</span></td><td>Export TXT</td><td>Saves your design so you can import it later.</td></tr>
+                    <tr><td><span class="material-symbols-outlined">description</span></td><td>Export Markdown</td><td>A readable summary with ASCII preview, code and a JSON spec for AI agents.</td></tr>
+                    <tr><td><span class="material-symbols-outlined">integration_instructions</span></td><td><b>Import YAML</b></td><td>Bring in your existing ESPHome config: fonts, colors and the display lambda are previewed, then opened for editing.</td></tr>
+                    <tr><td><span class="material-symbols-outlined">upload</span></td><td>Import TXT</td><td>Loads a design exported from this tool.</td></tr>
+                    <tr><td><span class="material-symbols-outlined">delete_sweep</span></td><td>Clear saved data</td><td>Your work autosaves in this browser; this wipes it.</td></tr>
+                    <tr><td><span class="material-symbols-outlined">dark_mode</span></td><td>Dark mode</td><td>Switches theme.</td></tr>
+                </table>
+
+                <h3>Known limitations</h3>
                 <ul>
-                    <li>Font previews are approximate</li>
-                    <li>Icon search covers all ~4,300 Material Symbols (Outlined) names from <a href="https://fonts.google.com/icons">fonts.google.com/icons</a></li>
-                    <li>Corner radius is preview-only {ESPHome limitation}</li>
-                                        <li>UI does not render properly on a Mobile Device></li>
-                </ul>
-                <h3>Known Bugs</h3>
-                <ul>
-                    <li>Import TXT file feature has issues</li>
-                    <li>Screen Resolution beyond 480px overflows in UI and scaling button has to be used.</li>
+                    <li>The preview is an approximation. Real font rendering on the device can differ by a few pixels.</li>
+                    <li>Corner radius and line thickness are preview-only; ESPHome ignores them.</li>
+                    <li>Triangles are not supported yet.</li>
+                    <li>Icon search covers ~4,300 Material Symbols (Outlined) from <a href="https://fonts.google.com/icons" target="_blank" rel="noopener">fonts.google.com/icons</a>.</li>
+                    <li>YAML import understands fixed <code>it.printf / print / rectangle / circle / lines</code> calls. Conditions, loops, images, graphs and <code>strftime</code> are skipped and listed as warnings.</li>
+                    <li>Screens wider than 480&nbsp;px overflow the layout; use scale-to-fit.</li>
+                    <li>The interface is not optimised for phones.</li>
                 </ul>
             </div>
             <div class="info-actions">
-                <button class="secondary" id="closeInfoBtn">
-                    <span class="material-symbols-outlined">close</span>Close
-                </button>
-                <button id="readMoreBtn">
-                    <span class="material-symbols-outlined">open_in_new</span>Read More
-                </button>
+                <button class="secondary" id="closeInfoBtn"><span class="material-symbols-outlined">close</span>Close</button>
+                <button id="readMoreBtn"><span class="material-symbols-outlined">open_in_new</span>Read More</button>
             </div>
+        </div>
+    </div>
+
+    <!-- YAML import (logic in yamlimport.js) -->
+    <div class="info-overlay" id="yamlOverlay">
+        <div class="info-content yaml-modal" role="dialog" aria-modal="true" aria-labelledby="yamlTitle">
+            <div class="deploy-head">
+                <h2 id="yamlTitle"><span class="material-symbols-outlined">integration_instructions</span> Import ESPHome YAML</h2>
+                <button type="button" class="drawer-close" id="yamlClose" title="Close"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="yaml-body">
+                <p class="yaml-lead">Paste your existing config (or just the display <code>lambda</code>) or choose a file. The <code>font:</code>, <code>color:</code> and <code>display:</code> lambda are read, shown below, and then loaded into the designer where you can keep editing.</p>
+                <div class="yaml-input">
+                    <textarea id="yamlText" spellcheck="false" placeholder="Paste YAML here..."></textarea>
+                    <div class="yaml-input-actions">
+                        <button type="button" class="deploy-act" id="yamlChoose"><span class="material-symbols-outlined">upload_file</span>Choose file</button>
+                        <button type="button" class="deploy-act" id="yamlExample"><span class="material-symbols-outlined">auto_awesome</span>Try an example</button>
+                        <input type="file" id="yamlFile" accept=".yaml,.yml,.txt,text/plain" hidden>
+                    </div>
+                </div>
+                <div id="yamlResult"></div>
+            </div>
+            <div class="yaml-foot">
+                <span class="yaml-foot-note" id="yamlFootNote">Importing replaces your current design. You can undo right after.</span>
+                <button type="button" class="deploy-act" id="yamlCancel">Cancel</button>
+                <button type="button" class="deploy-act primary" id="yamlApply" disabled><span class="material-symbols-outlined">download_done</span>Import into designer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deploy guide (content built in deploy.js) -->
+    <div class="info-overlay" id="deployOverlay">
+        <div class="info-content deploy-modal" role="dialog" aria-modal="true" aria-labelledby="deployTitle">
+            <div class="deploy-head">
+                <h2 id="deployTitle"><span class="material-symbols-outlined">rocket_launch</span> Deploy to ESPHome</h2>
+                <button type="button" class="drawer-close" id="deployClose" title="Close"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="deploy-tabs" role="tablist">
+                <button type="button" class="deploy-tab active" data-tab="guide" role="tab"><span class="material-symbols-outlined">school</span>Step-by-step</button>
+                <button type="button" class="deploy-tab" data-tab="quick" role="tab"><span class="material-symbols-outlined">bolt</span>Quick reference</button>
+                <span class="deploy-spacer"></span>
+                <button type="button" class="deploy-act" id="deployCopyYaml"><span class="material-symbols-outlined">content_copy</span>Copy YAML</button>
+                <button type="button" class="deploy-act" id="deployDlYaml"><span class="material-symbols-outlined">download</span>.yaml</button>
+                <button type="button" class="deploy-act primary" id="deployDlMd"><span class="material-symbols-outlined">description</span>Export .md</button>
+            </div>
+            <div class="deploy-body" id="deployBody"></div>
         </div>
     </div>
 
@@ -444,6 +542,7 @@ body.dark-mode details:not([open]) {
 
         // --- Global State & Elements ---
         let elements = [];
+        let fontOverrides = {}; // {fontIdName: {file,size,icon,bold}} from an imported YAML (IDs that don't encode their size)
         let selectedElementId = null;
         let nextId = 0;
         let customResolutions = [];
@@ -485,7 +584,7 @@ body.dark-mode details:not([open]) {
             const selectElement = document.getElementById('configResolution');
             customResolutions.forEach(res => { if (!selectElement.querySelector(`option[value="${res}"]`)) { const option = document.createElement('option'); option.value = res; option.textContent = res.replace('x', ' x '); selectElement.appendChild(option); } });
         }
-        function mapFontPreview(fontId) { if (!fontId) return '10px sans-serif'; let sizeMatch = fontId.match(/_(\d+)$/); if (!sizeMatch) sizeMatch = fontId.match(/(\d+)\)$/); if (!sizeMatch) sizeMatch = fontId.match(/_(\d+)_/); let baseSize = 12; if (sizeMatch && sizeMatch[1]) { baseSize = parseInt(sizeMatch[1], 10); } const finalSize = Math.max(5, baseSize); const family = (fontId.includes('material') || fontId.includes('symbol') || fontId.includes('icon')) ? "'Material Symbols Outlined', 'Roboto', sans-serif" : "'Roboto', sans-serif"; const weight = (fontId.includes('bold') || fontId.includes('black')) ? 'bold' : 'normal'; return `${weight} ${finalSize}px ${family}`; }
+        function mapFontPreview(fontId) { if (!fontId) return '10px sans-serif'; const ov = fontOverrides[String(fontId).replace(/^id\(\s*|\s*\)$/g, '')]; if (ov) return `${ov.bold ? 'bold ' : ''}${Math.max(5, ov.size)}px ${ov.icon ? "'Material Symbols Outlined', 'Roboto', sans-serif" : "'Roboto', sans-serif"}`; let sizeMatch = fontId.match(/_(\d+)$/); if (!sizeMatch) sizeMatch = fontId.match(/(\d+)\)$/); if (!sizeMatch) sizeMatch = fontId.match(/_(\d+)_/); let baseSize = 12; if (sizeMatch && sizeMatch[1]) { baseSize = parseInt(sizeMatch[1], 10); } const finalSize = Math.max(5, baseSize); const family = (fontId.includes('material') || fontId.includes('symbol') || fontId.includes('icon')) ? "'Material Symbols Outlined', 'Roboto', sans-serif" : "'Roboto', sans-serif"; const weight = (fontId.includes('bold') || fontId.includes('black')) ? 'bold' : 'normal'; return `${weight} ${finalSize}px ${family}`; }
 
         // --- Cache Functions ---
         function saveToCache() {
@@ -496,6 +595,7 @@ body.dark-mode details:not([open]) {
                 elements: elements, customResolutions: customResolutions,
                 isScaleToFit: isScaleToFit,
                 einkMode: einkMode, screenBorder: screenBorder, colorPalette: colorPalette,
+                fontOverrides: fontOverrides,
                 nextId: nextId
             };
             localStorage.setItem('esphomeDisplayDesignerCache', JSON.stringify(cacheData));
@@ -515,6 +615,7 @@ body.dark-mode details:not([open]) {
                 if (data.colors) configColorsInput.value = data.colors;
                 if (data.customResolutions) { customResolutions = data.customResolutions; populateResolutionSelect(); }
                 if (Array.isArray(data.colorPalette)) colorPalette = data.colorPalette.filter(c => c && c.name && /^#[0-9a-f]{6}$/i.test(c.hex));
+                if (data.fontOverrides && typeof data.fontOverrides === 'object') fontOverrides = data.fontOverrides;
                 if (data.einkMode !== undefined) einkMode = !!data.einkMode;
                 if (data.screenBorder !== undefined) screenBorder = Math.max(0, parseInt(data.screenBorder) || 0);
                 syncDisplayOptionsUI();
@@ -932,7 +1033,7 @@ body.dark-mode details:not([open]) {
             [...elements].reverse().forEach(el => {
                 const x = el.x ?? 0;
                 const y = el.y ?? 0;
-                const color = el.colorId || 'white';
+                const color = espColor(el.colorId);
                 if (el.type === 'text') {
                     const font = el.fontId || 'id(default_font)';
                     const formatStr = JSON.stringify(el.content || "");
@@ -988,8 +1089,55 @@ body.dark-mode details:not([open]) {
             generatedCodeOutput.value = code;
             codeSectionDetails.open = true;
         }
-        function generateFontYaml() { /* Unchanged */
-             const fontIds = getAvailableFonts(); if (fontIds.length === 0) { generatedFontCodeOutput.value = "# No font IDs listed in configuration."; fontCodeSectionDetails.open = true; return; } let yaml = "font:\n"; const addedFiles = new Set(); fontIds.forEach(fontId => { let idName = fontId; let baseName = 'unknown'; let size = 12; let type = ''; const match = fontId.match(/id\(([a-zA-Z0-9_]+?)_?(\d+)?\)/); if (match && match[1]) { idName = `id(${match[1]}${match[2] ? '_' + match[2] : ''})`; baseName = match[1].replace(/_$/, ''); size = match[2] ? parseInt(match[2], 10) : size; } let filePath = `fonts/${baseName.charAt(0).toUpperCase() + baseName.slice(1)}.ttf`; if (baseName.includes('material') || baseName.includes('symbol') || baseName.includes('icon')) { type = '    type: ICON\n'; if (baseName.includes('material')) filePath = 'fonts/materialdesignicons-webfont.ttf'; if (baseName.includes('symbols')) filePath = 'fonts/MaterialSymbols-Regular.ttf'; } if (baseName.includes('roboto')) filePath = `fonts/Roboto-${baseName.includes('bold') ? 'Bold' : 'Regular'}.ttf`; if (baseName.includes('open_sans')) filePath = `fonts/OpenSans-${baseName.includes('bold') ? 'Bold' : 'Regular'}.ttf`; yaml += `  - file: ${filePath} # VERIFY PATH!\n`; yaml += `    id: ${idName}\n`; yaml += `    size: ${size}\n`; if (type) yaml += type; }); generatedFontCodeOutput.value = yaml; fontCodeSectionDetails.open = true; }
+        // ESPHome's default glyph set (used when a font has no `glyphs:` option).
+        const ESPHOME_DEFAULT_GLYPHS = ' !"%()+=,-_.:°0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz';
+        const ESPHOME_NAMED_COLORS = { white: [255, 255, 255], black: [0, 0, 0], red: [255, 0, 0], green: [0, 255, 0], blue: [0, 0, 255] };
+        // Plain words like `white` are not valid in an ESPHome lambda; write them as Color(r, g, b).
+        function espColor(c) { const k = String(c || 'white').trim(); const n = ESPHOME_NAMED_COLORS[k.toLowerCase()]; return n ? `Color(${n.join(', ')})` : k; }
+        function bareId(id) { const m = String(id || '').trim().match(/^id\(\s*(\w+)\s*\)$/); return m ? m[1] : String(id || '').trim(); }
+        function yamlQuote(str) { return '"' + str.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'; }
+        function glyphEscape(ch) { const cp = ch.codePointAt(0); return cp < 0x10000 ? '\\u' + cp.toString(16).toUpperCase().padStart(4, '0') : '\\U' + cp.toString(16).toUpperCase().padStart(8, '0'); }
+
+        // One entry per font ID in Settings: {id, size, file, icon, icons:[chars], extra:[chars]}
+        function getFontSpecs() {
+            const specs = [];
+            getAvailableFonts().forEach(fontId => {
+                const match = fontId.match(/id\(([a-zA-Z0-9_]+?)_?(\d+)?\)/);
+                let idName = bareId(fontId), baseName = 'unknown', size = 12;
+                if (match && match[1]) { baseName = match[1].replace(/_$/, ''); size = match[2] ? parseInt(match[2], 10) : size; }
+                let file = `fonts/${baseName.charAt(0).toUpperCase() + baseName.slice(1)}.ttf`, icon = false;
+                if (baseName.includes('material') || baseName.includes('symbol') || baseName.includes('icon')) {
+                    icon = true;
+                    if (baseName.includes('material')) file = 'fonts/materialdesignicons-webfont.ttf';
+                    if (baseName.includes('symbols')) file = 'fonts/MaterialSymbols-Regular.ttf';
+                }
+                if (baseName.includes('roboto')) file = `fonts/Roboto-${baseName.includes('bold') ? 'Bold' : 'Regular'}.ttf`;
+                if (baseName.includes('open_sans')) file = `fonts/OpenSans-${baseName.includes('bold') ? 'Bold' : 'Regular'}.ttf`;
+                const ov = fontOverrides[idName];
+                if (ov) { size = ov.size; file = ov.file; icon = !!ov.icon; }
+                specs.push({ id: idName, size, file, icon, icons: new Set(), extra: new Set() });
+            });
+            elements.forEach(el => {
+                const f = specs.find(x => x.id === bareId(el.fontId));
+                if (!f) return;
+                if (el.type === 'icon') { const hex = getIconCodepoint(el.iconLigature); if (hex) f.icons.add(String.fromCodePoint(parseInt(hex, 16))); }
+                else if (el.type === 'text' && !f.icon) for (const ch of String(el.content || '')) if (ch !== '\n' && !ESPHOME_DEFAULT_GLYPHS.includes(ch)) f.extra.add(ch);
+            });
+            return specs;
+        }
+        window.getFontSpecs = getFontSpecs;
+
+        function generateFontYaml() {
+            const specs = getFontSpecs();
+            if (specs.length === 0) { generatedFontCodeOutput.value = "# No font IDs listed in configuration."; fontCodeSectionDetails.open = true; return; }
+            let yaml = "font:\n";
+            specs.forEach(f => {
+                yaml += `  - file: ${yamlQuote(f.file)}\n    id: ${f.id}\n    size: ${f.size}\n`;
+                if (f.icon && f.icons.size) yaml += `    glyphs: [${[...f.icons].map(c => '"' + glyphEscape(c) + '"').join(', ')}]   # the icons your design uses\n`;
+                else if (!f.icon && f.extra.size) yaml += `    glyphs: ${yamlQuote(ESPHOME_DEFAULT_GLYPHS + [...f.extra].join(''))}   # adds: ${[...f.extra].join(' ')}\n`;
+            });
+            generatedFontCodeOutput.value = yaml; fontCodeSectionDetails.open = true;
+        }
 
         function selectIcon(name) {
             editIconLigatureInput.value = name;
@@ -1566,7 +1714,7 @@ body.dark-mode details:not([open]) {
         const parsedFonts = [];
         // Example: Extract id and size. Needs robust YAML-like parsing or regex.
         // This simple regex might work for the provided example format:
-        const fontRegex = /id:\s*id\((.*?)\)\s*size:\s*(\d+)/g;
+        const fontRegex = /id:\s*(?:id\()?(\w+)\)?\s*size:\s*(\d+)/g; // accepts both `id: roboto_12` and legacy `id: id(roboto_12)`
         let match;
         while ((match = fontRegex.exec(fontCode)) !== null) {
             // You might need more properties depending on how your simulator stores fonts
@@ -1587,12 +1735,12 @@ body.dark-mode details:not([open]) {
             const lines = lambdaCode.split('\n');
 
             // Improved regex for printf (matches optional align, quoted format string, and any trailing args)
-            const printfRegex = /it\.printf\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(id\([^)]+\)|\w+)\s*,\s*([^\s,]+)(?:\s*,\s*TextAlign::(\w+))?\s*,\s*("[^"]*")(.*?)(?:\/\/\s*Ligature:\s*(.*?))?\s*\);/;
+            const printfRegex = /it\.printf\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(id\([^)]+\)|\w+)\s*,\s*(Color\([^)]*\)|[^\s,]+)(?:\s*,\s*TextAlign::(\w+))?\s*,\s*("[^"]*")(.*?)\)\s*;(?:\s*\/\/\s*Ligature:\s*(\S+))?\s*$/;
 
-            const rectRegex = /it\.rectangle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
-            const filledRectRegex = /it\.filled_rectangle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
-            const circleRegex = /it\.circle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
-            const filledCircleRegex = /it\.filled_circle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\S+)\s*\);/;
+            const rectRegex = /it\.rectangle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(Color\([^)]*\)|\S+)\s*\);/;
+            const filledRectRegex = /it\.filled_rectangle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(Color\([^)]*\)|\S+)\s*\);/;
+            const circleRegex = /it\.circle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(Color\([^)]*\)|\S+)\s*\);/;
+            const filledCircleRegex = /it\.filled_circle\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(Color\([^)]*\)|\S+)\s*\);/;
 
             lines.forEach(line => {
                 line = line.trim();
@@ -1703,6 +1851,9 @@ body.dark-mode details:not([open]) {
                 // console.warn("Could not parse lambda line:", line);
             });
 
+            // Map Color(255, 255, 255) etc. back to the plain names the color dropdown knows.
+            const named = { '255,255,255': 'white', '0,0,0': 'black', '255,0,0': 'red', '0,255,0': 'green', '0,0,255': 'blue' };
+            parsedElements.forEach(e => { const m = String(e.colorId || '').match(/^Color\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i); if (m && named[`${m[1]},${m[2]},${m[3]}`]) e.colorId = named[`${m[1]},${m[2]},${m[3]}`]; });
             return parsedElements;
         }
 
@@ -1991,12 +2142,20 @@ if (localStorage.getItem('darkMode') === 'true') {
     // ESPHome color: block
     window.generateColorYaml = function () {
         const defined = new Set(colorPalette.map(c => c.name));
-        const missing = colorTokens().map(t => (t.match(/^id\(\s*(\w+)\s*\)$/) || [])[1]).filter(n => n && !defined.has(n));
+        // Color IDs used by elements but never created: emit a placeholder so the YAML compiles.
+        const used = new Set();
+        elements.forEach(el => { const m = String(el.colorId || '').match(/^id\(\s*(\w+)\s*\)$/); if (m && !defined.has(m[1])) used.add(m[1]); });
+        const missing = colorTokens().map(t => (t.match(/^id\(\s*(\w+)\s*\)$/) || [])[1]).filter(n => n && !defined.has(n) && !used.has(n));
         let y = '';
-        if (colorPalette.length) {
+        if (colorPalette.length || used.size) {
             y += 'color:\n';
             colorPalette.forEach(c => { y += `  - id: ${c.name}\n    hex: "${c.hex.replace('#', '')}"\n`; });
-        } else y += '# No custom Color IDs defined yet. Use the Color ID creator in Configuration.\n';
+            used.forEach(n => {
+                let hex = '808080';
+                try { const h = mapColorPreview(`id(${n})`); if (/^#[0-9a-f]{6}$/i.test(h)) hex = h.slice(1).toUpperCase(); } catch (e) { /* keep grey */ }
+                y += `  - id: ${n}\n    hex: "${hex}"   # placeholder: set your real color\n`;
+            });
+        } else y += '# No custom Color IDs needed: your design only uses plain colors.\n';
         if (missing.length) y += `\n# Referenced in the Colors list but not defined above (define them in your own YAML):\n# ${missing.join(', ')}\n`;
         $('generatedColorCodeOutput').value = y;
         return y;
@@ -2124,6 +2283,7 @@ if (localStorage.getItem('darkMode') === 'true') {
         return t;
     }
     function bbox(el) {
+        const _nb = window.DD && DD.bbox && DD.bbox(el); if (_nb) return _nb;
         const x = parseInt(el.x || 0), y = parseInt(el.y || 0);
         if (el.type === 'text' || el.type === 'icon') {
             const px = fontPx(el.fontId); previewCtx.font = mapFontPreview(el.fontId);
@@ -2249,14 +2409,16 @@ if (localStorage.getItem('darkMode') === 'true') {
         return L.join('\n');
     }
 
-    document.getElementById('export-md-btn').addEventListener('click', () => {
+    function downloadMarkdown() {
         const md = buildMarkdown();
         const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob); a.download = 'display-design.md';
         document.body.appendChild(a); a.click(); a.remove();
         setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-    });
+    }
+    document.getElementById('export-md-btn').addEventListener('click', downloadMarkdown);
+    window.downloadDisplayMarkdown = downloadMarkdown;
     window.buildDisplayMarkdown = buildMarkdown;
 })();
 </script>
@@ -2279,9 +2441,20 @@ if (localStorage.getItem('darkMode') === 'true') {
         return t;
     }
     function bboxOf(el) {
+        const _nb = window.DD && DD.bbox && DD.bbox(el); if (_nb) return _nb;
         const x = parseInt(el.x || 0), y = parseInt(el.y || 0);
         if (el.type === 'text' || el.type === 'icon') {
             const px = fontPx(el.fontId); mctx.font = mapFontPreview(el.fontId);
+            if (el.type === 'icon') {
+                // Icon glyphs are drawn on a baseline at y + 0.8*size and are smaller than the em box,
+                // so measure the real ink bounds to keep the selection box centered on the glyph.
+                const m = mctx.measureText(iconGlyph(el.iconLigature)), by = y + Math.round(px * 0.8);
+                if (m && isFinite(m.actualBoundingBoxAscent) && (m.actualBoundingBoxLeft + m.actualBoundingBoxRight) > 0) {
+                    const x0 = Math.floor(x - m.actualBoundingBoxLeft), x1 = Math.ceil(x + m.actualBoundingBoxRight);
+                    const y0 = Math.floor(by - m.actualBoundingBoxAscent), y1 = Math.ceil(by + m.actualBoundingBoxDescent);
+                    return { x: x0, y: y0, w: Math.max(2, x1 - x0), h: Math.max(2, y1 - y0) };
+                }
+            }
             const w = el.type === 'text' ? Math.round(mctx.measureText(dText(el)).width) : px;
             let bx = x;
             if (el.type === 'text') { if (el.align === 'CENTER') bx = x - Math.round(w / 2); else if (el.align === 'RIGHT') bx = x - w; }
@@ -2863,5 +3036,16 @@ if (localStorage.getItem('darkMode') === 'true') {
         // --- End Keyboard Arrow Key Navigation ---
     </script>
 
+<script src="vendor/qrcode.js"></script>
+<script src="dd-core.js"></script>
+<script src="dd-render.js"></script>
+<script src="dd-gen.js"></script>
+<script src="dd-samples.js"></script>
+<script src="dd-ui.js"></script>
+<script src="yamlimport.js"></script>
+<script src="fontmanager.js"></script>
+<script src="deploy.js"></script>
+<script src="dd-font.js"></script>
+<script src="dd-boot.js"></script>
 </body>
 </html>

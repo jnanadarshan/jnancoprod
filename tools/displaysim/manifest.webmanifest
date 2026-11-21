@@ -1,0 +1,19 @@
+{
+  "name": "ESPHome Display Designer",
+  "short_name": "Display Designer",
+  "description": "Design ESPHome display layouts visually (OLED, TFT, e-paper), preview them as the panel will draw them, and export lambda, font, color and asset code.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0e1118",
+  "theme_color": "#3d6df2",
+  "categories": ["developer", "design", "productivity"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "file_handlers": [
+    { "action": "./", "accept": { "application/json": [".json"], "text/yaml": [".yaml", ".yml"] } }
+  ]
+}
